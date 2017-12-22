@@ -39,7 +39,7 @@ var ConeHighlightRules = function() {
         }],
         "#constants": [{
             token: "constant.other.cone",
-            regex: /\bthis\b/
+            regex: /\b(?:self|this)\b/
         }, {
             token: "constant.language.cone",
             regex: /\b(?:true|false)\b/
@@ -51,21 +51,21 @@ var ConeHighlightRules = function() {
             token: [
                 "keyword.declaration.cone",
                 "text",
-                "keyword.other.capability.cone",
+                "keyword.other.permission.cone",
                 "text",
                 "entity.name.function.cone"
             ],
-            regex: /\b(new|be|fun)(\s+)((?:iso|trn|ref|val|box|tag)?)\b(\s*)([_a-z][_a-zA-Z0-9]*)/
+            regex: /\b(new|be|fn)(\s+)((?:mut|imm|mmut|const|mutx|id)?)\b(\s*)([_a-z][_a-zA-Z0-9]*)/
         }],
         "#typedeclarations": [{
             token: [
                 "keyword.declaration.cone",
                 "text",
-                "keyword.other.capability.cone",
+                "keyword.other.permission.cone",
                 "text",
-                "entity.name.type.cone"
+                "type.cone"
             ],
-            regex: /\b(type|interface|trait|primitive|struct|class|actor)(\s+)((?:iso|trn|ref|val|box|tag)?)(@?\s*)([_A-Z][_a-zA-Z0-9]*)/
+            regex: /\b(type|interface|trait|primitive|struct|class|actor)(\s+)((?:mut|imm|mmut|const|mutx|id)?)(\s*)([_A-Z][_a-zA-Z0-9]*)/
         }],
         "#identifiers": [{
             token: ["support.function.cone", "text"],
@@ -98,11 +98,11 @@ var ConeHighlightRules = function() {
             token: "keyword.other.declaration.cone",
             regex: /\b(?:var|let|embed|delegate)\b/
         }, {
-            token: "entity.other.attribute-name.cone",
-            regex: /\b(?:iso|trn|ref|val|box|tag)\b/
+            token: "keyword.other.permission.cone",
+            regex: /\b(?:mut|imm|mmut|const|mutx|id)\b/
         }, {
             token: "keyword.control.jump.cone",
-            regex: /\b(?:break|continue|return|error)\b/
+            regex: /\b(?:break|continue|return)\b/
         }, {
             token: "keyword.control.cone",
             regex: /\b(?:if|ifdef|then|elseif|else|end|match|where|try|with|as|recover|consume|object|digestof)\b/
