@@ -12,6 +12,8 @@ var ConeHighlightRules = function() {
         }, {
             include: "#line-comments"
         }, {
+            include: "#vardeclarations"
+        }, {
             include: "#typedeclarations"
         }, {
             include: "#methoddeclarations"
@@ -51,21 +53,27 @@ var ConeHighlightRules = function() {
             token: [
                 "keyword.declaration.cone",
                 "text",
-                "keyword.other.permission.cone",
-                "text",
-                "entity.name.function.cone"
+                "function.cone"
             ],
-            regex: /\b(new|be|fn)(\s+)((?:mut|imm|mmut|const|mutx|id)?)\b(\s*)([_a-z][_a-zA-Z0-9]*)/
+            regex: /\b(new|be|fn)(\s+)([_a-z][_a-zA-Z0-9]*)/
         }],
         "#typedeclarations": [{
             token: [
                 "keyword.declaration.cone",
                 "text",
-                "keyword.other.permission.cone",
+                "entity.permission.cone",
                 "text",
                 "type.cone"
             ],
             regex: /\b(type|interface|trait|primitive|struct|class|actor)(\s+)((?:mut|imm|mmut|const|mutx|id)?)(\s*)([_A-Z][_a-zA-Z0-9]*)/
+        }],
+        "#vardeclarations": [{
+            token: [
+                "entity.permission.cone",
+                "text",
+                "var.cone"
+            ],
+            regex: /\b(mut|imm|mmut|const|mutx|id)(\s+)([_a-z][_a-zA-Z0-9]*)/
         }],
         "#identifiers": [{
             token: ["support.function.cone", "text"],
@@ -82,8 +90,11 @@ var ConeHighlightRules = function() {
             ],
             regex: /(@\s*)([_a-zA-z][_a-zA-Z0-9]*)(\s*)(\(|\[)/
         }, {
-            token: "entity.name.class.cone",
+            token: "entity.type.cone",
             regex: /\b_*[A-Z][_a-zA-Z0-9]*\b/
+        }, {
+            token: "entity.type.cone",
+            regex: /\b(?:i8|i16|i32|i64|u8|u16|u32|u64|f32|f64)\b/
         }, {
             token: "text",
             regex: /\b_*[a-z][_a-zA-Z0-9']*/
@@ -98,7 +109,7 @@ var ConeHighlightRules = function() {
             token: "keyword.other.declaration.cone",
             regex: /\b(?:var|let|embed|delegate)\b/
         }, {
-            token: "keyword.other.permission.cone",
+            token: "entity.permission.cone",
             regex: /\b(?:mut|imm|mmut|const|mutx|id)\b/
         }, {
             token: "keyword.control.jump.cone",
