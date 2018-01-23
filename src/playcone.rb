@@ -1,9 +1,13 @@
 require 'sinatra/base'
 require 'open3'
+require 'json'
 
 class PlayCone < Sinatra::Base
   get "/" do
-
+	send_file File.expand_path('index.html', settings.public_folder)
+  end
+	
+  get "/run" do
     # The list of scripted commands to execute
     cmds = [
 	  "cone/cone -oplay/ play/test.cone",
@@ -33,6 +37,20 @@ class PlayCone < Sinatra::Base
     request.env.each_pair do |k, v|
         response += "#{k} = \"#{v}\"<br/>\r\n"
     end
+	
+	File.open("response.log", 'w') { |file| file.write(response) }
+	
+	response
+  end
+
+  post "/evaluate.json" do
+    response = ""
+    request.env.each_pair do |k, v|
+        response += "#{k} = \"#{v}\"<br/>\r\n"
+    end
+	request.body.rewind
+	body = JSON.parse request.body.read
+	response += "\r\n" + body['code']
 	
 	File.open("response.log", 'w') { |file| file.write(response) }
 	

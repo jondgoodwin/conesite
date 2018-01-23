@@ -1,11 +1,13 @@
 # Cone Playground
-This code enables the use of a web browser to create and run Cone programs,
+The playground enables the use of a web browser to create and run Cone programs,
 thereby avoiding the need to first install the [Cone compiler][cone].
 It also supports the generation of assembler output, LLVM IR, or Github-hosted code gists.
 
 The web front-end makes use of the [Ace High-Performance Code Editor for the Web][ace] for program editing.
 The other .html, .css, and .js files are adapted from the Pony playground, which in turn
 adapted them from an [earlier version of the Rust playground][rustplay].
+
+The server app portion makes use of Ruby Sinatra scripts run within Passenger/Rack.
 
 ## License
 
