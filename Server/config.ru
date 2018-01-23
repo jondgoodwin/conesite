@@ -1,5 +1,3 @@
+require File.expand_path('playcone.rb', File.dirname(__FILE__))
 
-app = proc do |env|
-    [200, { "Content-Type" => "text/html" }, ["Hello World"] ]
-end
-run app
+run PlayCone

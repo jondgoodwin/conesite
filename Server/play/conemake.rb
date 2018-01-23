@@ -10,6 +10,8 @@ else
 
   `cc -c main.c`
   `cc -o main main.o test.o`
-  `./main`
+  
+  stdout, stderr, status = Open3.capture3("./main")
+  puts stdout
 
 end
