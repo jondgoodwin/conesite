@@ -1,0 +1,63 @@
+// A test program in Cone that does nothing interesting
+
+mut glowy = 34u32;
+mut glo2 i32 = 7;
+
+fn cone() u32 {
+    points();
+    mut unsy = 23;
+    imm calcptr = &calc;
+	// imm anonfn = &fn (x i32) i32 {x*x;};
+	// (*anonfn)(3);
+    '\t';
+    2.3e1;
+    glowy = unsy;
+    glo2 = glowy; // cast
+    glowy; // Implicit return of global var's value
+    bitfn(0x1a, 0x42);
+    (*calcptr)(&mut unsy, 3); // Forward reference call
+    fact(6);
+}
+
+// Structure handling test
+struct Point {
+    x f32;
+    y f32;
+}
+
+fn points() {
+    mut pt Point;
+    mut xpt Point;
+    xpt.x = 3f;
+    pt = xpt;
+    imm rpt = &mut pt;
+    imm a = (*rpt).x;
+    (*rpt).x = 3f;
+    pt.x = 3.4;
+}
+
+fn bitfn(a u32, b u32) u32 {
+    mut bin = a==0x1a;
+    bin = b > 100u32;
+    if a>4 {
+      return b;
+    }
+    (a & bin | a ^ ~b).shl(1);
+}
+
+fn fact(mut nbr u32) u32 {
+  mut result = 1;
+  while nbr > 1 && !nbr>50 {
+    result = result * nbr;
+    break if result > 10000u;
+    nbr = nbr - 1;
+  }
+  result;
+  // if nbr { nbr*fact(nbr-1); } else { 1; };
+}
+
+fn calc(aa &mut i32, b = 1) i32 {
+  imm a = *aa;
+  *aa = 5;
+  -a + (a+a)*b % b;
+}
