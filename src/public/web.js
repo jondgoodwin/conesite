@@ -171,7 +171,7 @@
         send("compile.json", {emit: emit, code: code,
                               color: true, highlight: true}, function(object) {
             if ("error" in object) {
-                set_result(result, "<pre class=\"rustc-output rustc-errors\"><samp></samp></pre>");
+                set_result(result, "<pre class=\"conec-output conec-errors\"><samp></samp></pre>");
                 result.firstChild.firstChild.innerHTML = formatCompilerOutput(object.error);
             } else {
                 set_result(result, "<pre class=highlight><code>" + rehighlight(object.result, emit) + "</code></pre>");
@@ -466,9 +466,9 @@
 
     // A simple function to decode ANSI escape codes into HTML.
     // This is very basic, with lots of very obvious omissions and holes;
-    // it’s designed purely to cope with rustc output.
+    // it’s designed purely to cope with conec output.
     //
-    // TERM=xterm rustc uses these:
+    // TERM=xterm conec uses these:
     //
     // - bug/fatal/error = red
     // - warning = yellow
@@ -588,6 +588,8 @@
             var code = optionalLocalStorageGetItem("code");
             if (code !== null) {
                 session.setValue(code);
+            } else {
+                session.setValue("// Your program goes here...\nfn cone() i32 {\n   30;\n}\n");
             }
         }
 
