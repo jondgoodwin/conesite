@@ -139,11 +139,11 @@
             function(object) {
                 var samp, pre;
                 set_result(result);
-                if (object.rustc) {
+                if ("conec" in object) {
                     samp = document.createElement("samp");
-                    samp.innerHTML = formatCompilerOutput(object.rustc);
+                    samp.innerHTML = formatCompilerOutput(object.conec);
                     pre = document.createElement("pre");
-                    pre.className = "rustc-output " + (("program" in object) ? "rustc-warnings" : "rustc-errors");
+                    pre.className = "conec-output " + (("program" in object) ? "conec-warnings" : "conec-errors");
                     pre.appendChild(samp);
                     result.appendChild(pre);
                 }

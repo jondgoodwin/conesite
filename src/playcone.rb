@@ -7,8 +7,13 @@ class PlayCone < Sinatra::Base
 	send_file File.expand_path('index.html', settings.public_folder)
   end
 	
-  get "/run" do
-    # The list of scripted commands to execute
+  post "/evaluate.json" do
+	# extract and save the code from JSON payload
+	request.body.rewind
+	body = JSON.parse request.body.read
+	File.open("play/test.cone", 'w') { |file| file.write(body['code']) }
+	
+	# The list of scripted commands to execute
     cmds = [
 	  "cone/cone -oplay/ play/test.cone",
 	  "gcc -c play/main.c -o play/main.o",
@@ -16,7 +21,8 @@ class PlayCone < Sinatra::Base
 	  "play/main"]
 	
 	rc = 0
-	response = ""
+	prog_out = ""
+	conec_err = ""
 	
 	# Perform them, one after another, capturing the results. Stop on first fail
 	ENV['PATH'] = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -25,35 +31,21 @@ class PlayCone < Sinatra::Base
 		stdout, stderr, status = Open3.capture3(cmd)
 		rc = status.exitstatus
 		if rc == 0
-		  response = stdout
+		  prog_out = stdout
 		else
-		  response = stderr
+		  conec_err = stderr
 		end
 	  end
 	end
 	
-	# Add env variables to output for diagnostic purposes
-	response += "<br/><br/>\r\n"
-    request.env.each_pair do |k, v|
-        response += "#{k} = \"#{v}\"<br/>\r\n"
-    end
-	
-	File.open("response.log", 'w') { |file| file.write(response) }
-	
-	response
-  end
 
-  post "/evaluate.json" do
-    response = ""
-    request.env.each_pair do |k, v|
-        response += "#{k} = \"#{v}\"<br/>\r\n"
-    end
-	request.body.rewind
-	body = JSON.parse request.body.read
-	response += "\r\n" + body['code']
-	
-	File.open("response.log", 'w') { |file| file.write(response) }
-	
+	if rc == 0
+		output = {'conec' => conec_err, 'program' => prog_out}
+	else
+		output = {'conec' => conec_err}
+	end
+	response = JSON.generate(output)
+	content_type :json
 	response
   end
 end
