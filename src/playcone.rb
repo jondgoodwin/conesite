@@ -18,7 +18,7 @@ class PlayCone < Sinatra::Base
 	  "cone/cone -oplay/ play/test.cone",
 	  "gcc -c play/main.c -o play/main.o",
 	  "gcc -o play/main play/main.o play/test.o",
-	  "play/main"]
+	  "timeout 15s play/main"]
 	
 	rc = 0
 	prog_out = ""
