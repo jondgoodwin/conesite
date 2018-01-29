@@ -21,13 +21,13 @@ class PlayCone < Sinatra::Base
 		ENV['PATH'] = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 		rc, stdout, stderr = docmd("gcc -o play/main play/test.o cone/bin/libconestd.a")
 		if rc == 0
-			rc, prog_out, stderr = docmd("timeout 15s play/main")
+			norc, prog_out, stderr = docmd("timeout 15s play/main")
 		else
 			conec_err = stderr
 		end
 	end
 
-	if prog_out.size > 0
+	if rc == 0
 		output = {'conec' => conec_err, 'program' => prog_out}
 	else
 		output = {'conec' => conec_err}
