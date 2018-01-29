@@ -589,7 +589,7 @@
             if (code !== null) {
                 session.setValue(code);
             } else {
-                session.setValue("// Your program goes here...\nfn cone() i32 {\n   30;\n}\n");
+                session.setValue("// Your program goes here...\nfn print(str &u8);\n\nfn main() {\n  print(\"Hello world!\");}\n");
             }
         }
 
