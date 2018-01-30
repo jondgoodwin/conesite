@@ -450,6 +450,7 @@
     var clearResultButton;
     var keyboard;
     var themes;
+    var examples;
     var editor;
     var session;
     var themelist;
@@ -540,6 +541,7 @@
         clearResultButton = document.getElementById("clear-result");
         keyboard = document.getElementById("keyboard");
         themes = document.getElementById("themes");
+        examples = document.getElementById("examples");
         editor = ace.edit("editor");
         set_result.editor = editor;
         editor.$blockScrolling = Infinity;
@@ -691,6 +693,13 @@
 
         gistButton.onclick = function() {
             shareGist(result, session.getValue(), gistButton);
+        };
+
+        examples.onkeyup = examples.onchange = function () {
+            var gist = examples.options[examples.selectedIndex].value;
+            if (gist.length > 0) {
+                 fetchGist(session, result, gist, false, evaluateButton);
+            }
         };
 
         configureEditorButton.onclick = function() {

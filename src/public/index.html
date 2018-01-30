@@ -51,7 +51,15 @@
 /*# sourceURL=ace/css/ace-github */</style></head>
     <body>
         <form id="control">
-            <div><button type="button" class="primary" id="evaluate" title="Execute your code (you can also press Ctrl+Enter when editing code)">Run</button><button type="button" id="asm" title="Compile to ASM">ASM</button><button type="button" id="llvm-ir" title="Compile to LLVM IR">LLVM IR</button></div><wbr><div><button type="button" id="share" title="Share a link to your code via is.gd">Shorten</button><button type="button" id="gist" title="Share a link to your code via Gist">Gist</button></div><wbr><div class="right-c-e"><button type="button" id="configure-editor"><span>Configure editor</span></button><div class="dropdown">
+            <div><button type="button" class="primary" id="evaluate" title="Execute your code (you can also press Ctrl+Enter when editing code)">Run</button><button type="button" id="asm" title="Compile to ASM">ASM</button><button type="button" id="llvm-ir" title="Compile to LLVM IR">LLVM IR</button></div><wbr><div><button type="button" id="share" title="Share a link to your code via is.gd">Shorten</button><button type="button" id="gist" title="Share a link to your code via Gist">Gist</button></div>
+			<select name="examples" id="examples">
+				<option selected disabled>Code Examples</option>
+				<option value="f55a8caa2605a11223437167730c53af">Hello world!</option>
+				<option value="4510655502edcde9d50d185cfd7f3c2e">Calculate pi</option>
+				<option value="96ecaecb4827c2b9e6aaad35feb2bfd1">Permissions</option>
+				<option value="cd702c7c1ffc8f97d7762735d04fd9de">Structs</option>
+			</select>
+				<wbr><div class="right-c-e"><button type="button" id="configure-editor"><span>Configure editor</span></button><div class="dropdown">
                     <p><label for="keyboard">Keyboard bindings:</label>
                     <select name="keyboard" id="keyboard">
                         <option>Ace</option>
