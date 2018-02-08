@@ -15,7 +15,7 @@ class PlayCone < Sinatra::Base
 	
 	# Run compile and generate hash object with requested file or error message
 	prog_out = ""
-	rc, stdout, conec_err = docmd("cone/cone -oplay/ play/test.cone")
+	rc, stdout, conec_err = docmd("cone/conec -oplay/ play/test.cone")
 	if rc == 0
 		# linkedit with the cone standard library. Path is needed for success
 		ENV['PATH'] = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -44,7 +44,7 @@ class PlayCone < Sinatra::Base
 	File.open("play/test.cone", 'w') { |file| file.write(body['code']) }
 	
 	# Run compile and generate hash object with requested file or error message
-	rc, stdout, error = docmd("cone/cone --asm --llvmir -oplay/ play/test.cone")
+	rc, stdout, error = docmd("cone/conec --asm --llvmir -oplay/ play/test.cone")
 	if rc == 0
 		# retrieve results on success
 		resultfile = body['emit'] == 'asm' ? "play/test.s" : "play/test.ir"
