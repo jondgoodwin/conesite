@@ -7,6 +7,10 @@ class PlayCone < Sinatra::Base
 	send_file File.expand_path('index.html', settings.public_folder)
   end
 	
+  get "/play" do
+	send_file File.expand_path('play/index.html', settings.public_folder)
+  end
+	
   post "/evaluate.json" do
 	# extract and save the code from JSON payload
 	request.body.rewind
