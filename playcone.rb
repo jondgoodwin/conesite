@@ -19,7 +19,7 @@ class PlayCone < Sinatra::Base
 	if rc == 0
 		# linkedit with the cone standard library. Path is needed for success
 		ENV['PATH'] = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-		rc, stdout, stderr = docmd("gcc -o work/main work/test.o cone/bin/libconestd.a")
+		rc, stdout, stderr = docmd("gcc -o work/main work/test.o /lib/libconestd.a")
 		if rc == 0
 			norc, prog_out, stderr = docmd("timeout 15s work/main")
 		else
