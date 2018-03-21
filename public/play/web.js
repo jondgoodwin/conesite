@@ -1,9 +1,10 @@
 (function () {
     "use strict";
-    const PLAYPEN_URL = "http://playcone.jondgoodwin.com";
-
-    // For convenience of development
-    var PREFIX = location.href.indexOf("/index.html") != -1 ? PLAYPEN_URL + "/" : "/";
+	
+	const PLAY_DOMAIN = "http://cone.jondgoodwin.com";
+	const PLAY_FOLDER = "/play/";
+	const PLAYURL_GETPREFIX = PLAY_DOMAIN + PLAY_FOLDER + "index.html";
+	const PLAYURL_POSTPREFIX = location.href.indexOf("file:") != -1 ? PLAY_DOMAIN + PLAY_FOLDER : PLAY_FOLDER;
 
     var samples = 2;
 
@@ -52,7 +53,7 @@
         set_result(result, "<p class=message>" + message);
 
         var request = new XMLHttpRequest();
-        request.open("POST", PREFIX + path, true);
+        request.open("POST", PLAYURL_POSTPREFIX + path, true);
         request.setRequestHeader("Content-Type", "application/json");
         request.onreadystatechange = function() {
             button.disabled = false;
@@ -215,7 +216,7 @@
 
     function shareGist(result, code, button) {
         // only needed for the "shrinking" animation
-        var full_url = PLAYPEN_URL + "/?code=" + encodeURIComponent(code);
+        var full_url = PLAYURL_GETPREFIX + "?code=" + encodeURIComponent(code);
         var url = "https://api.github.com/gists";
         button.disabled = true;
 
@@ -252,7 +253,7 @@
                         var gist_id = response.id;
                         var gist_url = response.html_url;
 
-                        var play_url = PLAYPEN_URL + "/?gist=" +
+                        var play_url = PLAYURL_GETPREFIX + "?gist=" +
                                        encodeURIComponent(gist_id);
 
 
@@ -280,7 +281,7 @@
     }
 
     function share(result, code, button) {
-        var playurl = PLAYPEN_URL + "/?code=" + encodeURIComponent(code);
+        var playurl = PLAYURL_GETPREFIX + "?code=" + encodeURIComponent(code);
         if (playurl.length > 5000) {
             set_result(result, "<p class=error>Sorry, your code is too long to share this way." +
                 "<p class=error-explanation>At present, sharing produces a link containing the" +
