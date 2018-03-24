@@ -1,0 +1,58 @@
+<html>
+<head>
+	<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="stylesheet" type="text/css" href="standard.css" />
+<title>Cone - Lean, Native Runtime</title>
+</head>
+<body>
+	<div id="header">
+		<div class="column">
+		<a href="/">
+			<img src="pegicon.png" width="56" height="56" alt="logo">
+		</a>
+		</div>
+		<span id="title">Cone</span>
+		<span id="sub">Lean, Native Runtime</span></div>
+		<div class="column flow-opposite">
+	</div>
+
+	<div class="text">
+	<p>Optimal performance and minimal code footprint are essential to a responsive 3D web experience.
+	3D worlds are punishing to deliver, as they have to perform millions of rendering and motion
+	calculations reliably every 16 milliseconds. Internet bandwidth constraints magnify these challenges;
+	if we cannot keep world assets and the underlying engine's code compact, it will be impossible
+	to stream them from the server to the client on a timely basis.</p>
+
+	<p><b>Performance</b></p>
+	<p>Cone has been designed to deliver blazingly-fast runtime performance (and to compile quickly too!).</p>
+	<p>A large part of Cone's performance story comes from obvious architectural choices.
+	Cone's statically-typed programs are compiled to native executables
+	supporting all popular platforms:  Windows, Linux, Macintosh, Android, iOS, and WebAssembly.
+	Cone accomplishes this using LLVM's award-winning backend technology and its powerful
+	suite of code optimizers.</p>
+	<p>Inspired by the Rust and Pony languages,
+	Cone's static type system aggressively reduces runtime overhead further:</p>
+	<ul>
+	<li>Static permissions signal when data is immutable or uniquely referenced,
+	enabling memory-access optimizations, reductions in garbage collection (GC) bookkeeping,
+	and lockless, cross-thread sharing of immutable and mutable data.</li>
+	<li>Static memory management techniques, such as borrowed references and lexical move/drop semantics,
+	make possible more substantial GC bookkeeping reductions.</li>
+	</ul>
+	<p>In addition, Cone's easy-to-use custom allocators, such as pools and arenas,
+	go a long way towards lowering the runtime cost of frequent memory allocation and free events,
+	commonly required by 3D worlds.</p>
+	
+	<p><b>Minimal footprint</b></p>
+	<p>To keep 3D program assets small, Cone's 3D libraries are guided by a modular, opt-in philosophy.
+	Rather than making users wait for a monolithic, do-everything 3D engine to finish loading,
+	3D worlds can pick-and-choose the 3D features they require and schedule when to 
+	downloaded them in the background so as to be available when required.</p>
+	<p>The Cone runtime for 3D web is quite small, as it leverages code logic already
+	resident in the client browser.</p>
+	
+	</div>
+
+</body>
+</html>
