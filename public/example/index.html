@@ -176,29 +176,28 @@
         cubeVertexIndexBuffer.numItems = 36;
     }
 
-	var mvMatrix = mat4.create();
-	var mvMatrixStack = [];
-	var pMatrix = mat4.create();
+    function degToRad(degrees) {
+        return degrees * Math.PI / 180;
+    }
 
-	function mvPushMatrix() {
-		var copy = mat4.create();
-		mat4.set(mvMatrix, copy);
-		mvMatrixStack.push(copy);
-	}
+    // Bind values to shader's particular variables
+    function shaderBind(shader, pMatrix, mvMatrix, positionBuffer, colorBuffer) {
+        gl.uniformMatrix4fv(shader.pMatrixUniform, false, pMatrix);
+        gl.uniformMatrix4fv(shader.mvMatrixUniform, false, mvMatrix);
 
-	function mvPopMatrix() {
-		if (mvMatrixStack.length == 0) {
-			throw "Invalid popMatrix!";
-		}
-		mvMatrix = mvMatrixStack.pop();
-	}
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, positionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-	function degToRad(degrees) {
-		return degrees * Math.PI / 180;
-	}
+        gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, colorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    }
 
+    // rotation angles in degrees
     var rPyramid = 0;
     var rCube = 0;
+    var mvMatrix = mat4.create();
+    var pMatrix = mat4.create();
+
 
     function drawScene() {
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
@@ -206,47 +205,19 @@
 
         mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
 
+        // Draw pyramid
         mat4.identity(mvMatrix);
-
-		// Draw pyramid
         mat4.translate(mvMatrix, [-1.5, 0.0, -8.0]);
-
-        mvPushMatrix();
         mat4.rotate(mvMatrix, degToRad(rPyramid), [0, 1, 0]);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexPositionBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, pyramidVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexColorBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, pyramidVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-        gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
-
+        shaderBind(shaderProgram, pMatrix, mvMatrix, pyramidVertexPositionBuffer, pyramidVertexColorBuffer);
         gl.drawArrays(gl.TRIANGLES, 0, pyramidVertexPositionBuffer.numItems);
 
-        mvPopMatrix();
-
-		// Draw cube
-        mat4.translate(mvMatrix, [3.0, 0.0, 0.0]);
-
-        mvPushMatrix();
+        // Draw cube
+        mat4.identity(mvMatrix);
+        mat4.translate(mvMatrix, [1.5, 0.0, -8.0]);
         mat4.rotate(mvMatrix, degToRad(rCube), [1, 1, 1]);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexColorBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cubeVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
-
-        gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
-
+        shaderBind(shaderProgram, pMatrix, mvMatrix, cubeVertexPositionBuffer, cubeVertexColorBuffer);
         gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-
-        mvPopMatrix();
     }
 
     var lastTime = 0;
