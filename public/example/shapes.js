@@ -1,14 +1,47 @@
-
+    var shaderProgram;
     var pyramidVertexPositionBuffer;
     var pyramidVertexColorBuffer;
     var cubeVertexPositionBuffer;
     var cubeVertexColorBuffer;
     var cubeVertexIndexBuffer;
 
-    function initScene() {
-        initShader(vsSrc, fsSrc);
+	let vsSrc =  
+		`attribute vec3 aVertexPosition;
+		attribute vec4 aVertexColor;
 
-       pyramidVertexPositionBuffer = gl.createBuffer();
+		uniform mat4 uMVMatrix;
+		uniform mat4 uPMatrix;
+
+		varying vec4 vColor;
+
+		void main(void) {
+			gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+			vColor = aVertexColor;
+		}`;
+
+	let fsSrc =
+		`precision mediump float;
+
+		varying vec4 vColor;
+
+		void main(void) {
+			gl_FragColor = vColor;
+		}`;
+
+    function initScene() {
+        shaderProgram = initShader(vsSrc, fsSrc);
+
+        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+        gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+
+        shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+        gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
+
+        shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+        shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+
+
+        pyramidVertexPositionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexPositionBuffer);
         var vertices = [
             // Front face
@@ -198,28 +231,3 @@
         }
         lastTime = timeNow;
     }
-
-
-	let vsSrc =  
-		`attribute vec3 aVertexPosition;
-		attribute vec4 aVertexColor;
-
-		uniform mat4 uMVMatrix;
-		uniform mat4 uPMatrix;
-
-		varying vec4 vColor;
-
-		void main(void) {
-			gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-			vColor = aVertexColor;
-		}`;
-
-	let fsSrc =
-		`precision mediump float;
-
-		varying vec4 vColor;
-
-		void main(void) {
-			gl_FragColor = vColor;
-		}`;
-	

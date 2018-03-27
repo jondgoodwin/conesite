@@ -1,19 +1,42 @@
 let gl = null;
 
-function glInit(canvas) {
+window.onload = async function() {
+    var owner = document.getElementById("webgl");
+    var canvas = document.createElement('canvas');
+    owner.appendChild(canvas);
+
     try {
         gl = canvas.getContext("webgl");
     } catch (e) {
     }
-    if (gl) {
-        gl.viewportWidth = canvas.width;
-        gl.viewportHeight = canvas.height;
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        gl.enable(gl.DEPTH_TEST);
+    if (!gl) {
+        alert("Could not initialise WebGL, sorry :-(");
+        return;
+    }
+    gl.enable(gl.DEPTH_TEST);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+    glResize();
+    window.addEventListener( "resize", glResize );
+
+    initScene();
+    glRenderLoop();
+}
+
+function glResize(){
+    var owner = document.getElementById("webgl");
+    if (owner.nodeName == "BODY") {
+        let pr = window.devicePixelRatio;
+        gl.canvas.width = (pr * window.innerWidth) | 0;
+        gl.canvas.height = (pr * window.innerHeight) | 0;
     }
     else {
-        alert("Could not initialise WebGL, sorry :-(");
+        gl.canvas.width = owner.offsetWidth;
+        gl.canvas.height = owner.offsetHeight;
     }
+    // exports['engine_window_resize']( gl.canvas.width, gl.canvas.height );
+    gl.viewportWidth = gl.canvas.width;
+    gl.viewportHeight = gl.canvas.height;
 }
 
 function glRenderLoop() {
@@ -35,8 +58,6 @@ function getShader(type, src) {
 	return shader;
 }
 
-var shaderProgram;
-
 function initShader(vssrc, fssrc) {
 	var vertexShader = getShader(gl.VERTEX_SHADER, vssrc);
 	var fragmentShader = getShader(gl.FRAGMENT_SHADER, fssrc);
@@ -51,14 +72,6 @@ function initShader(vssrc, fssrc) {
 	}
 
 	gl.useProgram(shaderProgram);
-
-	shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-	gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
-
-	shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
-	gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
-
-	shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-	shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+	return shaderProgram;
 }
 
