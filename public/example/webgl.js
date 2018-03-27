@@ -1,6 +1,6 @@
 let gl = null;
 
-function initGL(canvas) {
+function glInit(canvas) {
     try {
         gl = canvas.getContext("webgl");
     } catch (e) {
@@ -14,6 +14,12 @@ function initGL(canvas) {
     else {
         alert("Could not initialise WebGL, sorry :-(");
     }
+}
+
+function glRenderLoop() {
+	window.requestAnimationFrame(glRenderLoop);
+	drawScene();
+	animate();
 }
 
 function getShader(type, src) {
