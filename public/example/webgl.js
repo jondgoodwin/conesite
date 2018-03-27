@@ -1,45 +1,24 @@
-var gl;
+let gl = null;
 
 function initGL(canvas) {
-	try {
-		gl = canvas.getContext("webgl");
-		gl.viewportWidth = canvas.width;
-		gl.viewportHeight = canvas.height;
+    try {
+        gl = canvas.getContext("webgl");
+    } catch (e) {
+    }
+    if (gl) {
+        gl.viewportWidth = canvas.width;
+        gl.viewportHeight = canvas.height;
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.enable(gl.DEPTH_TEST);
-
-	} catch (e) {
-	}
-	if (!gl) {
-		alert("Could not initialise WebGL, sorry :-(");
-	}
+    }
+    else {
+        alert("Could not initialise WebGL, sorry :-(");
+    }
 }
 
-function getShader(gl, id) {
-	var shaderScript = document.getElementById(id);
-	if (!shaderScript) {
-		return null;
-	}
-
-	var str = "";
-	var k = shaderScript.firstChild;
-	while (k) {
-		if (k.nodeType == 3) {
-			str += k.textContent;
-		}
-		k = k.nextSibling;
-	}
-
-	var shader;
-	if (shaderScript.type == "x-shader/x-fragment") {
-		shader = gl.createShader(gl.FRAGMENT_SHADER);
-	} else if (shaderScript.type == "x-shader/x-vertex") {
-		shader = gl.createShader(gl.VERTEX_SHADER);
-	} else {
-		return null;
-	}
-
-	gl.shaderSource(shader, str);
+function getShader(type, src) {
+	var shader = gl.createShader(type);
+	gl.shaderSource(shader, src);
 	gl.compileShader(shader);
 
 	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
@@ -52,9 +31,9 @@ function getShader(gl, id) {
 
 var shaderProgram;
 
-function initShader(vsid, fsid) {
-	var fragmentShader = getShader(gl, fsid);
-	var vertexShader = getShader(gl, vsid);
+function initShader(vssrc, fssrc) {
+	var vertexShader = getShader(gl.VERTEX_SHADER, vssrc);
+	var fragmentShader = getShader(gl.FRAGMENT_SHADER, fssrc);
 
 	shaderProgram = gl.createProgram();
 	gl.attachShader(shaderProgram, vertexShader);
