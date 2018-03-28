@@ -219,15 +219,8 @@
         gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     }
 
-    var lastTime = 0;
 
-    function animate() {
-        var timeNow = new Date().getTime();
-        if (lastTime != 0) {
-            var elapsed = timeNow - lastTime;
-
-            rPyramid += (90 * elapsed) / 1000.0;
-            rCube -= (75 * elapsed) / 1000.0;
-        }
-        lastTime = timeNow;
+    function updateScene(elapsed) {
+        rPyramid += (90 * elapsed) / 1000.0;
+        rCube -= (75 * elapsed) / 1000.0;
     }

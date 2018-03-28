@@ -26,9 +26,9 @@ window.onload = async function() {
 function glResize(){
     var owner = document.getElementById("webgl");
     if (owner.nodeName == "BODY") {
-        let pr = window.devicePixelRatio;
-        gl.canvas.width = (pr * window.innerWidth) | 0;
-        gl.canvas.height = (pr * window.innerHeight) | 0;
+        // let pr = window.devicePixelRatio;
+        gl.canvas.width = (window.innerWidth) | 0;
+        gl.canvas.height = (window.innerHeight) | 0;
     }
     else {
         gl.canvas.width = owner.offsetWidth;
@@ -39,10 +39,15 @@ function glResize(){
     gl.viewportHeight = gl.canvas.height;
 }
 
+var lastTime = 0;
 function glRenderLoop() {
-	window.requestAnimationFrame(glRenderLoop);
-	drawScene();
-	animate();
+    window.requestAnimationFrame(glRenderLoop);
+    drawScene();
+    var timeNow = new Date().getTime();
+    if (lastTime != 0) {
+        updateScene(timeNow - lastTime);
+    }
+    lastTime = timeNow;
 }
 
 function getShader(type, src) {
