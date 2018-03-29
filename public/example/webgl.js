@@ -5,20 +5,7 @@
 
 let gl = null; // WebGL Context
 let imports;
-
-function fetchlocal(url) {
-  return new Promise(function(resolve, reject) {
-    var xhr = new XMLHttpRequest
-    xhr.onload = function() {
-      resolve(new Response(xhr.responseText, {status: xhr.status}))
-    }
-    xhr.onerror = function() {
-      reject(new TypeError('Local request failed'))
-    }
-    xhr.open('GET', url)
-    xhr.send(null)
-  })
-}
+let degToRad;
 
 // Sets up webgl context as canvas inside #webgl element nodeName
 // It initializes the scene and triggers the endless render loop
@@ -42,13 +29,12 @@ window.onload = async function() {
     window.addEventListener( "resize", glResize );
 
     imports = {};
-    WebAssembly.instantiateStreaming(fetchlocal('cone.wasm'), {"js": imports})
+    WebAssembly.instantiateStreaming(fetch('cone.wasm'), {"js": imports})
     .then(mod => {
-        let rad = mod.instance.exports.degreeToRadians(45.);
+        degToRad = mod.instance.exports.degreeToRadians;
+        initScene();
+        glRenderLoop();
     });
-
-    initScene();
-    glRenderLoop();
 }
 
 // When window is resized, recalculate webgl context dimensions

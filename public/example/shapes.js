@@ -175,9 +175,9 @@
         cubeVertexIndexBuffer.numItems = 36;
     }
 
-    function degToRad(degrees) {
+    /*function degToRad(degrees) {
         return degrees * Math.PI / 180;
-    }
+    } */
 
     // Bind values to shader's particular variables
     function shaderBind(shader, pMatrix, mvMatrix, positionBuffer, colorBuffer) {
