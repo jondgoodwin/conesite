@@ -1,0 +1,87 @@
+<html>
+<head>
+	<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="stylesheet" type="text/css" href="standard.css" />
+<title>Cone - Do-It-Your-Way Memory Management</title>
+</head>
+<body>
+	<div id="header">
+		<div class="column">
+		<a href="/">
+			<img src="pegicon.png" width="56" height="56" alt="logo">
+		</a>
+		</div>
+		<span id="title">Cone</span>
+		<span id="sub">Do-It-Your-Way Memory Management</span></div>
+		<div class="column flow-opposite">
+	</div>
+
+	<div class="text">
+	<p>Choosing a programming language often means accepting how that language handles
+	the allocation and use of memory:</p>
+	<ul>
+	<li>Java, C# and Go use tracing garbage collection.</li>
+	<li>Python and Swift use reference-counted objects.</li>
+	<li>With C, the allocation and freeing of memory is explicitly performed by the programmer</li>
+	<li>Rust supports two approaches: a lexical, single owner mechanism and reference-counted objects</li>
+	</ul>
+	<p>There is no one perfect memory management strategy;
+	each has well-known advantages and disadvantages. Some offer faster throughput or more predictable performance,
+	some offer guaranteed memory safety, and others support a broader range of data structures.
+	Such trade-offs make a big difference to the consistent, performance of real-time 3D,
+	particularly when stressed by memory-intensive realistic graphics.</p>
+	<p>Cone handles memory differently: It gives the choice to the programmer, allowing
+	the memory management strategy to be selected on an object-by-object basis.
+	Making this choice is surprisingly easy: instead of saying "new Point(1., 2.)" to create a new Point object,
+	you say: <span class="pre">&gc Point(1., 2.)</span>, where <span class="pre">&amp;gc</span>
+	means the tracing garbage collection allocator will allocate and manage 
+	the lifetime of this new Point object.</p>
+	
+	<p><b>Built-in Allocators</b></p>
+	<p>Cone supports three common "garbage collection" strategies as built-in allocators:</p>
+	<ul>
+	<li><b>lex</b> - Rust's lexical, single owner strategy (e.g., Box&lt;T&gt;),
+	which uses RAII and move semantics to determine
+	when to safely free the object. Since lifetimes are calculated at compile-time, there is no runtime
+	bookkeeping overhead (unlike the following two approaches).</li>
+	<li><b>rc</b> - Reference-count strategy, which keeps track of the number of references to the
+	object, freeing it when the count goes to zero.</li>
+	<li><b>gc</b> - Tracing garbage collection, which periodically scans all references from the root set,
+	freeing any objects that are no longer reachable by the active program.</li>
+	</ul>
+	<p>In addition, Cone provides built-in support for pools and arenas:
+	<ul>
+	<li><b>pool</b> - rapid allocation and free of fixed-size objects through the use of
+	bump pointer and free-list management against a large contiguous block of memory.
+	Not only does this dramatically improve allocation/free performance, but can also
+	facilitate support for cache-friendly data-oriented design approaches such as ECS.</li>
+	<li><b>arena</b> - rapid bump pointer allocation of variable-sized objects within a
+	specific lexical scope. When the lexical scope ends, all memory used by that scope is freed at once.</li>
+	</ul>
+	<p>Because Cone supports hybridized memory management, 
+	the programmer can better optimize performance, latency, safety, and data structure flexibility
+	as best meets the overall needs of a specific program.
+	High-speed strategies (lex, pool, arena) can be used where data structures permit,
+	dramatically reducing the overhead imposed by more flexible, but slower memory strategies (rc or gc)
+	used by the remaining objects.
+	Significant use of lex, for example, might significantly reduce the relevance of the "generational hypothesis",
+	thereby minimizing or eliminating the need for a generational nursery.</p>
+	
+	<p><b>Borrowed References</b></p>
+	<p>Cone supports Rust-like borrowed references, an important feature that further optimizes
+	performance and polymorphic reuse. Borrowed references are safe because they are life-time constrained,
+	a quality that the compiler can ensure.</p>
+	<p>Cone allows references to be borrowed from any allocator, including rc and gc.
+	Using a borrowed reference, rather than aliasing the rc or gc reference, reduces the runtime
+	overhead of these memory management strategies, as borrowed references are never counted nor traced.</p>
+	
+	<p><b>Custom Allocators</b></p>
+	<p>Cone is not limited to supporting only its built-in allocators. 
+	Additional allocators may be defined programmatically, and then used the same way as Cone's built-in allocators.
+	Use of custom allocators makes it even easier for a program to take advantage of the best mix
+	of memory management strategies for its needs.</p>
+	</div>
+
+</body>
+</html>
