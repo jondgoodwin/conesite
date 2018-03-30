@@ -68,7 +68,7 @@ imports.glCreateProgram = function() {
 }
 //imports.glCreateSampler
 imports.glCreateShader = function(type) {
-/    return wasmNewObj( gl.createShader( type ) );
+    return wasmNewObj( gl.createShader( type ) );
 }
 //imports.glCreateTexture
 imports.glCreateVertexArray = function() {
