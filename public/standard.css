@@ -34,7 +34,7 @@ font-weight: bold;
 margin-bottom: 10px;
 }
 
-a {color: #333;}
+a {color: #333; text-decoration-color: #ccc;}
 
 dl {
 }

@@ -70,8 +70,10 @@
 	
 	<p><b>Borrowed References</b></p>
 	<p>Cone supports Rust-like borrowed references, an important feature that further optimizes
-	performance and polymorphic reuse. Borrowed references are safe because they are life-time constrained,
-	a quality that the compiler can ensure.</p>
+	performance and polymorphic reuse. Borrowed references are safe because
+	the lifetime of the borrowed reference is guaranteed (by the compiler) to be shorter than the
+	owner reference it borrows from. In effect, the continued live-ness of the owner reference
+	"pins" the object and keeps it alive for at least as long as the lifetime of the borrowed reference.</p>
 	<p>Cone allows references to be borrowed from any allocator, including rc and gc.
 	Using a borrowed reference, rather than aliasing the rc or gc reference, reduces the runtime
 	overhead of these memory management strategies, as borrowed references are never counted nor traced.</p>
