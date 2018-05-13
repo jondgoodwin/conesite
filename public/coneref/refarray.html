@@ -1,0 +1,106 @@
+<html>
+  <head>
+	  <title>arrays - Cone Reference</title>
+		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	  <link rel="stylesheet" type="text/css" href="standard.css" />
+	</head>
+  <body>
+		<div id="header">
+			<a href="/"><div id="title">Cone</div></a>
+			<div id="sub">Arrays</div>
+		</div>
+
+    <div class="text">
+
+	<p>Arrays are a family of types used to package together multiple, indexable values that are all of the same type.</p>
+	
+    <p>The basic idea is that the internal behavior of square brackets for indexing changes based on type, 
+    but appears semantically equivalent to the programmer.
+    If it is declared as a fixed-size array, bounded-pointer, or bounded-reference, 
+    the behavior is hard coded into the compiler.
+    For all other types (particularly structs),
+    the square brackets invoke the type's overloaded '[]' method for both get and set operations.</p>
+
+    <p>There are many variations of built-in array types, distinguished by how they are declared:</p>
+    <ul>
+    <li>Vec: Variable-size arrays</li>
+    <li>Map: Variable-size associated arrays</li>
+    <li>Slices</li>
+    <li>Fixed-size arrays (C-style)</li>
+    <li>Bounded pointer arrays</li>
+    <li>Bounded-reference arrays</li>
+    </ul>
+    <p>Additional array structures can be defined using templates and/or structs that
+    build off the latter three array capabilities.</p>
+    
+    <h2>Vec: Variable-size arrays</h2>
+    <p>Vec is the language standard template for a resizeable array.
+    For ease-of-use, the language supports sugar for its use:
+<pre>
+vec_array [u32] i32   // Equivalent to Vec[i32, u32]
+</pre>
+    <p>The dimension must be an unsigned integer.</p>
+    
+    <h2>Map: Variable-size associated arrays</h2>
+    <p>Map is the language standard template for a resizeable dictionary map.
+    For ease-of-use, the language supports sugar for its use:
+<pre>
+map_marray [Text] i32  // Equivalent to Map[i32, Text, usize]
+</pre>
+    <p>The dimension here must be a type that supports the hash method.</p>
+
+    <h2>Slices</h2>
+    <p>TBD.</p>
+
+    <h2>Fixed-size arrays</h2>
+    <p>Fixed-size arrays declare the size of the array using a constant, unsigned integer:</p>
+<pre>
+mut c_array [4] i32
+</pre>
+    <p>Every attempt to index into such an array is automatically bounds-checked by its known size.
+    (Note: This bounds check is not performed within a trust block.)</p>
+
+    <h2>Bounded-pointer arrays</h2>
+    <p>The declaration for a bounded-pointer array always occurs within a struct. For example:
+<pre>
+struct VarArray
+    size u32
+    data *[size] i32  // <-- bounded-pointer array
+</pre>
+    <p>TBD. Distinguish when to use bounded-pointers vs. bounded-references.
+    Also, bounded-pointers can never be indexed outside a trust block which trips up bounds-checking!</p>
+    <p>The compiler recognizes this as a bounded-pointer array because the declared size of the array
+    references the field that declares the array's size as an unsigned integer.
+    Naming the companion field that specifies the array's size brings two advantages to the compiler:</p>
+    <ul>
+    <li>It can automatically calculate the correct bounds check (0 &lt;= i &lt; size)</li>
+    <li>It can mark the struct's type as having dependent values. 
+    This ensures we cannot obtain borrowed internal references to the struct if it has the mut permission.</li>    
+    </ul>
+    <p>Applying square brackets to the 'data' field is treated like a pointer that is bounds-checked.
+    The bounds check happens automatically, but only if not within a trust block.</p>
+    <p>Note: Apply the square brackets to an instance of VarArray invokes the '[]' method
+    defined for VarArray, which may or may not then invoke [] on the data field.
+    Bounded-pointer arrays are a good mechanisms for implementing various variable-size
+    array structures, and is what lies behind the Vec template (which adds a capacity field).</p>
+
+    <h2>Bounded-reference arrays</h2>
+    <p>This is similar to bounded-pointer arrays:
+<pre>
+struct Slice
+    offset usize
+    size usize
+    ref &[u32] i32
+</pre>
+    <p>This is important for implementing slices via templates.
+    In this case we have a borrowed (no allocator) reference with a known lifetime into some fixed or var size array.
+    As shown, the Slice template takes advantage of this construct.</p>
+    
+	<p style="text-align: right; margin-top: 2em;">
+		<a href="refalloc.html"><img alt="_" src="next.png" /></a>
+	</p>
+
+	</div>
+	</body>
+</html>
