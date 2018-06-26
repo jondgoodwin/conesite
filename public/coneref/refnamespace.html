@@ -8,25 +8,23 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Namespaces</div>
+			<div id="sub">Names and Namespaces</div>
 		</div>
 
     <div class="text">
 	
-		<p>Variables, functions, types, etc. are typically given names when declared or defined.
-			These names are defined within its lexical context's namespace.</p>
-
-		<p>Namespaces facilitate a module architecture in several ways.
-			Prudent use of namespaces reduces the accidental risk of name collisions, where two
-			different items (created possibly by different authors) are given the same name.
-			Namespaces also support encapsulation, helping to ensure that implementation details
-			are not visible outside of the namespace.</p>
+		<p>Variables, functions, types, etc. are usually given names when declared or defined.
+			These names are always defined within a specific lexical context's namespace.</p>
 
 		<p>Cone supports several kinds of namespaces:
 			<ul>
-				<li>Modules. Modules are pure namespaces. They are particularly useful for organizing
+					<li><a href="refblock.html">Blocks</a>. As we have already seen,
+						code blocks support the definition of <i>local</i> named variables and functions.</li>
+					<li><a href="reffunc.html#parms">Function parameters</a>. A function signature defines its named parameters,
+						later usable within the function's block(s) as local variables.</li>
+					<li><a href="refmodule.html">Modules</a>. Modules are <i>global</i> namespaces. They are helpful for organizing
 					code across source file programs and packages.
-					<p>Modules support a wide-range of named items, such as:</p>
+					<p>Modules enclose a wide range of named items, such as:</p>
 					<ul>
 						<li>Functions</li>
 						<li>Global variables</li>
@@ -35,14 +33,17 @@
 						<li>Macros and templates</li>
 					</ul>
 				</li>
-				<li>Method-capable types. These types support the definition of named methods and fields.
+				<li><a href="reftypes.html">Method-capable types</a>. These types support the definition of named methods and fields.
 					A type's public methods and fields may be applied to instances of that type.</li>
-				<li>Blocks. Code blocks support the definition of local variables and functions.</li>
-				<li>Function parameters. A function signature defines named parameters,
-					later usable as local variables.</li>
 			</ul>
 		</p>
 
+		<p>Namespaces facilitate a module architecture in several ways.
+				Prudent use of namespaces reduces the accidental risk of name collisions, where two
+				different items (created possibly by different authors) are given the same name.
+				Namespaces also support encapsulation, helping to ensure that implementation details
+				are not visible outside of the namespace.</p>
+	
 		<p>The rules governing names and namespaces vary depending on the type of namespace.</p>
 
 		<h2>Name uniqueness</h2>
