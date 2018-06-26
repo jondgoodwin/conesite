@@ -69,8 +69,7 @@
 			<h3>Local Name Visibility</h3>
 			<p>A function's (or method's) local names consist of its parameters,
 				as well as all local variables and named (nested) functions or closures
-				that are declared within any of its blocks.
-				A closure's bound variables are also considered local names.</p>
+				that are declared within any of its blocks.</p>
 			<p>Once a local name has been declared, it may be referenced at any point afterwards
 				within the block's scope it is declared within, 
 				as well as within any block that lies within that lexical scope.
@@ -78,7 +77,7 @@
 				a local variable of the same name, which then takes precedence within that inner scope.</p>
 			<p>A function cannot reference any local named declared by another function.
 				This is true even for functions or closures declared within another function.
-				Even a closure's bound variables are local only to that closure.</p>
+				Even a closure's bound variables are visible only to that closure.</p>
 
 			<h3>Methods and Fields: Public vs. Private</h3>
 			<p>All of a type's methods and fields may be referenced by any of its methods' code.

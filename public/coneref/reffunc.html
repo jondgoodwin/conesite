@@ -101,37 +101,17 @@ next()    // ERROR! no default value for nbr
 	<p>The indented statements that follow the function's signature are its statement block.
 	The block consists of a sequence of statements that represents the function's logic.
 	Generally, each statement is performed in order.</p>
-	<p>Many statements are expressions (including assignment expressions).
-	However, there are also several special-use statements that begin with a
-	reserved keyword (e.g., <span class="pre">return</span>). 
-	These special-use statements will be introduced in later sections.</p>
-	<p>In addition to function blocks, several other kinds of statement blocks
-	can be incorporated in a function's statement block.
-	These too typically begin with a reserved keyword.
-	For example, the <span class="pre">if</span> and <span class="pre">while</span>
-	<a href="refcontrol.html">control blocks</a> are used to control 
-	the flow of execution based on calculated conditions.
-	Use of such blocks further indents code statements.
-	Such statement blocks are considered part of the logic of the function they appear within.</p>
+	<p>Each statement is typically an expression (including an assignment or block expression).
+	A block's statement could also be a local variable declaration,
+	some nested block, or one of a set of special statements supported by Cone.
+	The <a href="refblock.html">Block</a> chapter offers detailed information about
+	what you can do with different kinds of blocks.</p>
 
-	<h4 id="local">Local variable declaration</h4>
-	<p>As described <a href="refterm.html#scope">earlier</a>,
-	declarations for local variables are often found within a function's statement block.
-	They are distinguished from other statements by starting off with a permission,
-	typically <span class="pre">imm</span> or <span class="pre">mut</span>.
-	The usable lifetime (scope) for these variables is the block they are declared within.
-	Space for them is made available when the block is entered and disappears when the block is left.</p>
-<pre>
-fn summult(a f32, b f32) f32
-	imm sum, mult = a + b, a * b  // local variable declaration
-	return sum / mult
-</pre>
-	
 	<h3 id="return">Return Statement</h3>
-	<p>A <span class="pre">return</span> statement may be placed anywhere within a method (even within a control block).
-	When encountered, execution of the method ceases and
-	all comma-separated values specified after <span class="pre">return</span> are returned to the caller.
-	All return values must match the return types declared on the function's signature.</p>
+	<p>A <span class="pre">return</span> statement may be placed at the end of any block.
+	When encountered, execution of the function ceases and
+	the comma-separated values specified after <span class="pre">return</span> are returned to the caller.
+	The number and types of all return values must match the return types declared on the function's signature.</p>
 <pre>
 fn ceil(x i32) i32, i32
 	if x > 6
@@ -143,11 +123,11 @@ a,b = ceil(3)       // returns 3,3
 </pre>
 
 	<h4>Implicit returns</h4>
-	<p>A function does not have to end with a <span class="pre">return</span> statement.
-	If the function signature does not declare a return value, the function automatically 
+	<p>A function does not have to specify a <span class="pre">return</span> statement at the end of its main block.
+	If the function signature does not declare a return value, the function just 
 	returns after the last statement is performed.</p>
 	<p>If the function signature declares that values must be returned, 
-	an attempt is made to find matching values on the last statement or block of the function:</p>
+	an attempt is made to matching the values on the last statement or block of the function:</p>
 	<ul>
 	<li>if it is an expression whose types match, it is treated as if <span class="pre">return</span> 
 	were specified before the expression:
@@ -201,7 +181,7 @@ fn factorial(x i32, prod i32 = 1)
 	</ul>
 
 		<p style="text-align: right; margin-top: 2em;">
-			<a href="refcondexp.html"><img alt="_" src="next.png" /></a>
+			<a href="refblock.html"><img alt="_" src="next.png" /></a>
 		</p>
 		
 	</div>
