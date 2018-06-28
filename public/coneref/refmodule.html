@@ -8,32 +8,47 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Program/Library Modules</div>
+			<div id="sub">Congo, include, and mod</div>
 		</div>
 
     <div class="text">
 	
-				<p>A <b>package</b> is a collection of source files that are transformed by a build system
-					into a specific program or library.
-								An entire package is the basic unit of compilation.
-				A package may contain one or more modules.</p>
-				<p>The filename for a program package's main source file is typically "main.cone".
-				Similarly, the file for a library package's main source file is typically "lib.cone".</p>
-			
-
-	<p>Packages and modules organize code that is distributed across many files and folders.
-	There are three techniques for joining together code that spans multiple source files:</p>
-	<ul>
-	<li><b>include</b> other files into the current namespace</li>
-	<li>Create a new <b>mod</b>ule namespace that is nested and usable within the current namespace</li>
-	<li><b>import</b> an external package whose namespace(s) are usable by the current namespace</li>
-	</ul>
-	<p>By convention, the names and structure for packages and modules typically maps closely to
-	how source files are named and organized into folders.</p>
+	<p>The previous import page indicated that external libraries are imported as packages.
+		In addition, any program or library you are building is also a package.
+		A package, not a source file, is the basic unit of compilation.</p>
+	<p>A package is a collection of one or more source files that are transformed by the Congo build system
+		into a specific program or library.
+		This page describes how to name and organize the source files for your program or library across folders,
+		as well as the language features used to bind them together at build time.
+		It also describes how a package's source code can be organized into module namespaces.
+		By convention, the names and structure for packages and modules typically map closely to
+	  how source files are named and organized into folders.</p>
 	
-	<h2>include: Combining Source Files</h2>
-	<p>The <span class="pre">include</span> statement is very straightforward.
-	It incorporates another source file's contents as if were made a part of the current source file.
+	<h2>A Single Source File</h2>
+	<p>Each package typically lives in its own base folder.
+		So, for a new program, you begin by creating that folder.
+		Within it, 'congo new' creates the necessary scaffolding for a new program. 
+		In the folder, you will find it created a new 'main.cone' file.
+		This name is what Congo starts with when compiling your package.
+	</p>
+	<p>You can use your favorite editor to modify main.cone, transforming it into the program you want to create.
+		To compile it, you only need to invoke 'congo build' within that folder.
+	</p>
+	<p>If you want to build a library rather than an executable program,
+		use 'congo new library' instead. The main source file for a library is called 'lib.cone'.
+	</p>
+	<p>When your package expands to more than one source file,
+		you have two options for binding the source files together:</p>
+	<ul>
+		<li><span class="pre">include</span>,
+			which stitches one source file into another as part of the same namespace.</li>
+		<li><span class="pre">mod</span>,
+			which creates a separate module namespace.</li>
+	</ul>
+
+	<h2>include</h2>
+	<p>The <span class="pre">include</span> statement
+	incorporates another source file's contents as if were made a part of the current source file.
 	For example, suppose we had a source file called 'useme.cone':
 <pre>
 fn inc(a i32) i32
@@ -46,128 +61,77 @@ fn timesnext(a i32)
   a * inc(a) // uses a function defined by 'useme.cone'
 </pre>
 	<p>'useme' is the name of the source file to include (the extension of .cone is assumed, if not specified).
-	By default, it looks for this file in the same folder as the source file which includes it.
-	Failing to find it there, it will look for a file named 'mod.cone' in the subfolder named 'useme'.
-	This latter convention makes it convenient to organize source files in nested folders.</p>
-	<p>Sometimes, a source file's name or path may need to use punctuation characters not legal in an identifier,
-	such as '/' or '.'. When this is the case, simply enclose the file/path name in double quotes:</p>
+	By default, it looks for this file in the same folder as the source file which includes it.</p>
+
+	<h3>Subfolders</h3>
+		<p>Sometimes, it is conceptually useful to organize include files in a nested structure,
+			mirrored by the structure of the folders that hold the source files.
+			The build system offers a simple convention for accomplishing this.</p>
+		<p>In the above example, if Congo failed to find 'useme.cone' in the same folder,
+			it will look inside the 'useme' subfolder for a file named 'mod.cone'.</p>
+
+	<h3>Quoted include files</h3>
+		<p>Sometimes, a source file's name or path may need to use punctuation characters not legal in an identifier,
+		such as '/' or '.'. When this is the case, simply enclose the file/path name in double quotes:</p>
 <pre>
 include "../useme"
 </pre>
 	<p>A specified path may be absolute or relative to the current source file's folder.</p>
 
-	<h2>mod: Module Namespaces</h2>
-	<p>A module is essentially a namespace that holds a collection of
-	uniquely named types, functions, global variables, constants and other modules.
-	Modules are valuable for isolating the names used by large programs.
-	Modules help to avoid situations where different source programs accidentally collide,
-	using the same name to refer to different things.</p>
-	<p>A module may lie within a source file, be a whole source file,
-	or even span multiple source files. Modules are nestable.</li>
+	<h2>mod</h2>
+	<p>The alternative to <span class="pre">include</span> is <span class="pre">mod</span>,
+	  which marks code as belonging to a distinct module.
+	  A module is a global namespace for named types, functions, global variables, 
+		metaprogramming constructs, and other modules.
+		A module may lie within a source file, be a whole source file,
+	  or even span multiple source files. Modules are nestable.</p>
+	  <p>Modules are valuable for isolating the names used by large programs.
+	  Modules help to avoid situations where different source programs accidentally collide
+	  because they use the same name to refer to different things.</p>
 	
-	<h3>Embedded modules</h3>
-	<p>A module block may be specified within a source file
-	using the <span class="pre">mod</span> statement.
-	Its named namespace is effectively nested within the enclosing program's namespace:</p>
+	<h3>Modules as separate files</h3>
+	<p>Typically, a nested module is defined in its own source file and then referenced by any module
+	that needs access to its named members. 
+	Using <span class="pre">mod</span>, a program can include 'useme.cone' as a module
+	(instead of an include file):</p>
+<pre>
+mod useme
+fn timesnext(a i32)
+	a * useme::inc(a) // uses a function defined by 'useme.cone'
+</pre>
+  <p>We need to qualify the inc() function with the module's namespace name to access it,
+		exactly as we needed to when we <a href="refpackage.html">import foreign packages</a>
+		(which are also treated as module namespaces).
+		Indeed, all the advice given there about namespace-qualified names applies here as well.
+		Since modules can be nested inside modules, namespace-qualified names
+		can get deep (e.g., ip::tcp::http).</p>
+	<p>Furthermore, <span class="pre">mod</span> supports the same options as
+		<span class="pre">import</span> for folding (and aliasing) 
+		specific module names into the current namespace.
+    Like <span class="pre">include</span>, <span class="pre">mod</span> also supports
+	  automatic folder nesting (e.g., "useme/mod.cone") and quoted filename paths.</p>
+	<p>Although <span class="pre">include useme</span> and <span class="pre">mod useme *</span>
+	might appear to do the same thing, there are some subtly important differences:</p>
+	<ul>
+		<li>Every use of include retrieves and parses the file, whereas mod will only
+			do this once for any given source file.</li>
+		<li>Using mod, the source file's private names (those beginning with an underscore)
+			will not become part of the current namespace.</li>
+		<li>Processing mod is somewhat slower than include.</li>
+	</ul>
+
+<h3>Embedded modules</h3>
+<p>It is possible to specify a separate module within a source file
+using the <span class="pre">mod</span> statement followed by a block.
+Its named namespace is effectively nested within the enclosing program's namespace:</p>
 <pre>
 mod frontend
   fn get() ...
-  
+
 fn main()
   frontend::get() // refers to the get function within the frontend namespace
 </pre>
-	<p>In this example, frontend is a module containing its own function(s), including get.
-	To refer to get() outside that module, we must prefix its name
-	with the name of the module it belongs to, using <span class="pre">::</span> to separate these names.</p>
-	
-	<h3>Modules as separate files</h3>
-	<p>More commonly, a nested module is defined in its own source file and then referenced by any module
-	that needs access to its named members.
-	Using the above example, we would move the frontend module's code to a 
-	separate source file called frontend.cone:</p>
-<pre>
-fn get() ....
-</pre>
-	<p>Then we can shorten the source file that needs access to frontend
-	to have <span class="pre">mod</span> simply refer to the 'frontend.cone' source file:</p>
-<pre>
-mod frontend; // this retrieves the module found in 'frontend.cone'
-
-fn main()
-  frontend::get()
-</pre>
-	<p>As with <span class="pre">include</span>, file and path names may be specified
-	within double quotes. Likewise, if the file 'frontend.cone' does not exist,
-	the program would automatically next look for 'frontend/mod.cone',
-	thereby enabling subfolders to represent nested modules.
-	If we were to move get() into the 'loader' sub-module within 'frontend', the main program would 
-	need to refer to it as <span class="pre">frontend::loader::get();</span></p>
-	
-	<h3 id="pathname">Namespaced names</h3>
-	<p>A reference to a named entity in another module (namespace) is called a path name.
-	Typically, path names are relative to the current module. This behavior can be overridden with a prefix:
-	<ul>
-	<li>A path name beginning with '::' begins with the current package's main (root) namespace.</li>
-	<li>A path name may begin with super::, which refers to the module that holds the current module.</li>
-	</ul>
-
-	<h3>Simplifying namespaced names</h3>
-	<p>It can become tedious to repetitively use fully-qualified path names for frequently used names.
-	To fold one or more specific names from a module in the current module's namespace,
-	simply specify these names on the <span class="pre">mod</span> command.
-	For example:</p>
-<pre>
-mod frontend::loader::get
-
-fn main()
-  get() // 'get' is now part of main's namespace
-</pre>
-	<p>An alias may be given for an imported name to avoid potential conflicts:</p>
-<pre>
-use frontend::loader::get as load
-
-fn main()
-  load() // We must use the alias
-</pre>
-	<p>All public names within a namespace may be folded into the current namespace using a glob (*):</p>
-<pre>
-use frontend::loader::*
-
-fn main()
-  get()
-</pre>
-	
-	<h3>Private vs. public</h3>
-	<p>The names within a module's namespace may be public or private:</p>
-	<ul>
-	<li><b>Public</b> names are visible to any other module</li>
-	<li><b>Private</b> names are only visible to code within the same module</li>
-	</ul>
-	<p>Private names begin with an underscore. Public names do not.</p>
-	
-	<h2>import: Packages</h2>
-	<p>A <b>package</b> is a collection of source files that are transformed by a build system
-	into a specific program or library.
-	An entire package is the basic unit of compilation.
-	A package may contain one or more modules.</p>
-	<p>The filename for a program package's main source file is typically "main.cone".
-	Similarly, the file for a library package's main source file is typically "lib.cone".</p>
-	
-	<p>To make use of named entities defined by another package library,
-	use <span class="pre">import</span> rather than <span class="pre">mod</span>.
-	The name of the package effectively becomes the highest level module name.</p>
-	<p>So, if we moved "frontend" to its own library package, the example would now be:</p>
-<pre>
-import frontend;
-
-fn main()
-  frontend::loader::get()
-</pre>
-	<p>The build system uses information in the package's configuration file
-	to retrieve the code for the desired version of the referenced package from its home on the Internet.</p>
-	<p>It is not necessary to import the standard library (std) and fold its names into the current namespace, 
-	as this happens automatically for every defined module.</p>
-	
+		
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refconcur.html"><img alt="_" src="next.png" /></a>
 	</p>
