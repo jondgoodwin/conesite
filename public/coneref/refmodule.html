@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>Packages and Modules - Cone Reference</title>
+	  <title>Modules - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -8,11 +8,19 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Packages and Modules</div>
+			<div id="sub">Program/Library Modules</div>
 		</div>
 
     <div class="text">
 	
+				<p>A <b>package</b> is a collection of source files that are transformed by a build system
+					into a specific program or library.
+								An entire package is the basic unit of compilation.
+				A package may contain one or more modules.</p>
+				<p>The filename for a program package's main source file is typically "main.cone".
+				Similarly, the file for a library package's main source file is typically "lib.cone".</p>
+			
+
 	<p>Packages and modules organize code that is distributed across many files and folders.
 	There are three techniques for joining together code that spans multiple source files:</p>
 	<ul>
