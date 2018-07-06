@@ -1,0 +1,62 @@
+<html>
+  <head>
+	  <title>Methods - Cone Reference</title>
+		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	  <link rel="stylesheet" type="text/css" href="standard.css" />
+	</head>
+  <body>
+		<div id="header">
+			<a href="/"><div id="title">Cone</div></a>
+			<div id="sub">Methods</div>
+		</div>
+
+    <div class="text">
+
+	<h2>Methods</h2>
+	<p>Most types allow the definition of methods that apply to values of that type.
+	Methods are simply functions whose definition is part of a type's declaration.
+	The method's first parameter is named <span class="pre">self</span>.
+	The type of <span class="pre">self</span> is either a value or reference of the type it belongs to.</p>
+<pre>
+struct Point
+  x f32
+  y f32
+  // a method that works on Point values...
+  fn len(self) f32
+    ((.x*.x)+(.y*.y)).sqrt()
+
+fn test()
+  imm pt = Point{3., 4.}
+  imm c = pt.len() // use Point's 'len' method
+</pre>
+
+	<h3>Constructor Methods</h3>
+	<p>For some types, it is useful to have methods able to create a new value of a specific type.
+	A type is allowed to define multiple constructor methods.
+	By convention, the most commonly used constructor is called <span class="pre">init</span>.</p>
+	<p>To represent that <span class="pre">self</span> needs to be created, 
+	it should be marked with <span class="pre">new</span> and should declared its type as a reference. 
+	The constructor should return self (otherwise, what's the point?).</p>
+<pre>
+struct Point
+  x f32
+  y f32
+  fn init(new self &, x f32, y f32)
+    self = Point{x,y}
+	self
+</pre>
+	
+	<h3>'drop' Method</h3>
+	<p>Although it is not often needed, some types need the ability to
+	perform some clean-up actions before a value is deleted
+	(for example, releasing resources they have acquired).
+	This clean-up activity should be performed within a method called <span class="pre">drop</span>.
+
+	<p style="text-align: right; margin-top: 2em;">
+		<a href="reftypesafe.html"><img alt="_" src="next.png" /></a>
+	</p>
+
+	</div>
+	</body>
+</html>

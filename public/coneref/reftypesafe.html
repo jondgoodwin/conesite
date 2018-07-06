@@ -1,0 +1,42 @@
+<html>
+  <head>
+	  <title>Type Safety - Cone Reference</title>
+		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	  <link rel="stylesheet" type="text/css" href="standard.css" />
+	</head>
+  <body>
+		<div id="header">
+			<a href="/"><div id="title">Cone</div></a>
+			<div id="sub">Type Safety</div>
+		</div>
+
+    <div class="text">
+
+	<h2>Strict Typing, Coercion and Conversion</h2>
+	<p>Typing is strict. In most cases, attempting to place a value of one type into a container
+	declared as another type will generate a compile-time error.
+	However, there are times when this is allowed:</p>
+	<ul>
+	<li><b>Subtype Coercion</b>.
+	If type A is a valid subtype (perfect subset) of some type B.
+	one may pass a value of type B to a function expecting a value of type A.
+	This coercion capability is particularly valuable when using an interface or trait 
+	as a viewing window into a number of different, but compatible structs.
+	This principle also applies when coercing reference permissions 
+	(e.g., <span class="pre">mut</span> to <span class="pre">const</pre>).</li>
+	<li><b>Implicit Conversion</b>.
+	Although the numeric primitives are never subtypes of each other,
+	a number of one type is <a href="refexpr.html#numrconv">automatically converted</a>
+	to a different type, if required.</li>
+	</ul>
+	<p>Another way to satisfy strict typing is to use methods that explicitly convert a value
+	of one type into a different value of the required type.</p>
+	
+	<p style="text-align: right; margin-top: 2em;">
+		<a href="refstruct.html"><img alt="_" src="next.png" /></a>
+	</p>
+
+	</div>
+	</body>
+</html>
