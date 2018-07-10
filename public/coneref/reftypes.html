@@ -13,45 +13,102 @@
 
     <div class="text">
 
-	<p>A type is a pattern that:
+	<p>We've talked about <a href="refterm.html#vtype">types</a> before,
+	mostly in regard to the integer and floating point number types (e.g., i32 or f32).
+	Cone offers a rich, versatile collection of types, whose documentation extends across quite a few chapters.</p>
+	<p>What is a type?  Broadly speaking, it is a pattern that:</p>
 	<ul>
-	<li>Declares the possible values for data and describes how it is encoded</li>
-	<li>Specifies the operations that can be performed using that data</li>
-	<li>Establishes constraints enforced by the compiler or run-time mechanisms</li>
+	<li>Establishes what kind of data a value of that type carries.</li>
+	<li>Determines how values are digitally encoded in memory.</li>
+	<li>Specifies the <a href="refmethod.html">methods</a> (functions) that can be performed with values of that type</li>
+	<li>Enforces <a href="reftypesafe.html">constraints</a> to ensure the type's values are handled consistently and safely.</li>
 	</ul>
-	<p>Explicit declaration of types are valuable for optimizing a program's performance and space efficiency,
-	as well as offer compile-time safety protections.</p>
-	<p>This page briefly introduces the various kinds of types and describes
-	features that they share in common.</p>
-	
-	<h2>Kinds of Types</h2>
-	
-	<p>Most types are value types; they apply to any value used and manipulated by a program:</p>
+	<p>Every value in a program has a type, 
+	  known at compile-time due to an explicit declaration or because the type can be easily inferred based on the context.
+	  By knowing the types all values, the compiler can optimize a program's performance and memory use.
+	  Clear typing facilitates precise, flexible data manipulation and improves the safe and correct use of data.</p>
+	<p>This page provides a helpful overview of Cone's diverse range of types.
+	These kinds of types are actually type factories, enabling definition of custom types as needed by a program or library.</p>
+
+	<h2>Concrete types</h2>
+	<p>The concrete types are used to instantiate specific data values:</p>
 	<ul>
-	<li>Primitive numbers, such as the unsigned integers (u32), signed integers (i32), floats (f32)
-	and Bool (effectively a 1-bit unsigned integer, whose values are called true and false).</li>
-	<li><a href="refstruct.html">structs</a>, 
-	interfaces, traits, and tuples which establish a record-like collection of fields.</li>
-	<li>arrays, vectors and dictionaries, which establish an indexed collection of same-typed elements.</li>
-	<li>sum types, which can hold values from two or more different types.</li>
-	<li>references and pointers, whose value is a pointer that refers to a value of another type
-	somewhere else in memory.</li>
+		<li><b>Built-in number types.</b>
+			This includes the signed and unsigned integers and floating point numbers.
+			It also includes bool (a 1-bit unsigned integer) and char (a 32-bit unsigned integer)
+			large enough to hold a unicode value.
+			These are the atomic building blocks on which (nearly) all other types rest.
+			Their bit sizes are designed to exploit the byte and word alignments used by most CPUs.
+		</li>
+		<li><b>Field-based structure types</b>.
+			<a href="refstruct.html">struct</a> defines a named type
+			that describes a group of values, called fields, each with its own type and name.
+			A number of other special-purpose types are field-based,
+			such as range, closure, trait, interface, allocator, and run-time permission.
+			Although traits never directly instantiate values,
+			they can be used to help assemble struct types which do.
+		</li>
+		<li><b>Indexed collection types</b>.
+			These types hold a collection of values that all have the same type.
+			Some collection types index access to its values using an unsigned integer (e.g., a List or a Text string).
+			Other collection types index its values using a hashed value (typically a Text).
+		</li>
+		<li><b>Variant types</b>.
+			These types enable a single value to be one of several types.
+			The value's specific type is only known (and changeable) at runtime.
+			Variant type capability includes sum and nullable types as well as tagged structs.
+			Special language features, like pattern matching, are used to ensure safe use of
+			variant-typed data.
+		</li>
 	</ul>
-	<p>Reference management types mediate the use of references to ensure memory and race safety:</p>
+
+	<h2>System Resource Types</h2>
+	<p>These types facilitate low-level, safe use of memory, functions and threads.</p>
 	<ul>
-	<li><a href="refperm.html">Permissions</a>, 
-	which establish the usage capabilities and restrictions that apply to variables and references.</li>
-	<li><a href="refallocref.html">Allocators</a>, 
-	which manage memory safely and efficiently on behalf of programs.</li>
+	<li><b><a href="refrefs.html">Reference types</a></b>.
+		Reference types provide a memory- and race-safe way for a program to create one or more managed paths
+		used to indirectly access a single value.
+		References can point to concrete types, another reference, functions, 
+		collection slice, or an interface- or trait-subtyped struct.
+		All references are assigned a permission (see below).
+		References are either borrowed for a lexically-constrained lifetime or 
+		managed by a specified allocator.
+	</li>
+	<li><b><a href="refperm.html">Permission types</a></b>. 
+		Permission types are used to constrain the mutability and aliasing of values
+		held by variables or pointed to by references.
+		Use of permissions prevents race conditions.
+		Some permission types are dynamic, using runtime synchronization mechanisms to enforce constraints.
+		Other permissions are static, and entirely enforced at compile-time.
+    </li>
+	<li><b><a href="refallocref.html">Allocator types</a></b>.
+		Allocator types manage the layout and lifetime of values in memory.
+		Allocators support a broad range of safe memory management strategies, such as
+		lexical single-owner, reference counted, tracing GC, pools and arenas.
+    </li>
+	<li><b><a href="retptr.html">Pointer types</a></b>.
+		Pointer types are very similar to references in their fundamental capability.
+		However, they are not constrained by permission and allocator safety mechanisms.
+		Instead, they offer greater flexibility in terms of pointer arithmetic and type re-casting.
+	</li>
+	<li><b>Function types</b>.
+		This is the signature for a function (or method): its named parameter types
+		and its return type (or type tuple).
+	</li>
+	<li><b>Thread types</b>.
+	  Thread types support the structured spawning, management and convergence
+	  of multiple threads. Multiple thread strategies are supported, such as co-routines, native and green threads.
+	</li>
 	</ul>
-	<p>Execution types apply to various units of execution.
-	Instead of defining their data content, they declare how they are to be used:</p>
-	<ul>
-	<li>Functions, methods and closures, which hold code that can be applied to values.</li>
-	<li>Threads, co-routines and actors, which represent distinct execution states for running code.</li>
-	</ul>
-	<p>These type kinds are used like type factories, enabling definition of specific types,
-	as detailed by the respective chapters that cover each kind of type.</p>
+
+	<h2>Template types</h2>
+	<p>Using template metaprogramming, one can define a collection of types
+		that share common logic, but whose implementation details vary
+		according to the specific type parameters applied to the template.
+		Most indexed collection types are implemented using templates.
+		Thus, hash-indexed collections share a similar logic, but that logic varies
+		according to the specified types of the hash and element values.
+	</p>
 	
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refmethod.html"><img alt="_" src="next.png" /></a>
