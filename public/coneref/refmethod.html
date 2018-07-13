@@ -13,11 +13,42 @@
 
     <div class="text">
 
-	<h2>Methods</h2>
-	<p>Most types allow the definition of methods that apply to values of that type.
-	Methods are simply functions whose definition is part of a type's declaration.
-	The method's first parameter is named <span class="pre">self</span>.
-	The type of <span class="pre">self</span> is either a value or reference of the type it belongs to.</p>
+	<p>Methods add functional behavior to a defined type, offering capabilities consistent with
+		and helpful for values of that type.
+		For example, as mentioned <a href="refexpr.html#method">earlier</a>, 
+		<span class="pre">`+`</span> is one of many methods defined for the <span class="pre">i32</span>.
+		It adds two integers together and returns the result.</p>
+	<p>Nearly every type supports the use of custom-defined methods: numbers, structs, indexed collections,
+		variant types, interfaces, traits, slices, etc. Even allocators and permissions support methods.
+		The only types that do not support their own customizeable methods are references, pointers and functions.</p>
+	<p>A method definition looks and behaves like a function definition: It has a name, named parameter(s),
+		return value type(s), and a statement body. On this page we explore the ways that methods
+		differ from global functions.</p>
+
+	<h2>The type's namespace</h2>
+	<p>Functions belong to a global (module) namespace.
+		By contrast, methods belong to a type's <a href="refnamespace.html">namespace</a>.
+		(Note: a type's named fields belong to the same namespace as its methods).</p>
+	<p>Because methods belong to a type's namespace, this means different types can
+		define methods having the same name, each doing something different (appropriate to its type).
+		There is no confusion over which one to use, because use of a method by functions or methods external to the type
+		is qualified implicitly (using the dot operator) or explicitly (using the double colon) by the desired type.</p>
+	<p>No such qualification is needed when a method calls another method in the same type;
+		such a call looks exactly like a function call.</p>
+
+	<h2>Multiple methods with the same name</h2>
+	<p>Another difference between methods and functions is that a type may define more than one method of the same name.
+	  Once again, there is no confusion about which method to use, because there is a requirement that
+	  same-named methods differ in their parameter definitions, either by type or by number of required parameters.
+	  When a certain named method is used, Cone chooses the first method whose parameter definition
+	  matches the types and number of arguments passed to that method.
+	  Supporting multiple methods of the same name makes it convenient for a type to
+	  support a similar capability for a broad range of differently-typed values.</p>
+
+	<h2>Self</h2>
+	<p>A method's first parameter is always named <span class="pre">self</span>.
+	The type specified for <span class="pre">self</span> must match the type the method is defined within,
+	or else be a reference to a value of that type.</p>
 <pre>
 struct Point
   x f32
@@ -30,28 +61,88 @@ fn test()
   imm pt = Point{3., 4.}
   imm c = pt.len() // use Point's 'len' method
 </pre>
+    <p>A parameter need not specify the type if it is the same as the type the method is defined in.
+    Similarly, when the type of self is the same as the method's type, which is typically the case,
+    self need not even be declared in the method's parameter list. It will be inserted automatically.</p>
 
-	<h3>Constructor Methods</h3>
-	<p>For some types, it is useful to have methods able to create a new value of a specific type.
-	A type is allowed to define multiple constructor methods.
-	By convention, the most commonly used constructor is called <span class="pre">init</span>.</p>
-	<p>To represent that <span class="pre">self</span> needs to be created, 
-	it should be marked with <span class="pre">new</span> and should declared its type as a reference. 
-	The constructor should return self (otherwise, what's the point?).</p>
+	<h2>Special-purpose Methods</h2>
+	<p>A number of methods have a built-in role in Cone. 
+		This means they get special handling in certain situations.</p>
+
+	<h3>Constructors</h3>
+	<p>A constructor method initializes a new value of the specified type.
+		Constructors are useful when a type's initialization logic is more complex than
+	  simply populating fields or elements with values.</p>
+	<p>A type may define multiple constructor methods.
+	  By convention, the most commonly used constructor is called <span class="pre">init</span>.
+	  A type need not define any constructor method, as there are other ways to directly initialize
+	  a new value.</p>
+  <p>Like all other methods, a constructor declares <span class="pre">self</span> as its first parameter.
+		In this case, <span class="pre">self</span> is a reference to an uninitialized memory location
+		which can then be initialized. The <span class="pre">new</span> permission indicates this.
+  	A constructor always return self (otherwise, what's the point?).</p>
 <pre>
 struct Point
   x f32
   y f32
-  fn init(new self &, x f32, y f32)
-    self = Point{x,y}
+  fn init(new self &amp;, x f32, y f32)
+    .x, .y = x, y
 	self
 </pre>
 	
-	<h3>'drop' Method</h3>
+	<h3>drop</h3>
 	<p>Although it is not often needed, some types need the ability to
-	perform some clean-up actions before a value is deleted
-	(for example, releasing resources they have acquired).
+	perform some clean-up actions before the memory allocated for the value is freed.
+	Often, this clean up involves releasing acquired resources.
 	This clean-up activity should be performed within a method called <span class="pre">drop</span>.
+
+	<h3>Operator methods</h3>
+	<p>Many operators are transformed into method calls. For instance, <span class="pre">x+3</span>
+	is treated as if it were:  <span class="pre">x.`+`(3)</span>
+	Because of this, a type need only implement the <span class="pre">`+`</span> method to
+	make the <span class="pre">+</span> operator meaningful to that type.
+	If you try to apply the <span class="pre">+</span> operator to a value 
+	whose type has not implemented the <span class="pre">`+`</span> method,
+	a compiler error will result.</p>
+	<p>This applies to all the arithmetic, arithmetic assignment, and comparison operators as well as:</p>
+	<ul>
+		<li><b>`[]`</b> for indexing</li>
+		<li><b>`()`</b> for function calls (this allows a struct to become a closure)</li>
+		<li><b>`+`</b> (the prefix operator) maps to the default <span class="pre">init</span> constructor</li>
+		<li><b>`=`</b> for copying</li>
+		<li><b>`&lt;&lt;` and `&gt;&gt;`</b> for append and prepend</li>
+	</ul>
+
+	<h3>Implicit methods</h3>
+	<p>Certain language constructs make use of specific methods under the covers:</p>
+	<ul>
+		<li><b>.each</b> is called by the <span class="pre">each</span> block to create an iterator</li>
+		<li><b>.`~~`</b> is the default match operator for <span class="pre">match</span> blocks</li>
+		<li><b>.`&lt;&lt;`</b> is the default append operator used for <span class="pre">build</span> blocks</li>
+	</ul>
+
+	<h3>Computed properties</h3>
+	<p>It is possible to define a method as having two distinct get and set behaviors.</p>
+<pre>
+struct Counter
+	count u32
+	fn counter
+		 get() {count += 1}
+		 set(cnt) {count = cnt}
+</pre>
+  <p>The get function is performed in most situations where the method is called.
+		The set function is performed whenever the method is called on the left of an assignment.
+		As a convenience, the parentheses can be avoided if the get definition has no parameters
+		and the set has one.
+	</p>
+<pre>
+mut x Count{0}
+x.counter // 1 from get()
+x.counter // 2
+x.counter = 10 // sets
+x.counter // 11
+</pre>
+
 
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="reftypesafe.html"><img alt="_" src="next.png" /></a>
