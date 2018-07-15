@@ -13,26 +13,84 @@
 
     <div class="text">
 
-	<h2>Strict Typing, Coercion and Conversion</h2>
-	<p>Typing is strict. In most cases, attempting to place a value of one type into a container
-	declared as another type will generate a compile-time error.
-	However, there are times when this is allowed:</p>
+	<p>Typing is strict: You cannot put a round peg in a square hole.</p>
+	<p>Since all values, expressions and variables have a type, the compiler can (and will)
+		check whether the use of types is consistent.
+		In most cases, an error will be reported wherever a program:</p>
 	<ul>
-	<li><b>Subtype Coercion</b>.
-	If type A is a valid subtype (perfect subset) of some type B.
-	one may pass a value of type B to a function expecting a value of type A.
-	This coercion capability is particularly valuable when using an interface or trait 
-	as a viewing window into a number of different, but compatible structs.
-	This principle also applies when coercing reference permissions 
-	(e.g., <span class="pre">mut</span> to <span class="pre">const</pre>).</li>
-	<li><b>Implicit Conversion</b>.
-	Although the numeric primitives are never subtypes of each other,
-	a number of one type is <a href="refexpr.html#numrconv">automatically converted</a>
-	to a different type, if required.</li>
+		<li>Stores a value of one type into a variable or collection declared for a different type.</li>
+		<li>Passing an argument of one type to a function that expects a value of another type in that position.</li>
+		<li>Returns a value of one type when the function's signature declares a different type for the return value.</li>
+		<li>Creates a reference (or pointer) to an object whose type does not match the reference's type declaration.</li>
 	</ul>
-	<p>Another way to satisfy strict typing is to use methods that explicitly convert a value
-	of one type into a different value of the required type.</p>
-	
+	<p>These constraints protect against the program manipulating a value in ways that make no sense or could be harmful,
+		due to acting as if the value has a different meaning than it actually does.</p>
+	<p>That said, Cone can handle certain type mismatches safely
+		by implicitly coercing or converting a value from one type to another.
+		Implicit conversion and coercion improves flexibility and can make code easier to write and more concise.</p>
+
+	<h2>Type Conversion</h2>
+	<p>Type conversion happens whenever a value of one type is transformed to an "equivalent" value of another type.
+		A common example of this would be serializing some encoded data value (like a number) into human-readable characters
+		(e.g., converting the integer 1 to the text "1").
+	</p>
+	<p>In most cases, the type conversion of a value is explicitly requested as part of the expression.
+		Since the purpose of a constructor is to create a new value of a specific type,
+		defining a new constructor for each source value type (e.g., <span class="pre">+Text(1)</span>) is a straightforward approach.
+		Alternatively, it can be more convenient to define a method for the source type
+		able to return the conversion of the object's value to the desired type (e.g., <span class="pre">1.toText</span>).
+	</p>
+
+	<h3>Implicit Number Conversion</h3>
+	<p>When it comes to converting between Cone's built-in primitive number types (integers and floating point numbers),
+		no constructor or method is required; conversion
+		<a href="refexpr.html#numrconv">happens implicitly and automatically</a>.</p>
+<pre>
+mut v = 4.0
+v = 3  // implicitly converted from integer to 3.0 (floating point)
+</pre>
+	<p>Most of the time, this will not result in the loss of significant information (e.g., u8 to u16 is lossless).
+		But it can. Converting a negative number to an unsigned one could trigger undesirable behavior.
+		Converting a float to an integer will round the number (and going the other way can experience rounding errors).
+		Implicit number conversion should be handled with care.
+	</p>
+		
+		<h2>Type Coercion</h2>
+	<p>Coercion works differently than conversion. As shown above, conversion changes the way a value is encoded.
+		Coercion reinterprets an existing value (without altering it) to mean something similar in the context of a different type.
+	</p>
+	<p>Explicit coercion uses the <span class="pre">as</span> infix operator.
+		Unlike other infix operators, <span class="pre">as</span> expects a type (rather than a value or expression) 
+		to the right of the operator.
+		Coercion is mostly used on references, such as when coercing a reference to a pointer (or vice versa).</p>
+<pre>
+	imm ptr = &amp;x as *Vector3
+</pre>
+  <p>Coercion can easily be dangerous, as an unchanged value could behave badly 
+		when treated and manipulated within the constraints of a different type.
+		For example, a reference coerced to a pointer loses permission constraints,
+		thereby making it possible for a pointer to be used to alter an immutable object.
+		Because of this safety exposure, coercions are sometimes restricted to <span class="pre">trust</span> blocks,
+		where it becomes the responsibility of the programmer to ensure the coerced value
+		is handled in a safe and useful manner.</p>
+
+	<h3>Implicit Subtype Coercion</h3>
+	<p>Cone supports subtypes, essentially types that are a perfect subset of other types.
+		Being perfect subsets, a reference to a value of a certain type can safely act as if it were a
+		reference to its subtype.
+		Thus, if type S is a valid subtype of some type T.
+		one may pass a value of type T to a function expecting a value of type S.
+		This is implicit subtype coercion.</p>
+	<p>
+	<p>Implicit subtype coercion is valuable in several situations:</p>
+	<ul>
+		<li>Interfaces and Traits act as a viewing window into a number of different structs they are valid subtypes of.</li>
+		<li>Slices enable "windowed" access to a subset of a collection's values.</li>
+		<li>Some permissions have a subtyping relationship.
+			This allows polymorphic functions to safely and temporarily override the permissions of a passed reference value.
+		  (e.g., <span class="pre">mut</span> to <span class="pre">const</span>).</li>
+	</ul>
+
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refstruct.html"><img alt="_" src="next.png" /></a>
 	</p>
