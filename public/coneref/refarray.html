@@ -13,28 +13,98 @@
 
     <div class="text">
 
-	<p>Arrays are a family of types used to package together multiple, indexable values that are all of the same type.</p>
-	
-    <p>The basic idea is that the internal behavior of square brackets for indexing changes based on type, 
-    but appears semantically equivalent to the programmer.
-    If it is declared as a fixed-size array, bounded-pointer, or bounded-reference, 
-    the behavior is hard coded into the compiler.
-    For all other types (particularly structs),
-    the square brackets invoke the type's overloaded '[]' method for both get and set operations.</p>
-
-    <p>There are many variations of built-in array types, distinguished by how they are declared:</p>
-    <ul>
-    <li>Vec: Variable-size arrays</li>
-    <li>Map: Variable-size associated arrays</li>
-    <li>Slices</li>
-    <li>Fixed-size arrays (C-style)</li>
-    <li>Bounded pointer arrays</li>
-    <li>Bounded-reference arrays</li>
-    </ul>
-    <p>Additional array structures can be defined using templates and/or structs that
-    build off the latter three array capabilities.</p>
+	<p>Array types are for indexed collections of values that are all the same type.
+    There are many variations of built-in array types, distinguished by how they are declared:</p>
+<pre>
+imm fixarray [10] f32      // Fixed-size array (C-style)
+imm slice    &amp;[] f32       // Array slice
+imm vecarray [u32] f32     // Vector variable-sized array struct
+imm maparray [Text] f32    // Map: variable-sized associated array struct
+</pre>
     
-    <h2>Vec: Variable-size arrays</h2>
+    <p>Generally, the presence of square brackets in a declaration signals that you are working with
+        some kind of indexed collection.
+        Similarly, square brackets are used to access one or more elements of an indexed collection.
+        Square brackets are also used to define an array literal.
+    </p>
+
+    <h2>Fixed-size arrays</h2>
+    <p>Fixed-size arrays declare the size of the array using a constant, unsigned integer literal:</p>
+<pre>
+mut c_array [4] u32
+</pre>
+    <p>Array and string literals are fixed-size arrays:</p>
+<pre>
+mut c_array = "abcd"      // [4] u32
+mut list = [1f, 4f, 5f]   // [3] f32
+</pre>
+    <p>An element may be accessed using square brackets:</p>
+<pre>
+c_array[3] = c_array[2]
+</pre>
+    <p>Every attempt to index into such an array is automatically bounds-checked by its known size.</p>
+
+    <h2>Array Slice Borrowed References</h2>
+    <p>An array slice is a special kind of borrowed reference.
+        Internally, it is represented by a tuple: an interior pointer and a size.
+        It is always an alias; a fixed-size view into some sort of array.
+    </p>
+    <p>A slice is created from an array or another slice using a range within the square brackets.
+        (A fixed-size array is automatically turned into a slice when passed as a parameter.)
+    </p>
+<pre>
+imm x = &amp;"Abc"[1..3]  // x is a slice pointing to "bc"
+imm y = &amp;"Abc"[..]    // y is a slice pointing to "Abc" (0 and end assumed)
+</pre>
+    <p>Since slices are always borrowed references, they must conform to lifetime rules.
+      Because they involve interior references, they cannot have the shared, mutable permission 'mut'.
+    </p>    
+  
+    <h2>Struct-based arrays</h2>
+    <p>Structs are useful for creating a variable-sized arrays.
+      Use of a struct is useful way to capture and work with all the array's dependent properties.
+      The most straightforward approach is to build around a private pointer property,
+      as any pointer may be used as if it pointed to an unbounded array.
+      Within a trust block, use of square brackets indexes based on the pointer.
+    </p>
+<pre>
+struct VarArray
+    _avail usize  // Capacity
+    _size usize
+    _ptr *f32
+
+    fn `[]`(index usize) f32 trust
+        if index &lt; _size    // Should do bounds check
+            _ptr[index]        // Equivalent to: *(ptr+index)
+        else
+            0f                 // or panic
+</pre>
+    <p>This struct acts like an array simply by responding to the <span class="pre">[]</span> method:</p>
+<pre>
+mut var VarArray
+var[3] = var[2]
+</pre>
+    <p>The presence of a pointer in a struct flags the struct as an "interior reference" (?),
+        which prohibits the struct from being shared mutable?
+        Or should this be a deliberate trait flagged?
+        Or should we use reference for a non-interior object reference and copy to pointer when used?
+    </p>
+    <p>TBD: constructor is required. How to implement using allocators?</p>
+
+    <h3>Slices from struct</h3>
+    <p>A slice may be obtained from a struct in the same way as from a fixed-size array:</p>
+<pre>
+&amp;vararray[..]
+</pre>
+    <p>This invokes the <span class="pre">[]</span> method with two arguments.
+    That method returns a slice. For example:</p>
+<pre>
+    fn `[]`(from usize, to usize) &amp;[] f32 trust
+        // .. boundary checking before this
+        &amp;_ptr[from .. to]
+</pre>
+
+<h2>Vec: Variable-size arrays</h2>
     <p>Vec is the language standard template for a resizeable array.
     For ease-of-use, the language supports sugar for its use:
 <pre>
@@ -50,53 +120,6 @@ map_marray [Text] i32  // Equivalent to Map[i32, Text, usize]
 </pre>
     <p>The dimension here must be a type that supports the hash method.</p>
 
-    <h2>Slices</h2>
-    <p>TBD.</p>
-
-    <h2>Fixed-size arrays</h2>
-    <p>Fixed-size arrays declare the size of the array using a constant, unsigned integer:</p>
-<pre>
-mut c_array [4] i32
-</pre>
-    <p>Every attempt to index into such an array is automatically bounds-checked by its known size.
-    (Note: This bounds check is not performed within a trust block.)</p>
-
-    <h2>Bounded-pointer arrays</h2>
-    <p>The declaration for a bounded-pointer array always occurs within a struct. For example:
-<pre>
-struct VarArray
-    size u32
-    data *[size] i32  // <-- bounded-pointer array
-</pre>
-    <p>TBD. Distinguish when to use bounded-pointers vs. bounded-references.
-    Also, bounded-pointers can never be indexed outside a trust block which trips up bounds-checking!</p>
-    <p>The compiler recognizes this as a bounded-pointer array because the declared size of the array
-    references the field that declares the array's size as an unsigned integer.
-    Naming the companion field that specifies the array's size brings two advantages to the compiler:</p>
-    <ul>
-    <li>It can automatically calculate the correct bounds check (0 &lt;= i &lt; size)</li>
-    <li>It can mark the struct's type as having dependent values. 
-    This ensures we cannot obtain borrowed internal references to the struct if it has the mut permission.</li>    
-    </ul>
-    <p>Applying square brackets to the 'data' field is treated like a pointer that is bounds-checked.
-    The bounds check happens automatically, but only if not within a trust block.</p>
-    <p>Note: Apply the square brackets to an instance of VarArray invokes the '[]' method
-    defined for VarArray, which may or may not then invoke [] on the data field.
-    Bounded-pointer arrays are a good mechanisms for implementing various variable-size
-    array structures, and is what lies behind the Vec template (which adds a capacity field).</p>
-
-    <h2>Bounded-reference arrays</h2>
-    <p>This is similar to bounded-pointer arrays:
-<pre>
-struct Slice
-    offset usize
-    size usize
-    ref &[u32] i32
-</pre>
-    <p>This is important for implementing slices via templates.
-    In this case we have a borrowed (no allocator) reference with a known lifetime into some fixed or var size array.
-    As shown, the Slice template takes advantage of this construct.</p>
-    
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refalloc.html"><img alt="_" src="next.png" /></a>
 	</p>
