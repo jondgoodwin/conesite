@@ -20,7 +20,8 @@
 		It adds two integers together and returns the result.</p>
 	<p>Nearly every type supports the use of custom-defined methods: numbers, structs, indexed collections,
 		variant types, interfaces, traits, slices, etc. Even allocators and permissions support methods.
-		The only types that do not support their own customizeable methods are references, pointers and functions.</p>
+		The only types that do not support their own customizeable methods are references, pointers, functions and static arrays
+		(although any of these can do so when wrapped within a struct).</p>
 	<p>A method definition looks and behaves like a function definition: It has a name, named parameter(s),
 		return value type(s), and a statement body. On this page we explore the ways that methods
 		differ from global functions.</p>

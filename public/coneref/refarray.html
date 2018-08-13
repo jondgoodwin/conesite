@@ -13,13 +13,14 @@
 
     <div class="text">
 
-	<p>Array types are for indexed collections of values that are all the same type.
+	<p>Array types are for indexed collections of values that have the same type.
     There are many variations of built-in array types, distinguished by how they are declared:</p>
 <pre>
-imm fixarray [10] f32      // Fixed-size array (C-style)
-imm slice    &amp;[] f32       // Array slice
-imm vecarray [u32] f32     // Vector variable-sized array struct
-imm maparray [Text] f32    // Map: variable-sized associated array struct
+imm staticarray [10] f32      // Static array (C-style)
+imm arrref      &amp;gc [] f32    // Array reference  
+imm slice       &amp;[] f32       // Array slice (borrowed array reference)
+imm vecarray    [u32] f32     // Vector variable-sized array struct
+imm maparray    [Text] f32    // Map: variable-sized associated array struct
 </pre>
     
     <p>Generally, the presence of square brackets in a declaration signals that you are working with
@@ -28,54 +29,101 @@ imm maparray [Text] f32    // Map: variable-sized associated array struct
         Square brackets are also used to define an array literal.
     </p>
 
-    <h2>Fixed-size arrays</h2>
-    <p>Fixed-size arrays declare the size of the array using a constant, unsigned integer literal:</p>
+    <h2>Array type primitives</h2>
+    <p>Let's start with the core language features that make support for array types possible:
+        static arrays, array references, and use of pointers as arrays.
+    </p>
+
+    <h3>Static arrays</h3>
+    <p>The size of a static array is fixed and declared using an unsigned integer literal
+        inside square brackets:</p>
 <pre>
-mut c_array [4] u32
+mut text [4] u32
 </pre>
-    <p>Array and string literals are fixed-size arrays:</p>
+    <p>Array and string literals are both static arrays:</p>
 <pre>
-mut c_array = "abcd"      // [4] u32
+mut text = "abcd"      // [4] u32
 mut list = [1f, 4f, 5f]   // [3] f32
 </pre>
-    <p>An element may be accessed using square brackets:</p>
+    <p>An element within a static array is accessed using square brackets:</p>
 <pre>
 c_array[3] = c_array[2]
 </pre>
-    <p>Every attempt to index into such an array is automatically bounds-checked by its known size.</p>
+    <p>Array indexing is automatically bounds-checked by its known size.</p>
+    <p>Elements may be accessed using ranges as well:</p>
+<pre>
+    mut clk = "Abc"
+    clk[0..1] = "Ti"          // clk is now "Tic"
+</pre>
 
-    <h2>Array Slice Borrowed References</h2>
-    <p>An array slice is a special kind of borrowed reference.
-        Internally, it is represented by a tuple: an interior pointer and a size.
-        It is always an alias; a fixed-size view into some sort of array.
+    <h3>Array References</h3>
+    <p>Arrays created while the program is running are represented using array references.
+        An array reference (unlike a regular reference) is a 2-value tuple containing:</p>
+    <ul>
+        <li>a pointer to the first element of the array</li>
+        <li>an unsigned integer specifying how many elements are in the array</li>
+    </ul>
+    <p>An array reference is returned from an array allocation.
+        This example allocates an array containing four floating point numbers:</p>
+<pre>
+imm n = 4
+imm newarr = &amp;gc [n] 0.   // newarr's type:  &amp;gc [] f32
+</pre>
+    <p>Array references may index elements in the same way as for static arrays.
+        A run-time check is made to ensure the index is less than the
+        size known to the array reference.
     </p>
-    <p>A slice is created from an array or another slice using a range within the square brackets.
-        (A fixed-size array is automatically turned into a slice when passed as a parameter.)
+    <p>Since an array reference is a tuple, its parts can be retrieved
+        within a trust block.</p>
+<pre>
+mut ptr, size = arrref
+</pre>
+
+    <h4>Slices</h4>
+    <p>A slice is a borrowed array reference.
+      A slice is created from an array or another slice using a range within square brackets.
     </p>
 <pre>
 imm x = &amp;"Abc"[1..3]  // x is a slice pointing to "bc"
 imm y = &amp;"Abc"[..]    // y is a slice pointing to "Abc" (0 and end assumed)
 </pre>
-    <p>Since slices are always borrowed references, they must conform to lifetime rules.
-      Because they involve interior references, they cannot have the shared, mutable permission 'mut'.
-    </p>    
-  
-    <h2>Struct-based arrays</h2>
-    <p>Structs are useful for creating a variable-sized arrays.
-      Use of a struct is useful way to capture and work with all the array's dependent properties.
-      The most straightforward approach is to build around a private pointer property,
-      as any pointer may be used as if it pointed to an unbounded array.
-      Within a trust block, use of square brackets indexes based on the pointer.
+    <p>A slice is always an alias; a fixed-size view into an array it was created from
+        and cannot outlive or re-structure.
+      Since slices are always borrowed references, they must conform to lifetime rules.
+      Because slices use interior references, they cannot 
+      be created from an array that has the shared, mutable permission 'mut',
+      as this could lead to potential memory safety problems.
+    </p>
+    <p><b>Note:</b> If a static array is passed as a parameter, it is automatically
+    converted into a slice.</p>
+
+    <h3>Pointers as arrays</h3>
+    <p>Any pointer can be treated as if it were a pointer into an array,
+        simply by indexing it within a trust block:
     </p>
 <pre>
+p[3]    // Equivalent to *(p+3)
+</pre>
+    <p>No boundary checking is performed when indexing a pointer.
+        This can be a useful performance boost if the index is already known to be valid.
+    </p>
+  
+    <h2>Struct-based arrays</h2>
+    <p>Structs are useful for creating a variable-sized array type.
+        Use of a struct makes it possible to offer a useful range of methods
+        and then wrap its implementation as private properties.
+    </p>
+    <p>Square brackets may be used to index into a struct once the '[]' method is implemented:</p>
+<pre>
 struct VarArray
-    _avail usize  // Capacity
-    _size usize
-    _ptr *f32
+    _array &amp;gc [] f32
+
+    fn init(size usize)
+        _array = &amp;gc [size] f32
 
     fn `[]`(index usize) f32 trust
-        if index &lt; _size    // Should do bounds check
-            _ptr[index]        // Equivalent to: *(ptr+index)
+        if index &lt; _size       // Should do bounds check
+            _array[index]
         else
             0f                 // or panic
 </pre>
@@ -84,24 +132,18 @@ struct VarArray
 mut var VarArray
 var[3] = var[2]
 </pre>
-    <p>The presence of a pointer in a struct flags the struct as an "interior reference" (?),
-        which prohibits the struct from being shared mutable?
-        Or should this be a deliberate trait flagged?
-        Or should we use reference for a non-interior object reference and copy to pointer when used?
-    </p>
-    <p>TBD: constructor is required. How to implement using allocators?</p>
 
-    <h3>Slices from struct</h3>
-    <p>A slice may be obtained from a struct in the same way as from a fixed-size array:</p>
+    <p>A slice may be obtained from a struct in the same way as from a fixed-size array,
+        again after implementing the '&amp;[]' method:</p>
 <pre>
 &amp;vararray[..]
 </pre>
-    <p>This invokes the <span class="pre">[]</span> method with two arguments.
+    <p>This invokes the <span class="pre">&amp;[]</span> method with two arguments.
     That method returns a slice. For example:</p>
 <pre>
-    fn `[]`(from usize, to usize) &amp;[] f32 trust
+    fn `&amp;[]`(from usize, to usize) &amp;[] f32 trust
         // .. boundary checking before this
-        &amp;_ptr[from .. to]
+        &amp;_array[from .. to]
 </pre>
 
 <h2>Vec: Variable-size arrays</h2>
