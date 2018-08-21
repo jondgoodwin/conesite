@@ -16,7 +16,7 @@
 	<p>Methods add functional behavior to a defined type, offering capabilities consistent with
 		and helpful for values of that type.
 		For example, as mentioned <a href="refexpr.html#method">earlier</a>, 
-		<span class="pre">`+`</span> is one of many methods defined for the <span class="pre">i32</span>.
+		<span class="pre">`+`</span> is one of several methods defined for the <span class="pre">i32</span> type.
 		It adds two integers together and returns the result.</p>
 	<p>Nearly every type supports the use of custom-defined methods: numbers, structs, indexed collections,
 		variant types, interfaces, traits, slices, etc. Even allocators and permissions support methods.
@@ -24,23 +24,23 @@
 		(although any of these can do so when wrapped within a struct).</p>
 	<p>A method definition looks and behaves like a function definition: It has a name, named parameter(s),
 		return value type(s), and a statement body. On this page we explore the ways that methods
-		differ from global functions.</p>
+		differ from functions.</p>
 
 	<h2>The type's namespace</h2>
-	<p>Functions belong to a global (module) namespace.
+	<p>Functions typically belong to a global (module) namespace.
 		By contrast, methods belong to a type's <a href="refnamespace.html">namespace</a>.
-		(Note: a type's named fields belong to the same namespace as its methods).</p>
-	<p>Because methods belong to a type's namespace, this means different types can
-		define methods having the same name, each doing something different (appropriate to its type).
-		There is no confusion over which one to use, because use of a method by functions or methods external to the type
-		is qualified implicitly (using the dot operator) or explicitly (using the double colon) by the desired type.</p>
+		(Note: a type's named properties belong to the same namespace as its methods).</p>
+	<p>Since methods belong to a type's namespace, two different types can
+		define a method with the same name, each doing something different and appropriate to its type.
+		There is no confusion over which one to use, because use of a method
+		is qualified implicitly (using the dot operator) by the type of the value it is applied to.</p>
 	<p>No such qualification is needed when a method calls another method in the same type;
 		such a call looks exactly like a function call.</p>
 
 	<h2>Multiple methods with the same name</h2>
 	<p>Another difference between methods and functions is that a type may define more than one method of the same name.
-	  Once again, there is no confusion about which method to use, because there is a requirement that
-	  same-named methods differ in their parameter definitions, either by type or by number of required parameters.
+	  Once again, there is no confusion about which method to use, because
+	  same-named methods differ in their parameter definitions, either the number or type of its parameters.
 	  When a certain named method is used, Cone chooses the first method whose parameter definition
 	  matches the types and number of arguments passed to that method.
 	  Supporting multiple methods of the same name makes it convenient for a type to
@@ -62,13 +62,12 @@ fn test()
   imm pt = Point{3., 4.}
   imm c = pt.len() // use Point's 'len' method
 </pre>
-    <p>A parameter need not specify the type if it is the same as the type the method is defined in.
+    <p>A method's parameter need not specify the type if it is the same as the type the method is defined in.
     Similarly, when the type of self is the same as the method's type, which is typically the case,
     self need not even be declared in the method's parameter list. It will be inserted automatically.</p>
 
 	<h2>Special-purpose Methods</h2>
-	<p>A number of methods have a built-in role in Cone. 
-		This means they get special handling in certain situations.</p>
+	<p>A number of methods have a built-in role in Cone.</p>
 
 	<h3 id="constructor">Constructors</h3>
 	<p>A constructor method initializes a new value of the specified type.
@@ -122,28 +121,54 @@ struct Point
 		<li><b>.`&lt;&lt;`</b> is the default append operator used for <span class="pre">build</span> blocks</li>
 	</ul>
 
-	<h3>Computed properties</h3>
-	<p>It is possible to define a method as having two distinct get and set behaviors.</p>
+	<h3>set methods (Computed Properties)</h3>
+	<p>By default, methods typically operate in "get" mode,
+		invoked as part of an expression and often returning one or more values.
+		However, it is possible for a method to be used on the left-hand side of an assignment.
+		These are called "set" methods,
+		and are declared by specifying <span class="pre">set</span> before <span class="pre">fn</span>.
+	</p>
 <pre>
 struct Counter
 	count u32
-	fn counter
-		 get() {count += 1}
-		 set(cnt) {count = cnt}
+	fn counter() u32 {count += 1}          // a "getter" method
+	set fn counter(cnt u32) {count = cnt}  // a "setter" method
 </pre>
-  <p>The get function is performed in most situations where the method is called.
-		The set function is performed whenever the method is called on the left of an assignment.
-		As a convenience, the parentheses can be avoided if the get definition has no parameters
-		and the set has one.
-	</p>
+  <p>The following example shows the use of this pair of get and set methods:
 <pre>
-mut x Count{0}
-x.counter // 1 from get()
+mut x = Counter{0}
+x.counter // 1
 x.counter // 2
-x.counter = 10 // sets
+x.counter = 10 // uses the "setter" to set the value
 x.counter // 11
 </pre>
+	<p>A "set" method can only be invoked to the left of an assignment operator.
+		The value to be assigned is passed to the setter method as its last argument.
+	</p>
+	<p>It is worth noting that with both the setter and getter method use,
+		it is permissable to omit the parentheses when no additional arguments are passed.
+		This makes the use of get and set methods look exactly like property access.
+		This visual symmetry means that a type can migrate from making its properties public,
+		to making them private, but still offering a compatible public interface of the same name
+		using methods.
+	</p>
 
+	<h3>Static functions</h3>
+	<p>Sometimes it makes sense to define a function as part of a type,
+		because it plays a useful role in relationship to the type, even though
+		it does not apply to a specific instance of the type.
+		In such cases, precede the function definition with
+		<span class="pre">static</span> to distinguish it from a method declaration.</p>
+	
+<pre>
+struct Counter
+	static fn factory() Counter
+			Counter{0}
+</pre>
+		<p>As with functions in a module namespace, a qualified name must be used to call the function:</p>
+<pre>
+mut cnt = Counter::factory()
+</pre>
 
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="reftypesafe.html"><img alt="_" src="next.png" /></a>
