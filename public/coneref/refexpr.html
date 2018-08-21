@@ -14,8 +14,8 @@
     <div class="text">
 
 	<p>Expressions use operators, methods and functions calls to calculate new values using existing values.
-	Although the arithmetic and logical expressions demonstrated below primarily use numbers for examples,
-	similar looking expressions may be formulated that use values of other types.</p>
+	Although the expression examples on this page use numbers,
+	similar expressions may be formulated that manipulate values of other types.</p>
 	
 	<h2>Arithmetic expressions</h2>
 	<h3 id="arithops">Arithmetic Operators</h3>
@@ -42,7 +42,8 @@
 </pre>
 
 	<h3>Arithmetic Assignment</h3>
-	<p>The arithmetic assignment operators (e.g., '+=', '-=', '*=', '/=') offer a convenient way to modify a variable's current value:</p>
+	<p>The arithmetic assignment operators (e.g., '+=', '-=', '*=', '/=') offer a convenient way to update
+		an existing stored value:</p>
 <pre>
 counter = 3
 counter += 1  // 4. Equivalent to: counter = counter + 1
@@ -50,38 +51,47 @@ counter += 1  // 4. Equivalent to: counter = counter + 1
 
 	<h3 id="method">Numeric methods</h3>
 	<p>Additional numeric calculations can be performed using built-in methods.
-	The name of the desired method follows the value, separated by a period ('.'):
+	The name of the desired method follows the value, separated by the dot operator ('.'):
 <pre>
 (-1).abs    // 1 (the absolute value, making a number positive)
 (pi/2).sin  // 1.0 (trigonometric sine function)
 </pre>
-	<p>Sometimes, the method needs additional values.
-	These are specified within parentheses following the method's name.</p>
+	<p>Sometimes, a method may require additional values.
+	These argument values are specified within parentheses following the method's name.</p>
 <pre>
 4.max(5)    // 5 (returns the larger of the two numbers)
 </pre>
-	<p>Methods are covered more thoroughly in <a href="refmethod.html">a later chapter</a>.
-	For now, several characteristics are worth mentioning:</p>
+	<p>Method use is very common and convenient. It is helpful to know that:
 	<ul>
-	<li>The logic used for a method depends on the type of the value it is applied to (the value it follows).
-	Thus, the method named 'max' applied to an integer is actually a different method than
-	a method with the same name applied to a floating point number.
-	Every type establishes the names of the methods it supports.
+	<li>The logic a method performs depends on the type of the value it is applied to.
+	Thus, a method named 'max' applied to an integer is actually a different method than
+	when 'max' is applied to a floating point number.
+	Every type defines the names and logic for all methods it supports.
 	An error results when trying to use a method not implemented by the value's type.</li>
 	<li>The arithmetic operators introduced earlier (e.g., <span class="pre">+</span> for add)
-	are implemented using number type methods:
+	are implemented under the covers using number type methods:
 <pre>
 // The method name equivalent for the + operator is `+`
 // The method name is enclosed in backticks since it includes punctuation
 3+4   // is actually: 3.`+`(4)
 </pre>
-	<p>Since the arithmetic operators are simply methods, they are also accessible to non-numeric types:</p>
+	<p>Since the arithmetic operators are simply methods, they may also be used on non-numeric values:</p>
 <pre>
 "a"+"b"  // "ab" (concatenation results when two strings are added)
 </pre>
-	<li>The method name for the negative operator is <span class="pre">neg</span>. 
+	<p><b>Note:</b> The method name for the negative operator is <span class="pre">neg</span>. 
 	This distinguishes it from <span class="pre">`-`</span>, the subtraction method.</li>
 	</ul>
+	<p>Methods are covered more thoroughly in <a href="refmethod.html">a later chapter</a>.</p>
+
+	<h3>Function calls</h3>
+	<p>Function calls are very much like method calls, except they are not applied to a value in the same way.
+	  Instead of specifying a value, dot operator, and a method name, one simply specifies the function name
+	  followed by any comma-separated arguments in parentheses.
+	</p>
+<pre>
+pow(10f, 2f)
+</pre>
 
 	<h3 id="numrconv">Numeric conversions</h3>
 	<p>Numbers are automatically converted whenever copied from one number type to another.</p>
@@ -132,10 +142,11 @@ flags |= 0x01u   // 0xC1u
 </pre>
 
 	<h2>Other Expression Operators</h2>
-	<p>There are many more expression operators whose description may be found in the chapters
-	relevant to their common use:</p>
+	<p>Cone supports several more expression operators.
+		Descriptions may be found in the chapters
+		relevant to their common use:</p>
 	<ul>
-	<li>Match and conditional operators</li>
+	<li><a href="refcondexp.html">Match and conditional operators</a></li>
 	<li>Collection (this block) operators</li>
 	<li>Range constructor (`..`)</li>
 	<li>New prefix operator (`+`)</li>

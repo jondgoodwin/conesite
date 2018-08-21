@@ -13,9 +13,11 @@
 
     <div class="text">
 
-	<p>This chapter explains how to declare and implement functions
-	which transform provided parameters into returned value(s).
-	Here's a simple example of function definition and use:</p>
+	<p>The previous page showed how to call functions as part of an expression.
+	Now it is time to show how to declare and implement functions.
+	In fact, all logic (including expressions) must be defined as part of the implementation
+	of a function (or method).</p>
+	<p>Let's start with a simple example of a function definition and its use:</p>
 <pre>
 // Define the 'square' function
 fn square(a f32) f32
@@ -31,16 +33,16 @@ area = Float.pi * square(r)
 	<ul>
 	<li><b>name</b> (square in this example).</li>
 	<li><b>parameters</b> in parentheses (a in this example).</li>
-	<li><b>return type</b> which follows the parentheses (f32 in this example).</li>
+	<li><b>return type(s)</b> which follows the parentheses (f32 in this example).</li>
 	</ul>
-	<li>The <a href="#stmtblk">statement block</a> follows the signature.
-	It contains indented statement(s) that representing the logic to be performed by the function.</li>
+	<li>The function's <a href="#stmtblk">implementation block</a> follows the signature.
+	The block contains indented statement(s) that represent the logic to be performed by the function.</li>
 	</ul>
 	 
-	<h3 id="parms">Parameter Declaration</h3>
+	<h3 id="parms">Parameters</h3>
 	<p>The declaration of a functions's parameters is a comma-separated list of variable names, 
 	enclosed in parentheses.
-	Each parameter variable corresponds on a one-to-one basis to the values passed to the function when it is called.
+	Each parameter variable corresponds on a one-to-one basis to the value arguments passed to the function when it is called.
 	They must match in both number and type:</p>
 <pre>
 // Define a method that returns the addition of its two parameters
@@ -52,7 +54,7 @@ add(2)    // ERROR! add() needs exactly two values, not one or three
 add(2.0, 4.0)  // ERROR! add() needs integers, not floating point numbers
 </pre>
 
-	<p>For those wondering, this number and type restriction means Cone does not support:</p>
+	<p>Cone functions do not support:</p>
 	<ul>
 	<li><i>Variadic parameters</i>, where a varying number of parameters can be passed to a function.
 	To achieve a similar result, make use of collections.
@@ -60,10 +62,10 @@ add(2.0, 4.0)  // ERROR! add() needs integers, not floating point numbers
 	way of building a string value than the traditional "printf" function.</li>
 	<li><i>Ad hoc polymorphism</i>, where multiple functions can be defined with the same name,
 	each with a different type signature.
-	To some degree, using same-named methods over differently typed objects offers a similar capability.</li>
+	(<b>Note:</b> unlike functions, methods <i>do</i> support ad hoc polymorphism.)
 	</ul>
 	
-	<h4>Parameter variables are local variables</h4>
+	<h4>Parameters are local variables</h4>
 	<p>Within the statement block, a parameter variable is treated just like a local variable.
 	Indeed, the declaration for each parameter looks very much like a declaration for a local variable,
 	with the value type being specified after the variable's name.
@@ -97,11 +99,11 @@ next(4)   // returns 5 (using incr's default value of 1)
 next()    // ERROR! no default value for nbr
 </pre>
 
-	<h3 id="stmtblk">Statement Block</h3>
-	<p>The indented statements that follow the function's signature are its statement block.
+	<h3 id="stmtblk">Implementation Block</h3>
+	<p>The indented statements that follow the function's signature are its implementation block.
 	The block consists of a sequence of statements that represents the function's logic.
 	Generally, each statement is performed in order.</p>
-	<p>Each statement is typically an expression (including an assignment or block expression).
+	<p>Each statement is often an expression (including an assignment or block expression).
 	A block's statement could also be a local variable declaration,
 	some nested block, or one of a set of special statements supported by Cone.
 	The <a href="refblock.html">Block</a> chapter offers detailed information about
@@ -167,15 +169,32 @@ fn factorial(x i32, prod i32 = 1)
 	return prod if x&lt;=1
 	factorial(x-1, prod*x)
 </pre>
-	<p>If the function returns a single value calculated by any function, this will be "tail-call" optimized.
+	<p>If the function returns a single value calculated by any function, this may be "tail-call" optimized.
 	This optimization improves performance and reduces the risk of execution stack overrun with recursive calls.</p>
 
+	<h3>extern</h3>
+    <p>It is possible to use of functions that have been implemented in a different language (e.g., C).
+	  Such functions still need to be properly declared to Cone.
+	  This is done by preceding the function declaration with <span class="pre">extern</span>.
+	  No implementation block should be specified, since its logic is implemented elsewhere.
+	</p>
+<pre>
+extern fn printFloat(nbr f32)
+</pre>
+	<p>An <span class="pre">extern</span> block may be used when multiple external functions require declaration.
+	  Externally initialized global variables may also be declared this way.</p>
+<pre>
+extern
+	fn printFloat(nbr f32)
+	fn printInt(nbr i32)
+	mut indentation
+</pre>
+
 	<h3>Related Capabilities</h3>
-	<p>Several other language features, described elsewhere, look and act like functions:</p>
+	<p>Other language features offer a similar capability as functions:</p>
 	<ul>
-	<li>methods, which operate in the context of an object</li>
-	<li>anonymous (first-class) functions</li>
-	<li>closures, which allow a function to preserves its state</li>
+	<li><a href="refmethod.html">methods</a></li>
+	<li><a href="refclosure.html">function or closure references</a></li>
 	<li>co-routines, which preserve a function's data and execution state</li>
 	<li>behaviors, like methods for threads/actors</li>
 	</ul>
