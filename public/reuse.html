@@ -3,7 +3,7 @@
 	<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<link rel="stylesheet" type="text/css" href="standard.css" />
-<title>Cone - Elegant Code Reuse</title>
+<title>Cone - Flexible Typing & Code Reuse</title>
 </head>
 <body>
 	<div id="header">
@@ -13,94 +13,95 @@
 		</a>
 		</div>
 		<span id="title">Cone</span>
-		<span id="sub">Versatile Code Reuse</span></div>
+		<span id="sub">Flexible Typing & Code Reuse</span></div>
 		<div class="column flow-opposite">
 	</div>
 
 	<div class="text">
-	<p>Cone's static types bring important benefits: optimal performance and compiler-assisted code quality and safety.
-	However, static types often also constrain values and functions to overly specialized roles.
-	When a program needs to repeat certain logic patterns over and over across many diverse types, 
-	it can become tedious and error-prone to handcraft many variations of the same code as needed to support 
-	every permissable combination of types.</p>
-	<p>To promote productivity and keep source code compact, Cone offers three distinct reuse mechanisms
-	which allow creation of generalized, polymorphic logic that applies well
-	across a useful range of concrete types:</p>
-	<ul>
-	<li>Static Subtyping</li>
-	<li>Sum (variant) types</li>
-	<li>Metaprogramming</li>
-	</ul>
-	
-	<p><b>Static subtyping reuse</b></p>
-	<p>Subtypes work like this: if we have a value v of type T and we know that type S is a subtype of T,
-	then we can safely treat v as if it were a type S value, including passing v to a function expecting a type S value.
-	This simple principle means we can write functions that are not only usable for the declared type, 
-	but can also be used by values of any type that can be subtyped to that declared type.
-	The Cone compiler is aware of subtyping relationships and will enforce valid substitutions.</p>
-	<p>Cone's static permissions take advantage of subtyping, allowing a value granted a certain permission
-	to be safely treated as if it had another permission. 
-	<span class="pre">const</span> is the popular default permission for a reference parameter,
-	because it is a valid subtype for most static permissions.
-	In a similar manner, borrowed references are the popular default allocator for reference parameters,
-	because a reference can be safely borrowed from any kind of allocator.
-	Due to this subtyping flexibility, Cone library functions and methods accept const, borrowed references
-	as much as possible, to maximize their reuse and universal utility.</p>
-	<p><span class="pre">struct</span> values also benefit from subtyping, 
-	as they may be subtyped to <span class="pre">traits</span> (nominal subtyping)
-	or <span class="pre">interfaces</span> (structural subtyping). 
-	Since traits are used to build structs, the subtyping relationship is implicitly understood.
-	Interfaces are useful when you want to apply a subtype to a struct that knows nothing about it.
-	Cone ensures the struct implements all fields and methods defined by any interface it is applied to.
-	Both traits and interfaces facilitate reuse, 
-	since declaring a function or method's parameters as references to traits or interfaces
-	allows every qualifying struct to participate.</p>
-	<p>Even better, Cone supports a form of inheritance (another reuse tool), 
-	allowing structs or traits to be built from other traits.
-	And since a struct can be built from multiple traits, a safe form of multiple inheritance is also possible.
-	<p>Lastly, Cone supports method overloading, the idea that more than one method in a type can have the same name
-	but a different type signature. This not only enriches type flexibility,
-	it also provides a graceful way to handle subtyped values. Since methods are declared in order,
-	the first successful match wins. So methods can be ordered to match first on a specific type (e.g., struct)
-	before falling through to match on a more-generic (and therefore less specific) subtype.</p>
-	<p>The rules for static subtypes are strict enough that most types can't substitute for each other.
-	But when they can, subtype reuse is preferable, as generated code size stays lean
-	and the runtime performance impact is typically negligible.</p>
+	<p>Despite the significant performance and safety benefits of static typing, there are downsides. 
+		The intentional rigidity of static types can mean that general-purpose algorithms
+		(e.g., sort or hashed collections) have to be replicated
+		and customized by hand for each type the algorithms are applied to,
+		adversely impacting programmer productivity and code size.
+		Type inflexibility also makes it harder to support heterogeneous collections,
+		where each value in the collection could have a different type.</p>
+	<p>To support greater code flexibility and reuse, while still enforcing type safety,
+		Cone offers various techniques to improve type flexibility and help generalize algorithmic logic
+		across diverse types and conditions.</p>
 
-	<p><b>Sum type reuse</b></p>
-	<p>Sum types are useful when values might be one of several, seemingly-unrelated types 
-	(but we won't know which until run-time). 
-	This approach requires definition of a named sum type that lists all the potential types.
-	A value's type is declared to be this sum type. Whenever we want to access its contents,
-	the code must first pattern match to determine which type it actually is.
-	Pattern matching safely extracts a properly-specialized type value which can then be directly manipulated.</p>
-	<p>When types have no subtyping relationship, sum types offer an alternative path for polymorphic functions,
-	at the cost of a sum type declaration, a small runtime cost to pattern match the type,
-	and separate logic in each function for each variant type.</p>
-	<p>Intriguingly, the subtyping and sum types reuse strategies may be combined.
-	Tagged structs allows structural cousins to collapse to a common collection of traits and interfaces.
-	Pattern matching can be applied to these subtypes to reverse direction and restore access to the original struct.</p>
+	<p><b>Method Overloading</b></p>
+	<p>Multiple methods in a type can be given the same name but different type signatures and implementations.
+		When a method of a certain name is used, the most appropriate implementation
+		is automatically picked and dispatched based on the types
+		of the passed arguments and the get/set context.</p>
+		
+	<p><b>Interfaces and Traits</b></p>
+	<p>When multiple types offer methods with the same names and signatures,
+		an interface type may be defined declaring this common subset of methods.
+		Any object whose type complies with the interface can be coerced to an interface type reference.
+		By collapsing the logic for multiple types through common interface dispatch, 
+		less code is needed for each distinct type.</p>
+	<p>Traits work similarly to interfaces, but add support for code and property inheritance
+		for types that explicitly implement them.
+		A type can mix in methods and properties from multiple traits.
+		This further improves code reuse over interfaces.
+	</p>
+
+	<p><b>Fluid Permissions and Borrowed References</b></p>
+	<p>To improve safety, every reference must specify its permission type.
+		Similarly, to support multiple memory management strategies, every reference also
+		specifies its allocator type.
+		If separate logic were needed for every combination of permission and allocator types, this could get messy.</p>
+	    <p>Fortunately, static permissions allow a reference
+		to be safely treated as if it had a lesser permission. 
+		For example, <span class="pre">const</span> is the popular default permission for a method's reference parameter,
+		because it is a valid substitute for most static permissions
+		(when we know a method or function won't change the value).</p>
+	<p>Similarly, any reference may be coerced to a borrowed reference, regardless of which allocator manages it.
+		Designing logic around the preferred use of borrowed const references,
+		wherever lifetime and mutability constraints allow,
+		helps significantly reduce the complexity of type libraries and program functions.</p>
 	
-	<p><b>Metaprogramming reuse</b></p>
-	<p>Metaprogramming is useful when we have many types whose underlying logic is quite similar,
-	where we don't want to bear a runtime cost for logic variations,
-	and where we can't anticipate and enumerate all variant types ahead of time.
-	Collection types are well served by this approach, as a single template
-	can generate a distinct, optimized code base for each base type 
-	whose values we want to gather together in a collection.</p>
-	<p>Cone's metaprogramming facilities are both friendly and flexible.
-	The friendliness results from the metaprogramming grammar 
-	looking nearly identical to Cone's programming grammar, improving code readability.
-	The flexibility comes from four well-integrated facilities:
+	<p><b>Variant types</b></p>
+	<p>Variant types are useful when a value might be one of several, seemingly-unrelated types 
+	(but we won't know which until run-time).
+	Variant types are useful for optional values (and nullable references), returned result/error, and many other uses.
+	The type flexibility of dynamic languages, including their support for heterogeneous collections,
+	is based on the use of variant types.
+	Downcasting an interface reference to its original tagged struct requires the use of variant types.</p>
+	<p>Information about the value's current type is carried as a part of the value.
+	Pattern matching is used to safely extract a properly typed value for appropriate manipulation.</p>
+	<p>Similar to interfaces, variant types can help reduce redundant logic.
+		Variant types are more flexible in some ways than interfaces, 
+		since the types contained within a variant type need not share common methods.
+	   However, variant types do bear some added memory and performance costs.</p>
+	
+	<p><b>Generics</b></p>
+	<p>Generics enable the creation of type or function logic that works across a range
+		of compliant types. A type's compliance is measured similarly to a type's conformance to an interface or trait,
+		but is not restricted to just references.
+		Collection types are well served by this approach, as a single generic
+		can encapsulate the same algorithmic logic across all the types the collection stores or indexes with.</p>
+	<p>Depending on the nature of the generic's parametric types, the instantiation of a generic can vary.
+		Sometimes, instantiation is a compile-time mechanism, using a macro-like mechanism to generate multiple versions
+		for each type. Other times, the generic is transformed into a runtime mechanism similarly to interfaces,
+		where a single piece of runtime logic can use runtime type information to generalize
+	    the logic successfully across values from many different types.</p>
+	</p>
+
+	<p><b>Metaprogramming</b></p>
+	<p>Metaprogramming involves the use of a scripting language "on top" of the programming language.
+		This scripting language, whose syntax looks nearly identical to Cone, provides programmatic control over the
+		program's compilation, offering such features as:
+	</p>
 	<ul>
-	<li>Compile-time execution, enabling conditional logic and calculation of values at compile-time</li>
-	<li>Reflection for accessing to compiler information (esp. types) to compile-time execution</li>
-	<li>Macros that expand code every time they are used</li>
-	<li>Templates that expand code for each unique combination of type parameters</li>
+		<li>Compile-time execution, enabling conditional logic and calculation of values at compile-time</li>
+		<li>Reflection for accessing to compiler information (esp. types) to compile-time execution</li>
+		<li>Macros that expand code every time they are used</li>
 	</ul>
-	<p>Metaprogramming is essential for customizing or replicating logic at compile-time.
+	<p>Metaprogramming is valuable for customizing, replicating or calculating logic or data at compile-time.
 	The downsides of metaprogramming are: the increased complexity of writing generalizable code,
-	slower compilation times, and generated-code bloat triggered by each variation.</p> 
+	slower compilation times, and generated-code size increases due to code expansion.</p> 
 	
 	</div>
 
