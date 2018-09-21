@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>References, Pointers, and Safety - Cone Reference</title>
+	  <title>References and Safety - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -8,95 +8,119 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">References, Pointers, and Safety</div>
+			<div id="sub">References and Safety</div>
 		</div>
 
     <div class="text">
 
-	<p>The basic idea behind references and pointers is pretty simple.
-	Instead of having a variable holding an object, we want the variable to hold a reference to an object.
-	Using this reference, we want to be able to access or change the object's contents.</p>
+	<p>The basic idea behind references is pretty simple.
+	Instead of having a variable hold a value, we want the variable to hold a reference to some value.
+	A reference is effectively an address to the memory location where the value has been stored.
+	Using this reference, we can access or change the value the reference points to.</p>
 	<p>Let's illustrate this with a simple example.
-	The <span class="pre">&</span> operator obtains a reference to a variable's contents.
-	The <span class="pre">*</span> operator accesses the contents referred to by a reference:</p>
+	The <span class="pre">&</span> operator obtains a reference to a variable,
+	and therefore to the value it holds.
+	The <span class="pre">*</span> operator can then be applied to the reference
+	to get or change the value pointed to by the reference:</p>
 <pre>
 imm a = 3
 imm ref = &amp;a    // ref holds a reference to a's contents
 imm val = *ref  // val is now 3
+*ref = 4        // a is now set to 4
 </pre>
-	<p>References (and pointers) offer several benefits:</p>
+
+	<h2>Benefits and Safety Risks</h2>
+	<p>References offer important benefits:</p>
 	<ul>
-	<li>It is often more space- and performance-efficient to pass references from function to function
-	than it would be to pass around copies of a much larger object.</li>
-	<li>With references, it is possible to create multiple references to the same object,
-	such that all of them see the most current contents of that object.
-	A change that one reference makes to an object is instantly seen by all other references.
-	Objects that are passed around as copies do not have this property,
-	as a change to a copy leaves the original object unchanged.</li>
+		<li><b>Shared access</b>.
+			Multiple references can point to the same value,
+			such that all of them see and can change the latest value at that address.
+			If one reference is used to change a value, another reference to that value sees the updated value.
+			By contrast, values passed around between functions do not work this way, as passed values are copies.
+			Any change to a copy leaves the original value unchanged.</li>
+		<li><b>Space efficiency</b>.
+			Some data values can be large, such that making copies of them as they are passed around
+			takes up a lot of space and wastes time in the copying.
+			In these situations, it can be more efficient to pass around a reference to the large value.</li>
+		<li><b>Speed of Vectorization</b>.
+			If multiple values are co-located right next to each other in memory,
+			it can be faster to use a pointer to process those values sequentially,
+			rather than work with each value separately, one at a time.</li>
 	</ul>
 	
-	<h2>Safety Challenges with References</h2>
-	<p>Although references can be efficient and versatile, they can also be dangerous.
-	Unless appropriate precautions are taken, use of raw pointers can cause serious logic failures:</p>
+	<p>However, without appropriate constraints, the unfettered ability to
+		access and change any arbitrary value based on its address
+		opens up a program to significant safety risks:</p>
 	<ul>
 	<li><b>Memory unsafe</b>. A pointer might point to an object that has been deleted and no longer exists.
-	It could also point to an area of memory that has no valid objects (e.g., NULL).</li>
-	<li><b>Type unsafe</b>. A pointer might point to an object whose type is different than it expected
-	(e.g., the program thought it was pointing at an integer, but there is a float there instead.)</li>
-	<li><b>Concurrency unsafe</b>. One pointer might try to access its object while its
-	contents are in the process of being changed by another pointer. Since the contents are
-	in transition, they may not make sense to an outside pointer.
-	Worse would be when two pointers try to change the same object at the same time,
-	making a mess of it in the attempt.</li>
+	It could also point to an area of memory (e.g., NULL) that has no valid objects.</li>
+	<li><b>Concurrency unsafe</b>. One pointer might try to access an object while its
+		contents are in the process of being changed by another pointer. Since the contents are
+		in transition, they may not make sense to an outside pointer.
+		Worse would be when two pointers try to change the same object at the same time across multiple steps,
+		making a mess of it in the attempt.</li>
+		<li><b>Type unsafe</b>. A pointer might point to an object whose type is different than it expected
+	(e.g., the program thought it was pointing at an integer, but there is a float there instead).</li>
 	</ul>
-	<p>Such failures are not always easy to detect and eliminate.
-	The consequences for such logic failures might be minor, but they could be catastrophic,
+	<p>Such failures are not always easy to detect and eliminate when the responsibility for being
+		careful lies 100% with fallible humans.
+		Although the consequences are not always serious, they <i>could</i> be catastrophic,
 	especially when malicious actors take advantage of undetected pointer problems to
 	gain access or control over other peoples' privileges or information.</p>
+	<p>Because of these safety risks, Cone explicitly distinguishes between references
+	  and <a href="refptr.html">pointers</a>.
+	  Although both offer addressable access to values,
+	  references are constrained to prevent unsafe use.
+	  Pointers are not subject to such constraints, making them more versatile but also potentially more dangerous.
+	</p>
 	
-	<h2>References vs. Pointers</h2>
-	<p>One of Cone's key goals is to make it easier to build safe programs.
-	To support this goal, Cone explicitly distinguishes between references and pointers as separate types:
+	<h2>Reference Mechanisms and Flavors</h2>
+	<p>The way that Cone handles references is unusual among programming languages.
+	  Although many capabilities are similar to those found in other languages, Cone's distinctive approach
+	  optimizes for versatility, safety and ease-of-use.</p>
+	<p>Getting comfortable with Cone's references begins with understanding
+		the four fundamental mechanisms	that underlie their capabilities and constraints.</p>
 	<ul>
-	<li><b>References</b> are implicitly understood to just be a stand-in for the objects they reference.
-	References are certified memory-, type-, and concurrency-safe by the compiler. 
-	Safety is ensured by constraining reference use in specific ways, 
-	such as single owner, lifetime and permission constraints as well as forbidding pointer arithmetic.
-	Additionally, runtime mechanisms, such garbage collectors and locks,
-	may be automatically woven into reference use (where requested) 
-	to safely improve the flexible use of references.</li>
-	<li><b>Pointers</b> are more powerful than references, being far less constrained by the compiler.
-	Pointer arithmetic is allowed. Pointers have no lifetime or aliasing constraints.
-	However, this added versatility carries a responsibility: 
-	the programmer becomes solely responsible for ensuring that all pointer use is safe.</li>
+	  <li><a href="refallocref.html"><b>Allocators</b></a>.
+		A reference's allocator is responsible for allocating new values.
+		The allocator also tracks all allocated values, automatically disposing
+		of any values no longer needed.
+		Allocators are what makes it possible for a Cone program to support multiple memory strategies,
+		such as tracing GC, ref counting, escape-based RAII, arenas, pools, etc.
+		In effect, allocators help ensure memory safety.
+		A reference that has no allocator is a <a href="refborref.html"><b>borrowed reference</b></a>.</li>
+	  <li><a href="refborref.html#lifetime"><b>Lifetimes</b></a>.
+		Cone automatically tracks the lifetime of every reference based on its lexical scope.
+		Lifetimes are invaluable for ensuring that allocated objects are freed only when no reference
+		points to it. In this way, lifetimes also help improve memory safety.
+	  </li>
+	  <li><a href="refperm.html"><b>Permissions</b></a>.
+		Permissions govern what may be done with a reference.
+		Each distinct permission grants and denies certain rights, such as the ability to read
+		or change the value the reference points at, or the ability to alias (create a copy of) a reference.
+		Permissions also govern the use of atomics, locks and other synchronization mechanisms.
+		Permissions help ensure concurrency safety.</li>
+	  <li><a href="reftypes.html"><b>Value type</b></a>.
+		The value type specifies the type of the value that the reference points to.
+		References are often treated as simply a stand-in for a value of this type.
+		The value type helps protect type safety.</li>
 	</ul>
-	
-	<h2>Allocator vs. Borrowed References</h2>
-	<p>References come in two flavors, distinguished by how they are created:</p>
+
+	<p>In addition to basic references, Cone also supports more complex reference types
+		that carry more than a pointer:</p>
 	<ul>
-	<li><b>Allocator References</b> are created and managed by a named allocator.
-	An allocator reference can only ever point to a complete, allocated object.
-	Allocator references preserve their allocator as part of their type.
-	Allocator references are typically free from lifetime constraints.</li>
-	<li><b>Borrowed References</b> are borrowed from a variable or some other reference.
-	Borrowed references are more flexible, as they have no idea what allocator created the object
-	and are able to point to substructures within compound objects.
-	This flexibility makes them ideal for passing information to general-purpose functions or methods.
-	However, the lifetime of a borrowed reference is constrained;
-	it cannot outlive the variable or reference it borrowed from.</li>
-	</ul>
-	
-	<h2>Related Information</h2>
-	<p>Subsequent chapters provide detailed information about each of these distinct types:</p>
-	<ul>
-		<li><b><a href="refperm.html">Permissions</a></b></li>
-		<li><b><a href="refborref.html">Borrowed References</a></b></li>
-		<li><b><a href="refallocref.html">Allocator References</a></b></li>
-		<li><b><a href="refptr.html">Raw Pointers</a></b></li>
+		<li><a href="refarrau.html#arrref"><b>Array references</b></a>,
+		which point to a collection of identically-typed elements.
+		These elements are contiguous in memory with the reference pointing to the first element.
+		The number of elements is carried as part of the array reference.</li>
+		<li><a href="refinterface.html"><b>Interface references</b></a>,
+		which provide a generic view of some value defined by one of several possible struct types.
+		In addition to the object pointer, the reference also points to runtime type information about the value's type,
+		such as a vtable for dynamically dispatching method calls on the object.</li>
 	</ul>
 	
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refperm.html"><img alt="_" src="next.png" /></a>
+		<a href="refborref.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

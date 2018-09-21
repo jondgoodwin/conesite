@@ -114,7 +114,7 @@ imm val = *ref    // val is now 3
 	In this statement, the first permission governs the variable 'ref' and the second governs the reference 
 	held by 'ref'. These are two different concerns.</p>
 	
-	<h3>Lifetime Constraints</h3>
+	<h3 id="lifetime">Lifetime Constraints</h3>
 	<p>	Borrowed references are lifetime-constrained, which means that a borrowed reference may never
 	outlive the object it refers to. This constraint is enforced by ensuring the lexical scope of the
 	borrowed reference is wholly encompassed by the lexical scope of the reference or object it borrowed from.</p>
