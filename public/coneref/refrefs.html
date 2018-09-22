@@ -23,7 +23,7 @@
 	The <span class="pre">*</span> operator can then be applied to the reference
 	to get or change the value pointed to by the reference:</p>
 <pre>
-imm a = 3
+mut a = 3
 imm ref = &amp;a    // ref holds a reference to a's contents
 imm val = *ref  // val is now 3
 *ref = 4        // a is now set to 4
@@ -118,6 +118,13 @@ imm val = *ref  // val is now 3
 		In addition to the object pointer, the reference also points to runtime type information about the value's type,
 		such as a vtable for dynamically dispatching method calls on the object.</li>
 	</ul>
+	<p>The default condition for references is that they can only point to valid values.
+		However, it is possible to also declare and create
+		<a href="refnullref.html">nullable references</a>.
+		A nullable reference can have the value <span class="pre">null</span>,
+		which means the reference does not point to any valid value.
+		Protective measures ensure that one can never
+	  dereference a nullable reference whose value is <span class="pre">null</span>.</p>
 	
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refborref.html"><img alt="_" src="next.png" /></a>

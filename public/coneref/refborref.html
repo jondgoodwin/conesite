@@ -13,178 +13,291 @@
 
     <div class="text">
 
-	<p>Borrowed references are borrowed from a variable or some other reference.
-	They have no idea what allocator created the object
-	and are able to point to substructures within compound objects.
-	This flexibility makes them ideal for passing information to general-purpose functions or methods.
-	However, the lifetime of a borrowed reference is constrained;
-	it cannot outlive the variable or reference it borrowed from.</p>
-	<p>Use of a borrowed reference typically focuses only on the object it references.
-	In fact, a reference is often implicitly understood to just be a stand-in for the object it references.
-	Strict safety rules ensure that references always refer to a valid object of the right type.</p>
-	<p>Here's a simple example that shows a borrowed reference being created and used.
-	The <span class="pre">&</span> operator obtains a reference to a variable's contents.
-	The <span class="pre">*</span> operator accesses the contents referred to by a reference:</p>
+		<p>Borrowed references offer a straightforward introduction to references.
+			Remember this example from the previous page?
+		</p>
 <pre>
-imm a = 3
+mut a = 3
 imm ref = &amp;a    // ref holds a reference to a's contents
 imm val = *ref  // val is now 3
+*ref = 4        // a is now set to 4
 </pre>
 
-	<h2>Borrowed Reference Type Declarations</h2>
-	<p>Similar to numbers and structures, references are value types.
-	Mirroring the <span class="pre">&amp;</span> operator used to create a reference,
-	a borrowed reference declaration begins with <span class="pre">&amp;</span>,
-	followed by the reference's permission, lifetime (optional),
-	and the value type of the object being referred to.</p>
+		<p>The <span class="pre">&amp;a</span> on the second line creates a borrowed reference.
+		Borrowed references point to a value which has already been allocated in some other way.
+		Thus, they are "borrowing" the pointer address from something that already knows where the value is stored.
+		Unlike allocator references, borrowed references don't know
+		how the value was created nor do they manage its memory existence in any way.
+		Instead, borrowed references simply have a known, limited lifetime,
+		guaranteed to last no longer than the reference they borrow from or the value they point to.
+		</p>
+		
+		<p>This page describes how borrowed references are declared, shows how they are created and used,
+			and explains the lifetime mechanisms that help ensure borrowed references stay memory safe.</p>
+
+	<h2>Borrowed Reference Declarations</h2>
+	<p>An explicit type declaration for 'ref' in the earlier example would look like this:</p>
 <pre>
-imm ptr2 &amp;mut Coord
-imm ptr3 &amp;Coord       // omitted permission is 'const'
+imm ref <span class="pre">&int32</span> = &amp;a
 </pre>
-	<p>The <span class="pre">const</span> permission is the default given to a borrowed reference when none is specified.
-	<span class="pre">const</span> grants a reference the ability to view the contents of the object but not change it.</p>
-	<p>Borrowed references may be declared for:</p>
+	<p>The type declaration for a reference always begins with <span class="pre">&amp;</span>.
+		What follows can be up to four pieces of information which correspond to the reference
+		mechanisms mentioned on the previous page. These are specified in this order:</p>
 	<ul>
-	<li><b>variables</b>. Due to type inference, explicit reference declarations 
-	are typically unnecessary on variable declarations that specify an initial value.</li>
-	<li><b>struct</b> (or similar) fields or elements.
-	The presence of one or more references in a <span class="pre">struct</span>
-	may prevent it from being implicitly copied on assignment, unless it implements the .clone method.</li>
-	<li><b>function parameters and return value(s)</b>
-	Functions typically require explicit declaration of references on parameters or return values:
-	For example:</p>
-<pre>
-// next takes a reference and returns a number
-fn next(x &amp;i32) i32
-  *x + 1
-
-fn caller()
-  imm a = 3
-  next(&amp;a)  // gets back 4
-</pre>
-	<p>A lifetype annotation may occasionally be necessary within function signatures.
-	See <a href="#lifetime">Lifetime Annotations</a> for more information.</p></li>
+		<li><b>Lifetime</b>. Most of the time, the lifetime of a borrowed reference need not be specified,
+		as a reference typically takes on the lifetime of the variable or reference it borrows from.
+		Only function parameters or return values will sometimes require explicit lifetime specification,
+		as discussed later in the <a href="#lifeannot">lifetime annotations</a> section.</li>
+		<li><b>Allocator</b>. This is never specified for a borrowed reference.
+			The absence of a specified allocator is how you know it is a borrowed reference.</li>
+		<li><b>Permission</b>.
+			The <span class="pre">const</span> permission is the default given when no permission is specified.
+			<span class="pre">const</span> grants a reference the ability to view the contents of the object but not change it.
+			If you want to be able to be able to change the value the reference points to,
+			you will need to explicitly specify some other <a href="refperm.html">permission</a>.
+		<li><b>Value Type</b>.
+			This specifies the type of the value that the reference points to
+			(e.g., <span class="pre">int32</span> in the example above).</li>
 	</ul>
+	<p>To summarize, borrowed reference type declarations always need to specify the value type.
+		However, only references that want to mutate the value will need to specify a permission.
+		Far rarer are function signatures that require lifetime annotations on parameter or return references.
+	</p>
 
-	<h2>Creating Borrowed References</h2>
-	<p>Borrowed references may be borrowed from:</p>
-	<ul>
-	<li>a global variable, local variable or parameter:
+	<h2>Creating a Borrowed Reference</h2>
+	<p>There are several ways to create a borrowed reference.</p>
+	<h3>From a variable</h3>
+	<p>As already demonstrated, one may borrow a reference to any global, local or parameter variable:</p>
 <pre>
 imm glovar = 2
 fn func(imm parm)
-  imm localvar = 3
-  imm ref1 = &amp;glovar
-  imm ref2 = &amp;parm
-  imm ref3 = &amp;localvar
+	mut localvar = 3
+	imm ref1 = &amp;glovar
+	imm ref2 = &amp;parm
+	imm ref3 = &amp;localvar
+</pre>
+
+	<p>The permission of the borrowed reference will match that of the variable it borrows the address to.
+    Thus, <span class="pre">ref3</span> is a mutable borrowed reference, usable to change the value it points at.
+		An alternative permission may be specified after the &amp;, if a more constrained
+		permission is desired for the borrowed reference.</p>
+	<p>Notice that the <i>variable</i> 'ref3' that holds the reference is itself immutable
+		(it can only ever refer to 'localvar'). However, it holds a <i>reference</i> able to change (mutate) 'localvar'.
+		In this statement, 'imm' prohibits the variable 'ref3' from being changed,
+		whereas the implicit 'mut' allows the value pointed at by ref3 to be changed.
+		These are separable concerns.</p>
+			
+	<h3>From another reference</h3>
+	<p>Any kind of reference (including an <a href="refallocref.html">allocator reference</a>) 
+		may be coerced into a borrowed reference.
+		This sort of coercion commonly happens when passing any reference to a function or method
+		that expects a borrowed reference:</p>
+<pre>
+// This function accepts a borrowed reference
+fn incr(nbr &amp;mut i32)
+	 *nbr += 1
+
+fn main()
+	imm allocref = &amp;rc 1   // An allocator reference pointing to an allocated value of 1
+	incr(allocref)         // Coerces the allocator reference to a borrowed reference
+	// allocref now points to the value 2
+</pre>
+	<p>Because <i>any</i> reference may be safely coerced to a borrowed reference,
+		functions and methods typically accept borrowed references as parameters.
+		This offers two huge benefits:</p>
+	<ul>
+		<li>it makes these functions and methods polymorphic across allocators (memory management strategies)</li>
+		<li>it eliminates the runtime performance overhead of reference counting (for the rc allocator)
+			and reference tracing (for a tracing GC allocator) within these functions.</li>
+	</ul>
+
+	<h3>From a substructure</h3>
+	<p>One can borrow a reference to a value contained within a compound value,
+		such as a named property of a <a href="refstruct.html">struct</a>
+		or an element or slice in an <a href="refarray.html">array</a>.</p>
+<pre>
+imm ref1 = &amp;apoint.x   // a property within a struct
+imm ref2 = &amp;vec[a]     // an element within an array
+imm ref3 = &amp;vec[3].point.x
 </pre></li>
-	<li>another borrowed reference.
-<pre>
-imm ref1 = &amp;glovar
-imm ref2 = &amp;ref1
-imm ref3 = ref1  // or one can simply copy the reference
-</pre></li>
-	<li>an allocator reference.
-<pre>
-imm apoint = &amp;gc mut Point{x: 0f, y: 1f}
-imm borrow = &amp;apoint   // without the &amp;, this would create another allocator reference
-</pre></li>
-	<li>a substructure within some variable or reference:
-<pre>
-imm ref1 = &amp;apoint.x   // a field within a struct
-imm ref2 = &amp;vec[a]     // a slice within an array
-// TBD // pattern matching a sum typed value's contents
-</pre></li>
-</ul>
-	
-	<h3>Permission</h3>
-	<p>If a borrowed reference requires some other permission than <span class="pre">const</span>,
-	specify it following the <span class="pre">&amp;</span>.</p>
-<pre>
-mut a = 3
-imm ref = &amp;mut a  // ref holds a mutable reference to a's contents
-imm val = *ref    // val is now 3
-*ref = 10         // a is now 10. val is still 3.
-</pre>
-	<p>Note that the permission specified for a borrowed reference may not exceed the permission granted
-	to the variable or reference it borrowed from. 
-	Thus, you cannot get a <span class="pre">mut</span> reference from an <span class="pre">imm</span> variable.</p>
-	<p>Also notice that the <i>variable</i> 'ref' that holds the reference is itself immutable
-	(it can only ever refer to 'a'). However, it holds a <i>reference</i> able to change (mutate) 'a'.
-	In this statement, the first permission governs the variable 'ref' and the second governs the reference 
-	held by 'ref'. These are two different concerns.</p>
-	
-	<h3 id="lifetime">Lifetime Constraints</h3>
-	<p>	Borrowed references are lifetime-constrained, which means that a borrowed reference may never
-	outlive the object it refers to. This constraint is enforced by ensuring the lexical scope of the
-	borrowed reference is wholly encompassed by the lexical scope of the reference or object it borrowed from.</p>
-	<p>For example, a reference may not be borrowed from an object whose lifetime is shorter than the reference:</p>
-<pre>
-imm a = 3
-mut ref = &amp;a
-do
-  imm b = 4
-  ref = &amp;b  // ERROR! b's lexical lifetime is shorter than ref's
-</pre>
-	<p>When borrowing from a <span class="pre">uni</span> variable or reference,
-	the owner becomes inaccessible for the lifetime of borrowed reference.
-	In the case of a substructure borrow, it is the collection (not the field or element) that is being borrowed from.</p>
-<pre>
-uni a = 3
-do
-  imm ref = &amp;a
-  a = 4   // ERROR! a is unavailable due to the borrow
-a = 5     // This one is okay, since lifetime of 'ref' has expired
-</pre>
-	<p>Note that any reference known to have borrowed from a global variable has no lifetime constraint.</p>
-	<p>The compiler loses important lifetime information when borrowed references
-	are passed to and from another function. In such situations,
-	<a href="#lifetime">lifetime annotations</a> may be required to ensure correct
-	enforcement of lifetime constraints.</p>
-	
-	<h2>Dereferencing</h2>
-	<p>The <span class="pre">*</span> operator is used to access the contents of a reference.
-	Normally, in an expression, it obtains the contents referred to by the reference.
-	However, when used to the left of an assignment expression,
-	it modifies the referred-to contents:</p>
-<pre>
-mut a = 3
-imm ref = &amp;mut a  // ref holds a mutable reference to a's contents
-*ref = 10         // a is now 10.
-</pre>
-	<p>Such derefencing happens implicitly
-	whenever applying a method to (or calling) an object referred to by a reference:</p>
-<pre>
-mut a = -4
-imm ptr = &amp;mut a
-imm y = ptr.abs()    // y is 4. Equivalent to: (*ptr).abs
-</pre>
-	
-	<h2>Borrowed References to Functions</h2>
-	<p>A reference may borrow from any function.
-	Later, that reference may be used to call the function it refers to.</p>
+<p>This technique applies whether the variable holds the compound value or holds a reference to one.</p>
+
+	<h3>From a function or method</h3>
+	<p>A reference may be borrowed from any named function or method.
+	That reference may be used to call the function it refers to.</p>
 <pre>
 fn incr(x i32) i32
   x + 1
 
 fn caller()
-  imm fnref = &amp;incr
-  fnref(4)            // returns 5 (automatic de-referencing)
+  imm fnref = &amp;incr   // Get a borrowed reference to a function
+  fnref(4)            // Call incr and return 5
 </pre>
 	<p>Using a similar technique, it is also possible to make use of anonymous functions:</p>
 <pre>
 fn caller()
   imm fnref = &amp;fn (nbr i32) i32 {nbr+1}
-  fnref(4)            // returns 5
+  fnref(4)            // Return 5
 </pre>
-	<p>Although these are borrowed references, the default lifetime for function references
-	is <span class="pre">'static</span>, which means they can be moved around freely
-	without any lifetime constraints.</p>
+<p>Note, it is not possible to dereference a borrowed function reference using the '*' operator.
+	Its permission forbids that. All you can do with a function reference
+	is pass it around and use it to call the function it points to.</p>
 
-	<h3 id="lifetime">Lifetime Annotations</h3>
-	<p>TBD.</p>
+	<h2>Reference Use (Dereferencing)</h2>
+	<p>Use of a borrowed reference typically focuses only on the value it references.
+	The <span class="pre">*</span> dereferencing operator may be used to handle this explicitly.
+	Within expressions, dereferencing retrieves the value the reference points to.
+  Used to the left of an assignment operator, dereferencing changes that value.</p>
+<pre>
+mut a = 3
+imm ref = &amp;a    // ref holds a reference to a's contents
+imm val = *ref  // val is now 3
+*ref = 4        // a is now set to 4
+</pre>
+
+	<p>It is not always necessary to explicitly dereference a borrowed reference to use it,
+	since a reference is understood to be a stand-in for the value it references.
+	Dereferencing happens implicitly when using the <span class="pre">.</span> operator
+	to access a property or call a method on some value pointed to by a reference:</p>
+<pre>
+mut a = -4
+imm ptr = &amp;mut a
+imm y = ptr.abs    // y is 4. Similar to: (*ptr).abs
+</pre>
+	<p>With method calls, it is important to note that self receives the the reference rather than the value.</p>
+			
+	<h2 id="lifetime">Reference Lifetimes</h2>
+	<p>At last we get to what can sometimes be a frustrating aspect of borrowed references:
+		lifetime constraints.
+		Their purpose is to protect against a borrowed reference pointing to a value that no longer exists. Consider:</p>
+<pre>
+fn getval() i32
+	mut ref &amp;int32
+	do
+	  imm a = 5
+	  ref = &amp;a
+	*ref   // Oops!
+</pre>
+  <p>The lexical scope of the variable 'a' lasts only for the duration of the do block.
+		So when we are done executing that block, the variable 'a' ceases to exist.
+		However, 'ref' (which points to 'a') continues to exist, but now points to a value that is gone.
+		When we dereference it, we are problematically trying to retrieve a value that is no longer there.
+		The purpose of lifetime reference constraints is to prevent this from ever happening.</p>
+	<p>Lifetime constraints forbid a reference from pointing to a value whose
+		lifetime is shorter than its lifetime.
+		Within a single function, this is accomplished by comparing when their respective lexical scopes end.
+		If the lexical block scope for a value happens sooner than any reference trying to point to it,
+		Cone will simply not allow changing the reference to point to that value.
+		Thus, the line <span class="pre">ref = &a</span> will trigger a compile error,
+		since the do block that the 'a' value belongs to ends before the function block that 'ref' belongs to.</p>
+
+	<h3 id="lifeannot">Lifetime Annotations</h3>
+	<p>Within a function, Cone has all the information it needs to enforce lifetime constraints.
+			That is why references typically do not need to declare lifetimes.
+			However, when dealing with borrowed references that travel to and from functions,
+			Cone may not know enough about the lifetimes of these references to correctly enforce lifetime constraints.
+			In these cases, lifetime annotations are required on parameter or return references
+			to close this gap.</p>
+	<p>The way to think about it is that there is a thick brick wall that separates a called function
+		from the function that calls it. Each cannot see anything about what the other is doing with references.
+		The purpose of the lifetime annotations on function signatures is to establish a contract
+		that summarizes the lifetime relationships between parameter and return borrowed references 
+		which Cone can then enforce independently on both the caller and the callee.
+		These lifetime annotations do not tell us everything about lifetimes, only what is needed
+		to correctly enforce lifetime constraints.</p>
+	<p>Lifetime annotations <i>only</i> apply to borrowed references (not allocator references).
+		Furthermore, if none of the passed borrowed references can change a value and if no borrowed reference
+		is returned from the function, no lifetime annotations are required.
+		Really, there are only two circumstances where lifetime annotations <i>might</i> be required,
+		both of them requiring that the function receives multiple parameters that contain borrowed references.</p>
+
+	<h4>Returned borrowed references</h4>
+	<p>If a function passes multiple borrowed references
+		and returns value(s) that contain borrowed references,
+		the brick wall prevents us from knowing which of the passed borrowed references
+		is the source for the returned borrowed reference.
+		That means the caller does not know what the lifetime is of the returned borrowed references.
+		Without that knowledge, how can we safely enforce lifetime constraints on wherever
+		the caller might store that reference? Consider this classic example:</p>
+<pre>
+fn refswitch(nbr i32, ref1 &i32, ref2 &i32) &i32
+	if nbr &lt; 0
+		ref1
+	else
+		ref2
+
+fn caller(nbr i32)
+  mut ref &amp;int32
+  imm outer = 5
+	do
+	  imm inner = 10
+	  ref = refswitch(1, &outer, &inner) // Is this safe???
+</pre>
+	<p>To play it completely safe in the absence of lifetime annotations,
+		Cone will assume for the callee that the lifetime for all references
+		is the same. However, with the caller it will assume the returned reference
+		might have the longest lifetime of the passed references.
+		Using those rules, the above program would compile with an error in the caller,
+		since the lifetime of one of the passed parameters is shorter than the lifetime of ref.
+		The only way to call refswitch safely is when the lifetime of both passed references
+	  are at least as long as the lifetime of ref.</p>
+	<p>Lifetime annotations may be used to relax this conservative stance.
+		Marking multiple references with the same simple lifetime annotations
+		signals that the lifetimes of these borrowed references should be treated as if they were the same
+		(in the most conservative way possible). Consider:</p>
+<pre>
+fn refone(ref1 &'a i32, ref2 &i32) &'a i32
+</pre>
+  <p>Using lifetime annotations ('a), this function declares that the caller should treat
+		the lifetime of the returned reference as the same as the lifetime for ref1.
+		It also enforces that the callee's logic provides no way to return a reference
+		sourced from ref2.
+		Thus, a called function should annotate some references with lifetime annotations
+		when it knows it implements no dependences between a returned reference
+		and some other passed reference(s).</p>
+
+	<h4>Mutable borrowed reference parameters</h4>
+	<p>If a function is passed multiple references, at least one of which is mutable,
+		we have an opportunity for a different sort of lifetime problem.
+		If the called function changes the value pointed at by the mutable reference
+		to a value retrieved from a different reference parameter,
+		it has insufficient information to know that lifetime constraints are safely enforced.</p>
+<pre>
+fn refchange(refmut &amp;mut i32, refval &amp;i32)
+	*refmut = *refval
 	
-	<p style="text-align: right; margin-top: 2em;">
+fn tryit()
+	mut a = 5
+	do
+		imm b = 10
+		refchange(&a, &b) // Oops!
+</pre>
+  <p>In the absence of lifetime annotations, Cone will once again
+		apply the most conservative assumptions.
+		The callee will assume their lifetimes are the same.
+		The caller will assume the known lifetime of all mutable reference can never be longer
+		than the known lifetime of any non-mutable reference.
+		The use of lifetime annotations can also be used in these circumstances
+		to relax these assumptions, when the called function can guarantee there are
+		no lifetime dependences between some of the references.</p>
+	
+	<h3>'static lifetime</h3>
+	<p>The lifetime of a global variable is forever.
+		The same is true for all functions, methods and anonymous functions.
+		Any reference created directly from a global variable or function is implicitly marked 
+		with the <span class="pre">'static</span> lifetime annotation.
+		A reference may always safely point to a value that is known to be global,
+		as this never violates lifetime constraints.</p>
+	<p>References to functions preserve this <span class="pre">'static</span> lifetime even when a function reference
+		is passed from one function to another.
+		This means that function references can always be moved around freely and safely
+		between functions and safely stored and used anywhere,
+		without the need to explicit annotate them with <span class="pre">'static</span>.</p>
+	<p>However, that is not true for global variables when references to them are passed
+		around and stored. Unless the receiver reference (and any donor reference) are explicitly marked with
+		<span class="pre">'static</span>, lifetime shortening and constraints will apply.
+			
+			<p style="text-align: right; margin-top: 2em;">
 		<a href="refallocref.html"><img alt="_" src="next.png" /></a>
 	</p>
 

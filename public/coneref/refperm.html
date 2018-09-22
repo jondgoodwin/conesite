@@ -115,6 +115,18 @@ imm ref = &amp;gc Point {x: 1, y: 2}
 ref.x = 5      // Allowed, since borrowed references have expired
 </pre>
 	
+	<h3>uni and borrowed references</h3>
+	<p>When borrowing from a <span class="pre">uni</span> variable or reference,
+		the owner becomes inaccessible for the lifetime of borrowed reference.
+		In the case of a substructure borrow, it is the collection (not the field or element) that is being borrowed from.</p>
+<pre>
+uni a = 3
+do
+	imm ref = &amp;a
+	a = 4   // ERROR! a is unavailable due to the borrow
+a = 5     // This one is okay, since lifetime of 'ref' has expired
+</pre>
+	
 	<h2>const</h2>
 	<p>The <span class="pre">const</span> (constant) permission is valuable for temporary references,
 	particularly borrowed references.
