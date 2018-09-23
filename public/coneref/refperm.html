@@ -13,9 +13,10 @@
 
     <div class="text">
 
-	<p>Before talking about allocator references, we need a more expansive view of permissions as they relate to references.
-	  This is important because the default permission for allocator references,
-	  <span class="pre">uni</span>, has not yet been introduced.</p>
+	<p>While talking about references, several unfamiliar permissions have been mentioned in passing.
+		It is now time for a more detailed treatment.
+		This is important not only because the list of permissions is incomplete,
+		but also because many of these permissions offer fluid, polymorphic, and <i>safe</i> transitions.</p>
 	<p>The primary role of permissions is to improve program safety by preventing race conditions,
 	where multiple concurrent threads step on each other when trying to access the same value.
 	Prudent use of permissions can also help make code easier to understand and improve execution performance.</p>
@@ -235,7 +236,7 @@ perm NewLock
 	<p>TBD</p>
 	
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refallocref.html"><img alt="_" src="next.png" /></a>
+		<a href="refptr.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

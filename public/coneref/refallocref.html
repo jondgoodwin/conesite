@@ -13,42 +13,73 @@
 
     <div class="text">
 
-	<p>Allocator references are created and managed by a named allocator.
-	An allocator reference can only ever point to a complete, allocated object.
-	Allocator references preserve their allocator as part of their type information.
-	Unlike borrowed references, the lifetime of allocator references is not constrained
-	to the lexical scope where they are created.</p>
-	<p>As with borrowed references, an allocator reference is typically used as a stand-in for the object it references.
-	Strict safety rules ensure that such references always refer to a valid object of the right type.</p>
+	<p>Programming languages offer a way to dynamically allocate new values.
+	  And if a language enforces memory safety, as most languages do,
+	  it uses an automatic memory management mechanism (such as tracing garbage collection)
+	  to ensure that allocated values are automatically freed when no longer needed.
+	  Most languages bake in a single memory management strategy, take it or leave it.</p>
+	<p>In Cone, allocator references handle these memory management responsibilities.
+	  They do so in a versatile way: <i>each</i> allocator reference specifies
+	  which memory management strategy allocates its value and manages its lifetime.
+	  One reference might use reference counting, another reference garbage
+	  collection, and a third a Rust-like single-owner model (RAII with escape analysis).
+	  Each memory strategy has distinct advantages and disadvantages.
+	  Cone's versatility allows a program to select the optimal mix of strategies that best satisfies its requirements.
+	</p>
+	<p>Using allocator references looks like use of borrowed references.
+	  There are differences, however. 
+	  Allocator references cannot point to substructures the way a borrowed reference can.
+	  An allocator reference may be coerced to a borrowed reference, but not vice-versa.
+	  The handling of allocator references sometimes carries extra runtime costs
+	  that borrowed references never do.
+    </p>
+	<p>This page describes how allocator references are declared, shows how they are created,
+		and explains the memory management mechanisms that allocators use to ensure memory safety.</p>
 
-	<h2>Allocator Reference Type Declarations</h2>
-	<p>Like borrowed references, use the <span class="pre">&amp;</span> operator to declare an allocator reference.
-	It is followed by the reference's allocator, permission (optional),
-	and the value type of the object being referred to.</p>
+	<h2>Allocator Reference Declarations</h2>
+	<p>As with borrowed references, the type declaration for an allocator reference 
+		begins with <span class="pre">&amp;</span>.
+		The reference mechanics follow:</p>
+	<ul>
+		<li><b>Lifetime</b>. Allocator references never specify a lifetime, as it is inferred.</li>
+		<li><b>Allocator</b>. This is the memory management strategy used to allocate
+			and manage the lifetime of an allocated value. We will get into the details of this
+			<a href="#allocators">soon</a>.
+			The presence of a specified allocator is how you know it is a allocator reference.</li>
+		<li><b>Permission</b>.
+			The <span class="pre">uni</span> permission is the default given when no permission is specified.
+			<span class="pre">uni</span> grants a reference the ability to view or change the reference's value.
+			This is the universal donor permission, allowing mutation and inter-thread movement,
+			but restricting aliasing to a single live reference.
+			Extensive information about <span class="pre">uni</span> and other permissions
+			is covered on the <a href="refperm.html">permissions</a> page.
+		<li><b>Value Type</b>.
+			This specifies the type of the value that the reference points to.</li>
+	</ul>
+	<p>To summarize, allocator reference type declarations always need to specify the allocator and value type.
+		A permission is specified when different from <span class="pre">uni</span>. For example:</p>
 <pre>
-// reference's allocator is gc and permission is mut. Object's value type is Coord
-imm ptr1 &amp;gc mut Coord
+imm aref1 &amp;lex i32
+imm aref2 &amp;rc mut i32
 </pre>
-	<p>Specifying the allocator is what distinguishes an allocator reference from a borrowed reference.
-	The <span class="pre">uni</span> permission is the default given to an allocator reference when none is specified.
-	This is the universal donor permission, allowing mutation and inter-thread movement, 
-	but restricting aliasing to a single live reference.</p>
-	<p>Due to type inference, most variable declarations won't need to declare the allocator reference type information. 
-	However, function signatures require explicit declaration of allocator references used as parameters or return values.</p>
 
-	<h2>Allocator Reference Creation</h2>
-	<p>Creating an allocator reference looks a lot like a declaration, except instead of just specifying
-	the value type, one specifies an appropriately typed literal or constructor. For example:</p>
+	<h2>Creating an Allocator Reference</h2>
+	<p>There is only one way to create an allocator reference:
+		Specify the <span class="pre">&</span> operator, followed by the allocator, an optional permission, 
+		and then either specify its initial value or use a <a href="refmethod.html#constructor">type constructor</a>:
+	</p>
 <pre>
-imm rcref = &amp;rc mut Point{x: 4f, y: 3f}
+imm rcref = &amp;lex 45                     // Allocate a new boxed value, initialized with 45
+imm gcref = &amp;gc mut Point3(1f, 2f, 3f)  // Allocate a new Point3 value using a constructor
 </pre>
-	<p>Instead of a literal or constructor, one can also specify another borrowed or allocator reference.
-	This effectively copies (clones) the value held by the second reference:
-<pre>
-imm rcref = &amp;rc anotherref
-</pre>
+	<p>Creating an allocator reference is quite different than creating a borrowed reference.
+	  With a borrowed reference, we are simply obtaining the already-known address of some value.
+	  With an allocator reference, we are actually allocating a new place in memory
+	  with enough space to hold a value of the desired type. That memory space
+	  is initialized using the provided value or constructor.
+	  The returned allocator reference points to this newly created value.</p>
 
-	<h2>Allocator Examples</h2>
+	<h2 id="allocators">Standard Allocators</h2>
 	<p>Cone supports a wide variety of allocators, each of which varies in how they manage 
 	and determine when to free the memory used by the values they allocate.
 	Ultimately, the following flavors of allocators will be possible:</p>
@@ -138,7 +169,7 @@ alloc rc
 	from the correct pointer to the correct reference.</p>
 	
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refptr.html"><img alt="_" src="next.png" /></a>
+		<a href="refperm.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>
