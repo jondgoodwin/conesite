@@ -35,10 +35,10 @@ imm val = *ref  // val is now 3
 		<p>This page describes how borrowed references are declared, shows how they are created and used,
 			and explains the lifetime mechanisms that help ensure borrowed references stay memory safe.</p>
 
-	<h2>Borrowed Reference Declarations</h2>
+	<h2 id="dcl">Borrowed Reference Declarations</h2>
 	<p>An explicit type declaration for 'ref' in the earlier example would look like this:</p>
 <pre>
-imm ref <span class="pre">&int32</span> = &amp;a
+imm ref <span class="pre">&i32</span> = &amp;a
 </pre>
 	<p>The type declaration for a reference always begins with <span class="pre">&amp;</span>.
 		What follows can be up to four pieces of information which correspond to the reference
@@ -57,7 +57,7 @@ imm ref <span class="pre">&int32</span> = &amp;a
 			you will need to explicitly specify some other <a href="refperm.html">permission</a>.
 		<li><b>Value Type</b>.
 			This specifies the type of the value that the reference points to
-			(e.g., <span class="pre">int32</span> in the example above).</li>
+			(e.g., <span class="pre">i32</span> in the example above).</li>
 	</ul>
 	<p>To summarize, borrowed reference type declarations always need to specify the value type.
 		However, only references that want to mutate the value will need to specify a permission.
@@ -172,21 +172,21 @@ imm y = ptr.abs    // y is 4. Similar to: (*ptr).abs
 		Their purpose is to protect against a borrowed reference pointing to a value that no longer exists. Consider:</p>
 <pre>
 fn getval() i32
-	mut ref &amp;int32
+	mut ref &amp;i32
 	do
 	  imm a = 5
 	  ref = &amp;a
 	*ref   // Oops!
 </pre>
-  <p>The lexical scope of the variable 'a' lasts only for the duration of the do block.
+  <p>The scope of the variable 'a' lasts only for the duration of the do block.
 		So when we are done executing that block, the variable 'a' ceases to exist.
 		However, 'ref' (which points to 'a') continues to exist, but now points to a value that is gone.
 		When we dereference it, we are problematically trying to retrieve a value that is no longer there.
 		The purpose of lifetime reference constraints is to prevent this from ever happening.</p>
 	<p>Lifetime constraints forbid a reference from pointing to a value whose
 		lifetime is shorter than its lifetime.
-		Within a single function, this is accomplished by comparing when their respective lexical scopes end.
-		If the lexical block scope for a value happens sooner than any reference trying to point to it,
+		Within a single function, this is accomplished by comparing when their respective scopes end.
+		If the scope for a value happens sooner than any reference trying to point to it,
 		Cone will simply not allow changing the reference to point to that value.
 		Thus, the line <span class="pre">ref = &a</span> will trigger a compile error,
 		since the do block that the 'a' value belongs to ends before the function block that 'ref' belongs to.</p>
@@ -206,15 +206,15 @@ fn getval() i32
 		These lifetime annotations do not tell us everything about lifetimes, only what is needed
 		to correctly enforce lifetime constraints.</p>
 	<p>Lifetime annotations <i>only</i> apply to borrowed references (not allocator references).
-		Furthermore, if none of the passed borrowed references can change a value and if no borrowed reference
+		Furthermore, if none of the borrowed references can change a value and if no borrowed reference
 		is returned from the function, no lifetime annotations are required.
 		Really, there are only two circumstances where lifetime annotations <i>might</i> be required,
 		both of them requiring that the function receives multiple parameters that contain borrowed references.</p>
 
 	<h4>Returned borrowed references</h4>
-	<p>If a function passes multiple borrowed references
+	<p>If a function accepts multiple borrowed references
 		and returns value(s) that contain borrowed references,
-		the brick wall prevents us from knowing which of the passed borrowed references
+		the brick wall prevents us from knowing which of the borrowed reference parameters
 		is the source for the returned borrowed reference.
 		That means the caller does not know what the lifetime is of the returned borrowed references.
 		Without that knowledge, how can we safely enforce lifetime constraints on wherever
@@ -227,7 +227,7 @@ fn refswitch(nbr i32, ref1 &i32, ref2 &i32) &i32
 		ref2
 
 fn caller(nbr i32)
-  mut ref &amp;int32
+  mut ref &amp;i32
   imm outer = 5
 	do
 	  imm inner = 10
@@ -238,8 +238,8 @@ fn caller(nbr i32)
 		is the same. However, with the caller it will assume the returned reference
 		might have the longest lifetime of the passed references.
 		Using those rules, the above program would compile with an error in the caller,
-		since the lifetime of one of the passed parameters is shorter than the lifetime of ref.
-		The only way to call refswitch safely is when the lifetime of both passed references
+		since the lifetime of one of the parameters is shorter than the lifetime of ref.
+		The only way to call refswitch safely is when the lifetime of both references
 	  are at least as long as the lifetime of ref.</p>
 	<p>Lifetime annotations may be used to relax this conservative stance.
 		Marking multiple references with the same simple lifetime annotations
@@ -254,10 +254,10 @@ fn refone(ref1 &'a i32, ref2 &i32) &'a i32
 		sourced from ref2.
 		Thus, a called function should annotate some references with lifetime annotations
 		when it knows it implements no dependences between a returned reference
-		and some other passed reference(s).</p>
+		and some parameter reference(s).</p>
 
 	<h4>Mutable borrowed reference parameters</h4>
-	<p>If a function is passed multiple references, at least one of which is mutable,
+	<p>If a function accepts multiple references, at least one of which is mutable,
 		we have an opportunity for a different sort of lifetime problem.
 		If the called function changes the value pointed at by the mutable reference
 		to a value retrieved from a different reference parameter,
@@ -298,7 +298,7 @@ fn tryit()
 		<span class="pre">'static</span>, lifetime shortening and constraints will apply.
 			
 			<p style="text-align: right; margin-top: 2em;">
-		<a href="refallocref.html"><img alt="_" src="next.png" /></a>
+		<a href="refpern.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

@@ -92,7 +92,9 @@ imm val = *ref  // val is now 3
 	  <li><a href="refborref.html#lifetime"><b>Lifetimes</b></a>.
 		Cone automatically tracks the lifetime of every reference based on its lexical scope.
 		Lifetimes are invaluable for ensuring that allocated objects are freed only when no reference
-		points to it. In this way, lifetimes also help improve memory safety.
+		points to it.
+		They also ensure that borrowed references can never point to a freed value.
+		In these ways, lifetimes also help improve memory safety.
 	  </li>
 	  <li><a href="refperm.html"><b>Permissions</b></a>.
 		Permissions govern what may be done with a reference.
