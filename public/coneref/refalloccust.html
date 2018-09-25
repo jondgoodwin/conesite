@@ -40,21 +40,21 @@ alloc rc
     free(self as *u8)
 </pre>
 	<p>As this example shows, an allocator typically defines at least these four methods
-	which are invoked automatically by the compiler based on key events in the lifetime of an allocator reference:
+	which are invoked automatically by the compiler based on key events in the lifetime of an allocated reference:
 	<ul>
-	<li><b>allocate</b>. This is invoked whenever a new allocator reference is created using the &amp; operator.
+	<li><b>allocate</b>. This is invoked whenever a new allocated reference is created using the &amp; operator.
 	The compiler supplies the sizeof the appropriate type of value to be stored in the allocated memory.
 	This size is expanded to include runtime bookkeeping data for the allocator (e.g., refcnt) and permission.
 	After allocate, the compiler will also initialize any runtime permission's fields, if needed.
 	The compiler's final step is to adjust the pointer to point at the value's data (past the runtime bookkeeping data),
 	and then to initialize its value based on the literal, constructor or a copy of another similar value.</li>
 	<li><b>alias</b>. This is invoked whenever a new shared copy is made of the reference.</li>
-	<li><b>dealias</b>. This is invoked whenever an allocator reference is destroyed, typically when
+	<li><b>dealias</b>. This is invoked whenever an allocated reference is destroyed, typically when
 	the variable holding the reference reaches the end of its lexical lifetime.
 	It can also happen when overwriting a reference held by an existing variable or field.</li>
 	<li><b>free</b>. This is invoked whenever the allocator determines the value is safe to free.
 	Before executing its logic, the compiler will invoke the drop method on the object, if it exist,
-	which serves as a finalizer for any resources obtained by the allocator reference.</li>
+	which serves as a finalizer for any resources obtained by the allocated reference.</li>
 	</ul>
 	<p>Any allocator which does not define the alias method (e.g., the lex allocator)
 	ensures single-owner move semantics, as it prevents multiple copies of the reference from being created.

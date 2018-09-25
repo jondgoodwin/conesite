@@ -26,7 +26,7 @@ imm val = *ref  // val is now 3
 		<p>The <span class="pre">&amp;a</span> on the second line creates a borrowed reference.
 		Borrowed references point to a value which has already been allocated in some other way.
 		Thus, they are "borrowing" the pointer address from something that already knows where the value is stored.
-		Unlike allocator references, borrowed references don't know
+		Unlike allocated references, borrowed references don't know
 		how the value was created nor do they manage its memory existence in any way.
 		Instead, borrowed references simply have a known, limited lifetime,
 		guaranteed to last no longer than the reference they borrow from or the value they point to.
@@ -88,7 +88,7 @@ fn func(imm parm)
 		These are separable concerns.</p>
 			
 	<h3>From another reference</h3>
-	<p>Any kind of reference (including an <a href="refallocref.html">allocator reference</a>) 
+	<p>Any kind of reference (including an <a href="refallocref.html">allocated reference</a>) 
 		may be coerced into a borrowed reference.
 		This sort of coercion commonly happens when passing any reference to a function or method
 		that expects a borrowed reference:</p>
@@ -98,8 +98,8 @@ fn incr(nbr &amp;mut i32)
 	 *nbr += 1
 
 fn main()
-	imm allocref = &amp;rc 1   // An allocator reference pointing to an allocated value of 1
-	incr(allocref)         // Coerces the allocator reference to a borrowed reference
+	imm allocref = &amp;rc 1   // An allocated reference pointing to an allocated value of 1
+	incr(allocref)         // Coerces the allocated reference to a borrowed reference
 	// allocref now points to the value 2
 </pre>
 	<p>Because <i>any</i> reference may be safely coerced to a borrowed reference,
@@ -205,7 +205,7 @@ fn getval() i32
 		which Cone can then enforce independently on both the caller and the callee.
 		These lifetime annotations do not tell us everything about lifetimes, only what is needed
 		to correctly enforce lifetime constraints.</p>
-	<p>Lifetime annotations <i>only</i> apply to borrowed references (not allocator references).
+	<p>Lifetime annotations <i>only</i> apply to borrowed references (not allocated references).
 		Furthermore, if none of the borrowed references can change a value and if no borrowed reference
 		is returned from the function, no lifetime annotations are required.
 		Really, there are only two circumstances where lifetime annotations <i>might</i> be required,

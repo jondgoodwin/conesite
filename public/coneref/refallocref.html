@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>Allocator References - Cone Reference</title>
+	  <title>Allocated references - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -8,7 +8,7 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Allocator References</div>
+			<div id="sub">Allocated references</div>
 		</div>
 
     <div class="text">
@@ -18,34 +18,35 @@
 	  it uses an automatic memory management mechanism (such as tracing garbage collection)
 	  to ensure that allocated values are automatically freed when no longer needed.
 	  Most languages bake in a single memory management strategy, take it or leave it.</p>
-	<p>In Cone, allocator references handle these memory management responsibilities.
-	  They do so in a versatile way: <i>each</i> allocator reference specifies
+	<p>In Cone, allocated references handle these memory management responsibilities.
+	  They do so in a versatile way: <i>each</i> allocated reference specifies
 	  which memory management strategy allocates its value and manages its lifetime.
 	  One reference might use reference counting, another reference garbage
 	  collection, and a third a Rust-like single-owner model (RAII with escape analysis).
 	  Each memory strategy has distinct advantages and disadvantages.
 	  Cone's versatility allows a program to select the optimal mix of strategies that best satisfies its requirements.
 	</p>
-	<p>Using allocator references looks like use of borrowed references.
-	  There are differences, however. 
-	  Allocator references cannot point to substructures the way a borrowed reference can.
-	  An allocator reference may be coerced to a borrowed reference, but not vice-versa.
-	  The handling of allocator references sometimes carries extra runtime costs
+	<p>A reference in Cone is either an allocated reference or a borrowed reference.
+	  Using allocated references looks largely like use of borrowed references, but there are differences.
+		An allocated reference owns the reference that a borrowed reference borrows from.
+	  Thus, an allocated reference may be coerced to a borrowed reference, but not vice-versa.
+	  The handling of allocated references sometimes carries extra runtime costs
 	  that borrowed references never do.
+		Allocated references cannot point to substructures the way a borrowed reference can.
     </p>
-	<p>This page describes how allocator references are declared, shows how they are created,
+	<p>This page describes how allocated references are declared, shows how they are created,
 		and explains the memory management mechanisms that allocators use to ensure memory safety.</p>
 
-	<h2>Allocator Reference Declarations</h2>
-	<p>As with borrowed references, the type declaration for an allocator reference 
+	<h2>Allocated reference Declarations</h2>
+	<p>As with borrowed references, the type declaration for an allocated reference 
 		begins with <span class="pre">&amp;</span>.
 		The reference mechanics follow:</p>
 	<ul>
-		<li><b>Lifetime</b>. Allocator references never specify a lifetime, as it is inferred.</li>
+		<li><b>Lifetime</b>. Allocated references never specify a lifetime, as it is inferred.</li>
 		<li><b>Allocator</b>. This is the memory management strategy used to allocate
 			and manage the lifetime of an allocated value. We will get into the details of this
 			<a href="#allocators">soon</a>.
-			The presence of a specified allocator is how you know it is a allocator reference.</li>
+			The presence of a specified allocator is how you know it is a allocated reference.</li>
 		<li><b>Permission</b>.
 			The <span class="pre">uni</span> permission is the default given when no permission is specified.
 			<span class="pre">uni</span> grants a reference the ability to view or change the reference's value.
@@ -56,15 +57,15 @@
 		<li><b>Value Type</b>.
 			This specifies the type of the value that the reference points to.</li>
 	</ul>
-	<p>To summarize, allocator reference type declarations always need to specify the allocator and value type.
+	<p>To summarize, allocated reference type declarations always need to specify the allocator and value type.
 		A permission is specified when different from <span class="pre">uni</span>. For example:</p>
 <pre>
 imm aref1 &amp;lex i32
 imm aref2 &amp;rc mut i32
 </pre>
 
-	<h2>Creating an Allocator Reference</h2>
-	<p>There is only one way to create an allocator reference:
+	<h2>Creating an Allocated reference</h2>
+	<p>There is only one way to create an allocated reference:
 		Specify the <span class="pre">&</span> operator, followed by the allocator, an optional permission, 
 		and then either specify its initial value or use a <a href="refmethod.html#constructor">type constructor</a>:
 	</p>
@@ -72,12 +73,12 @@ imm aref2 &amp;rc mut i32
 imm rcref = &amp;lex 45                     // Allocate a new boxed value, initialized with 45
 imm gcref = &amp;gc mut Point3(1f, 2f, 3f)  // Allocate a new Point3 value using a constructor
 </pre>
-	<p>Creating an allocator reference is quite different than creating a borrowed reference.
+	<p>Creating an allocated reference is quite different than creating a borrowed reference.
 	  With a borrowed reference, we are simply obtaining the already-known address of some value.
-	  With an allocator reference, we are actually allocating a new place in memory
+	  With an allocated reference, we are actually allocating a new place in memory
 	  with enough space to hold a value of the desired type. That memory space
 	  is initialized using the provided value or constructor.
-	  The returned allocator reference points to this newly created value.</p>
+	  The returned allocated reference points to this newly created value.</p>
 
 	<h2 id="allocators">Standard Allocators</h2>
 	<p>Cone supports several standard allocators, each corresponding to a specific memory management strategy.
@@ -90,7 +91,7 @@ imm gcref = &amp;gc mut Point3(1f, 2f, 3f)  // Allocate a new Point3 value using
 	  for performance, memory utilization, and data structure complexity.</p>
 	</p>
 	<h3>lex - RAII with escape analysis</h3>
-	<p>Only one allocator reference may point to any lex-allocated value.
+	<p>Only one allocated reference may point to any lex-allocated value.
 	  That reference may be passed around from function to function or from thread to thread.
 	  The memory for that value is automatically dropped and freed when its single reference goes out of its last scope.
 	  lex is similar to Rust's Box&lt;T&gt; single-owner mechanism.</p>
@@ -98,15 +99,15 @@ imm gcref = &amp;gc mut Point3(1f, 2f, 3f)  // Allocate a new Point3 value using
 	  The performance benefit comes from avoiding the need for runtime bookkeeping,
 	  since the allocated value's lifetime can be determined at compile time.
 	  The biggest downside is its data structure inflexibility.
-	  It cannot safely handle data structures that require multiple allocator references to the same value,
+	  It cannot safely handle data structures that require multiple allocated references to the same value,
 	  such as all cyclic and many directed acyclic graphs.</p>
-	<p><b>Note:</b> A lex allocator reference only accepts the 'uni' or 'imm' permissions.
-	It is not possible to alias a lex allocator reference.
+	<p><b>Note:</b> A lex allocated reference only accepts the 'uni' or 'imm' permissions.
+	It is not possible to alias a lex allocated reference.
 	Any attempt to do so simply moves the reference to a new binding.</p>
 
 	<h3>rc - Reference Counting</h3>
 	<p>When a new rc reference is created, it is initialized with a counter that is set to 1.
-	Every time an alias (copy) is made of an rc allocator reference, the counter is incremented.
+	Every time an alias (copy) is made of an rc allocated reference, the counter is incremented.
 	Whenever a reference goes out of scope, the counter is decremented.
 	When the counter reaches 0, the value is dropped and freed.</p>
 	<p>The key benefits are memory efficiency, deterministic drops, simple mechanism,
@@ -133,7 +134,7 @@ imm gcref = &amp;gc mut Point3(1f, 2f, 3f)  // Allocate a new Point3 value using
 	  Allocations are never individually freed. The entire slab is freed as a single event 
 	  when the arena itself goes out of scope.</p>
 	<p>The primary benefit is speed: allocation and free are much faster
-		than general-purpose allocators and there are no run-time bookkeeping costs.
+		than malloc or equivalent, and there are no run-time bookkeeping costs.
 		The chief drawbacks are memory waste (because nothing is freed until the arena goes out of scope)
 		and the inability to support drop finalizers.</p>
 
@@ -143,7 +144,7 @@ imm gcref = &amp;gc mut Point3(1f, 2f, 3f)  // Allocate a new Point3 value using
 	  Each new allocation quickly grabs some unused slot.
 	  Reference counting is used to determine when an allocation is freed (marking its slot as reusable).</p>
 	<p>The primary benefit of pool is memory efficiency and 
-		a much faster allocation and free of size-limited values than is possible using a general-purpose allocator.
+		a much faster allocation and free of size-limited values than is possible using malloc.
 		The chief drawbacks are the size limits on values
 	    and the runtime bookkeeping costs of its underlying lifetime algorithm.</p>
 	

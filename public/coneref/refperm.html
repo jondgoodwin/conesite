@@ -61,8 +61,8 @@
 	
 	<h3>uni as the first permission</h3>
 	<p><span class="pre">uni</span> is best understood as
-	the first permission an allocator reference gets in the early days of its existence.
-	Whenever a type constructor creates and returns a new allocator reference, 
+	the first permission an allocated reference gets in the early days of its existence.
+	Whenever a type constructor creates and returns a new allocated reference, 
 	it has the <span class="pre">uni</span> permission by default.
 	This makes sense: since the just-created reference is the only one in existence, 
 	it naturally complies with the single reference restriction.</p>
@@ -117,7 +117,7 @@ imm newref1 = &amp;rc mut 5 // Allocate new 'mut' integer
 <pre>
 imm uniref = &amp;rc 5
 do
-  imm bref1 &amp;mut i32 = uniref   // Coerce allocator reference to a 'mut' borrowed reference
+  imm bref1 &amp;mut i32 = uniref   // Coerce allocated reference to a 'mut' borrowed reference
   imm bref2 = ref2              // Share with another borrowed reference
   *bref2 = *bref1 + 1
   *uniref = 6                   // Error, uniref is unusable during scope of borrowed 'bref1'
@@ -159,14 +159,14 @@ do
 	This is because <span class="pre">mut1</span> can safely accept references that are declared as
 	<span class="pre">mut</span>, <span class="pre">uni</span>, or <span class="pre">mut1</span>.
 	This is more flexible than if we defined a mutable borrowed reference parameter as <span class="pre">mut</span>,
-	which would not be able accept <span class="pre">uni</span> allocator references, 
+	which would not be able accept <span class="pre">uni</span> allocated references, 
 	references to variant types, or <span class="pre">mut1</span> references.</p>
 	
-	<h4>mut1 for sum type allocator references</h4>
-	<p><span class="pre">mut1</span> may also be used on allocator references.
+	<h4>mut1 for sum type allocated references</h4>
+	<p><span class="pre">mut1</span> may also be used on allocated references.
 	Its main purpose is to allow multiple references to a value that guarantee
 	that only one can modify the value at a time and only via a <span class="pre">mut1</span> borrowed reference.
-	This can be useful when a program needs multiple mutable allocator references to sum types which,
+	This can be useful when a program needs multiple mutable allocated references to sum types which,
 	for safety reasons, may never be <span class="pre">mut</span>.</p>
 	<p>Sum types, variable-sized arrays and other types need restrictions on shared mutability for memory safety,
 	even in single-threaded situations. 
@@ -201,7 +201,7 @@ do
 	
 	<h3>Runtime Permission Coercions</h3>
 	<p>Runtime permissions do not allow coercion to or from any other permission.
-	Thus, the runtime permission must be specified when creating a new allocator reference to a value.
+	Thus, the runtime permission must be specified when creating a new allocated reference to a value.
 	All copies of that reference carry the same permission.</p>
 	<p>This means that objects protected by runtime permissions cannot use functions
 	that accept <span class="pre">const</span> or <span class="pre">mut1</span> references.
