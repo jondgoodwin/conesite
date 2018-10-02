@@ -12,98 +12,90 @@
 		</div>
 
     <div class="text">
-		<p>Cone is a powerful, easy-to-use systems programming language,
-		used to build realistic, interactive, <a href="/web3d.jondgoodwin.com/faq.html">3D web</a> worlds. 
-		It is designed for real-time performance and responsiveness, compile-time safety, 
-		and programmer flexibility and convenience.</p>
-		
-		<p>To serve that goal, Cone is:
+		<p>Cone is a fast, fit, friendly, and safe systems programming language:</p>
 		<ul>
-		<li>a <b>modelling</b> language, as it enables specification of complex systems
+			<li><b>Fast</b>. Systems programming languages (like C) produce the fastest programs.
+			Cone is no exception.</li>
+			<li><b>Fit</b>. Cone programs pack a lot of power for their size,
+				both as source files and as delivered executables.</li>
+			<li><b>Friendly</b>. The language design makes programs easy to read and change.
+			  The tools accelerate your time-to-market.</li>
+			<li><b>Safe</b>. Built-in mechanisms ensure programs behave well,
+				even when dealing with raw memory or concurrency.</li>
+		</ul>
+
+		<h2>Design Goals</h2>
+		<p>The <b><a href="/web3d">3D web</a></b> is the "killer app" focus for Cone.
+		As a result, it must handle these programming language roles well:</p>
+		<ul>
+		<li><b>simulation modelling</b>, enabling specification of complex systems
 		that can be simulated via real-time high-quality rendering, 
 		timely interactions between people and parts, and rule-driven changes of state.</li>
-		<li>an <b>event-driven</b> language, so worlds stay calm and responsive 
+		<li><b>event-driven control flow</b>, so worlds stay calm and responsive 
 		while juggling a blur of competing workload demands.</li>
-		<li>an <b>object-oriented</b> language, as snapping together flexibly typed, modular parts,
+		<li><b>object- and actor-oriented modularity</b>, as snapping together flexibly typed, modular parts,
 		each with its own content and behavior, is ideally suited to the object-oriented paradigm.</li>
-		<li>a <b>static</b> language, to accelerate performance and ensure compile-time
+		<li><b>static typing</b>, to accelerate performance and ensure compile-time
 		memory, concurrence and type safety.</li>
 		</ul>
-		
-		<h2>Features</h2>
-		<p>Cone offers a rich set of features 
-		(see the <a href="showcase.html">Showcase</a> for code examples):</p>
+			
+		<p>In pursuit of its core focus, Cone supports:</p>
 		<ul>
-		<li>Readable, modular marriage of 3D content and behavior:
-			<ul>
-			<li>'this' blocks and operators for specifying static or runtime content</li>
-			<li>@ operator for snap-together inclusion of Internet-hosted content</li>
-			<li>Content iterators and 'each' control block</li>
-			</ul></li>
-		<li>Url-based packaging and resource handling:
-			<ul>
-			<li>Dynamic, asynchronous-capable resource loading</li>
-			<li>Extensible url schemes and content type de-serialization</li>
-			<li>Programs are treated as dynamically loadable resources</li>
-			<li>Automatic resource unzip and de-compression</li>
-			<li>Relative url addressing</li>
-			</ul></li>
-		<li>Memory, type, and concurrency safe</li>
-		<li><a href="web3d.jondgoodwin.com/gmm.pdf">Gradual memory management</a>:
-			<ul>
-			<li>Supports use of multiple GCs in one program</li>
-			<li>Static allocators: stack and Rust-like lexical GC</li>
-			<li>Runtime GCs: reference counting and tracing GC</li>
-			<li>Object pools and arenas</li>
-			<li>Lifetime-checked borrowed references</li>
-			</ul></li>
-		<li>Robust type system:
-			<ul>
-			<li>Sum types, structs, arrays, slices, ranges, aliases</li>
-			<li>Type inference</li>
-			<li>Structural and nominative typing</li>
-			</ul></li>
-		<li>Modules, Interfaces, Generics and Classes
-			<ul>
-			<li>Multiple inheritance</li>
-			<li>Method override and super</li>
-			<li>Operator overloading</li>
-			<li>Computable properties (get/set functions and closures)</li>
-			</ul></li>
-		<li>Lightweight concurrency
-			<ul>
-			<li>Co-routines, threads and actors</li>
-			<li>Lockless and locked permissions for safe data sharing</li>
-			</ul></li>
-		<li>Functions, Methods and Closures
-			<ul>
-			<li>Variadic parameters and multiple return values</li>
-			<li>Implicit return and tail-call optimization</li>
-			</ul></li>
-		<li>Extensible pattern matching:</li>
-			<ul>
-			<li>Type-defined '~~' match operator</li>
-			<li>'match' blocks using custom match methods</li>
-			<li>Content extraction during matching</li>
-			</ul></li>
-		<li>'do' block for context management</li>
-		<li>Concise, readable code:
-			<ul>
-			<li>'this'-implied prefix operators for method cascading, etc.</li>
-			<li>Control clauses for 'if', 'while', 'each'</li>
-			<li>Parallel assignment</li>
-			<li>Off-side rule support</li>
-			</ul></li>
-		<li>Unicode-aware (UTF8) text strings and variable names</li>
-		<li>Fast compilation and convenient packaging</li>
+			<li><a href="/memory.html">"Do-it-your-way" memory management</a></li>
+			<li><a href="/reuse.html">Flexible typing & code reuse</a></li>
+			<li><a href="/concise.html">Concise, readable code</a></li>
+			<li><a href="/safety.html">Memory, thread & type safety</a></li>
+			<li><a href="/runtime.html">Lean, native runtime</a></li>
+		</ul>
+		<p>It turns out that Cone's ability to handle the punishing demands required for realtime, realistic 3D
+			means it also has the fitness and ease-of-use to handle other, less-demanding program requirements.</p>
+
+		<h2>What's Special about Cone?</h2>
+		<p>There are many programming languages to choose from. 
+			What makes Cone worth taking the time to get to know it better?
+		Let's start with a few distinctive features you won't find in any comparable language:</p>
+		<ul>
+			<li><b><a href="refrefs.html">References</a></b>.
+				You've never seen references safely carry this much power and flexibility.
+			With them, a program can easily exploit the broadest range of multiple
+			<a href="refalloc.html">memory management strategies</a>
+			(from fast RAII to flexible GC) in a way that optimizes performance and productivity.
+			Furthermore, references support the fluid transition of any value's 
+			<a href="refperm.html">access permissions</a> as it flows
+			through a program, making possible faster approaches to safe, lockless concurrency.</li>
+			<li><b><a href="">Extensible Pattern Matching</a></b>.
+				You can build your own pattern matchers
+				which not only determine if there is a successful match, 
+				but can also extract values as part of the process.</li>
+			<li><b><a href="">Structural Interfaces</a></b>.
+				Like other languages, Cone supports nominal "interfaces" in the form of traits
+				which a struct must declare that it implements.
+				Unusually, Cone <i>also</i> supports structural interfaces, which allow types
+				to be more flexibly applied to generic program logic even in the absence of a declared implementation.</li>
+			<li><b><a href="">This blocks</a></b>.
+				This simple bit of syntactic sugar goes a long way towards improving code clarity,
+				particularly when working with complex content (e.g., a 3D world).
+				This lexical structure makes it easier to see what content the code is working on and
+				what it is doing with that content.
+			</li>
+		</ul>
+		<p>Of course, Cone also supports features expected of a modern programming language:</p>
+		<ul>
+			<li>Variant (sum) types</li>
+			<li>Closures and anonymous functions</li>
+			<li>Concurrency</li>
+			<li>Generics and metaprogramming</li>
+			<li>Tuples, for parallel assignment and multiple return values</li>
+			<li>Slices and built-in iteration</li>
+			<li>Operator overloading and computable properties</li>
 		</ul>
 
-		<h2>Reference Sections</h2>
-		<p>This Cone Language Reference is written
-		for people comfortable and familiar with programming concepts and code.
-		It contains the following sections:</p>
+		<h2>Additional material</h2>
+		<p>There are several approaches one can take to learn more about Cone:</p>
 
 		<ul>
+		<li><b><a href="/play/index.html">Cone Playground</a></b>.
+			Offers helpful short sample programs which can be modified and run in the browser.</li>
 		<li><b><a href="showcase.html">Showcase</a></b>.
 		A few selected examples that demonstrate Cone's visual style and idioms.</li>
 		<li><b><a href="refterm.html">Language Reference</a></b>.
