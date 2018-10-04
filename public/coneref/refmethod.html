@@ -66,61 +66,6 @@ fn test()
     Similarly, when the type of self is the same as the method's type, which is typically the case,
     self need not even be declared in the method's parameter list. It will be inserted automatically.</p>
 
-	<h2>Special-purpose Methods</h2>
-	<p>A number of methods have a built-in role in Cone.</p>
-
-	<h3 id="constructor">Constructors</h3>
-	<p>A constructor method initializes a new value of the specified type.
-		Constructors are useful when a type's initialization logic is more complex than
-	  simply populating fields or elements with values.</p>
-	<p>A type may define multiple constructor methods.
-	  By convention, the most commonly used constructor is called <span class="pre">init</span>.
-	  A type need not define any constructor method, as there are other ways to directly initialize
-	  a new value.</p>
-  <p>Like all other methods, a constructor declares <span class="pre">self</span> as its first parameter.
-		In this case, <span class="pre">self</span> is a reference to an uninitialized memory location
-		which can then be initialized. The <span class="pre">new</span> permission indicates this.
-  	A constructor always return self (otherwise, what's the point?).</p>
-<pre>
-struct Point
-  x f32
-  y f32
-  fn init(new self &amp;, x f32, y f32)
-    .x, .y = x, y
-	self
-</pre>
-	
-	<h3>drop</h3>
-	<p>Although it is not often needed, some types need the ability to
-	perform some clean-up actions before the memory allocated for the value is freed.
-	Often, this clean up involves releasing acquired resources.
-	This clean-up activity should be performed within a method called <span class="pre">drop</span>.
-
-	<h3>Operator methods</h3>
-	<p>Many operators are transformed into method calls. For instance, <span class="pre">x+3</span>
-	is treated as if it were:  <span class="pre">x.`+`(3)</span>
-	Because of this, a type need only implement the <span class="pre">`+`</span> method to
-	make the <span class="pre">+</span> operator meaningful to that type.
-	If you try to apply the <span class="pre">+</span> operator to a value 
-	whose type has not implemented the <span class="pre">`+`</span> method,
-	a compiler error will result.</p>
-	<p>This applies to all the arithmetic, arithmetic assignment, and comparison operators as well as:</p>
-	<ul>
-		<li><b>`[]`</b> for indexing</li>
-		<li><b>`()`</b> for function calls (this allows a struct to become a closure)</li>
-		<li><b>`+`</b> (the prefix operator) maps to the default <span class="pre">init</span> constructor</li>
-		<li><b>`=`</b> for copying</li>
-		<li><b>`&lt;&lt;` and `&gt;&gt;`</b> for append and prepend</li>
-	</ul>
-
-	<h3>Implicit methods</h3>
-	<p>Certain language constructs make use of specific methods under the covers:</p>
-	<ul>
-		<li><b>.each</b> is called by the <span class="pre">each</span> block to create an iterator</li>
-		<li><b>.`~~`</b> is the default match operator for <span class="pre">match</span> blocks</li>
-		<li><b>.`&lt;&lt;`</b> is the default append operator used for <span class="pre">build</span> blocks</li>
-	</ul>
-
 	<h3>set methods (Computed Properties)</h3>
 	<p>By default, methods typically operate in "get" mode,
 		invoked as part of an expression and often returning one or more values.
@@ -153,7 +98,39 @@ x.counter // 11
 		using methods.
 	</p>
 
-	<h3>Static functions</h3>
+	<h2>Methods with pre-defined roles</h2>
+	<p>A number of method names have an important built-in role in various Cone features.</p>
+
+	<h3>Operator methods</h3>
+	<p>Many operators are implemented as method calls. For instance, <span class="pre">x+3</span>
+	is treated as if it were:  <span class="pre">x.`+`(3)</span>
+	A type need only implement the <span class="pre">`+`</span> method to
+	make the <span class="pre">+</span> operator meaningful to values of that type.
+	If a program tries to apply the <span class="pre">+</span> operator to a value 
+	whose type has not implemented the <span class="pre">`+`</span> method,
+	a compiler error results.</p>
+	<p>This principle applies to all the arithmetic, arithmetic assignment, and comparison operators.
+		It also applies to:</p>
+	<ul>
+		<li><b>`[]`</b> for indexing or slice creation</li>
+		<li><b>`()`</b> for function calls (this allows a struct to become a closure)</li>
+		<li><b>`&lt;&lt;` and `&gt;&gt;`</b> for append and prepend</li>
+	</ul>
+
+	<h3>Implicit methods</h3>
+	<p>Various language constructs call certain methods under the covers:</p>
+	<ul>
+			<li><b>.init</b> is the default <a href="refallocref.html#initializer">initializer</a>
+				for newly allocated values</li>
+			<li><b>.drop</b> is the <a href="refallocref.html#finalizer">finalizer</a>
+				called when before an allocated value is freed</li>
+			<li><b>.clone</b> is called when making a copy of a "non-copyable" value</li>
+			<li><b>.each</b> is called by the <span class="pre">each</span> block to create an iterator</li>
+		<li><b>.`~~`</b> is the default match operator for <span class="pre">match</span> blocks</li>
+		<li><b>.`&lt;&lt;`</b> is the default append operator used for <span class="pre">build</span> blocks</li>
+	</ul>
+
+	<h2>Static functions</h2>
 	<p>Sometimes it makes sense to define a function as part of a type,
 		because it plays a useful role in relationship to the type, even though
 		it does not apply to a specific instance of the type.

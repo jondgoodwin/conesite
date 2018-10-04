@@ -67,20 +67,60 @@ imm aref2 &amp;rc mut i32
 	<h2>Creating an Allocated reference</h2>
 	<p>There is only one way to create an allocated reference:
 		Specify the <span class="pre">&</span> operator, followed by the allocator, an optional permission, 
-		and then either specify its initial value or use a <a href="refmethod.html#constructor">type constructor</a>:
+		and then either specify its initial value or use a <a href="refmethod.html#initializer">type initializer</a>:
 	</p>
 <pre>
 imm rcref = &amp;lex 45                     // Allocate a new boxed value, initialized with 45
-imm gcref = &amp;gc mut Point3(1f, 2f, 3f)  // Allocate a new Point3 value using a constructor
+imm gcref = &amp;gc mut Point3(1f, 2f, 3f)  // Allocate a new Point3 value using an initializer
 </pre>
 	<p>Creating an allocated reference is quite different than creating a borrowed reference.
 	  With a borrowed reference, we are simply obtaining the already-known address of some value.
 	  With an allocated reference, we are actually allocating a new place in memory
 	  with enough space to hold a value of the desired type. That memory space
-	  is initialized using the provided value or constructor.
+	  is initialized using the provided value or initializer.
 	  The returned allocated reference points to this newly created value.</p>
 
-	<h2 id="allocators">Standard Allocators</h2>
+		<h3 id="initializer">Initializers</h3>
+		<p>An initializer is a certain kind of method defined by the value's type.
+			It is typically named <span class="pre">init</span>.
+			Its purpose is to fully initialize a value of that type.
+			A type may define multiple initializers.</p>
+		<p>Initializers are very useful when the use of a literal would be:</p>
+		<ul>
+			<li><b>Insufficient</b>, because initialization needs to perform some logic that
+			 is more than simply assigning value(s).</li>
+			<li><b>Impossible</b>, because parts of the type are private and can only be accessed by methods of the type.</li>
+			<li><b>Inconvenient</b>, because the literal would be unnecessarily verbose in comparison to using an initializer.</li>
+		</ul>
+		<p>The type's declaration of an initializer looks like any other method and can accept parameters.
+			It typically returns no value.
+			self is always a reference.
+			When used by an allocated reference, the reference passed to self is a newly allocated area of
+			memory that still needs to be initialized.</p>
+			<p>The initializer for the Point3 example above might look like this,
+			effectively filling in the x, y, and z fields of a Point3 struct:
+		</p>
+<pre>
+	fn init(self &, xi f32, yi f32, zi f32)
+	  x = xi; y = yi; z = zi
+</pre>
+		<p>We know that an allocator reference is using an initializer when it explicitly names
+			a type or a type's method in what looks like a function call.
+		</p>
+<pre>
+// Point3 is a type. Point3 is de-sugared to Point3::init
+imm gcref = &amp;gc mut Point3(1f, 2f, 3f)
+</pre>
+		
+		<h3 id="finalizer">drop</h3>
+		<p>A type may also define a single <span class="pre">drop</span> method.
+		This method may never be explicitly called by a program.
+	  However, it is implicitly always called before any allocated value is about to be freed.</p>
+		<p>The purpose of the drop method is to give back any acquired resources or dependencies
+			before the allocated value vanishes.
+			It is useful for closing file or network handles, or de-subscribing to services.</p>
+	
+		<h2 id="allocators">Standard Allocators</h2>
 	<p>Cone supports several standard allocators, each corresponding to a specific memory management strategy.
 	Allocators vary in how they allocate and free memory,
 	as well as the lifetime algorithm they use to determine when it is safe to automatically free an allocated memory segment,

@@ -47,7 +47,7 @@ alloc rc
 	This size is expanded to include runtime bookkeeping data for the allocator (e.g., refcnt) and permission.
 	After allocate, the compiler will also initialize any runtime permission's fields, if needed.
 	The compiler's final step is to adjust the pointer to point at the value's data (past the runtime bookkeeping data),
-	and then to initialize its value based on the literal, constructor or a copy of another similar value.</li>
+	and then to initialize its value based on the literal, initializer or a copy of another similar value.</li>
 	<li><b>alias</b>. This is invoked whenever a new shared copy is made of the reference.</li>
 	<li><b>dealias</b>. This is invoked whenever an allocated reference is destroyed, typically when
 	the variable holding the reference reaches the end of its lexical lifetime.

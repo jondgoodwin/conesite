@@ -35,15 +35,15 @@
 		(e.g., converting the integer 1 to the text "1").
 	</p>
 	<p>In most cases, the type conversion of a value is explicitly requested as part of the expression.
-		Since the purpose of a constructor is to create a new value of a specific type,
-		defining a new constructor for each source value type (e.g., <span class="pre">+Text(1)</span>) is a straightforward approach.
+		Since the purpose of an initializer is to create a new value of a specific type,
+		defining a new initializer for each source value type (e.g., <span class="pre">+Text(1)</span>) is a straightforward approach.
 		Alternatively, it can be more convenient to define a method for the source type
 		able to return the conversion of the object's value to the desired type (e.g., <span class="pre">1.toText</span>).
 	</p>
 
 	<h3>Implicit Number Conversion</h3>
 	<p>When it comes to converting between Cone's built-in primitive number types (integers and floating point numbers),
-		no constructor or method is required; conversion
+		no initializer or method is required; conversion
 		<a href="refexpr.html#numrconv">happens implicitly and automatically</a>.</p>
 <pre>
 mut v = 4.0

@@ -62,7 +62,7 @@
 	<h3>uni as the first permission</h3>
 	<p><span class="pre">uni</span> is best understood as
 	the first permission an allocated reference gets in the early days of its existence.
-	Whenever a type constructor creates and returns a new allocated reference, 
+	Whenever an allocated reference is created, 
 	it has the <span class="pre">uni</span> permission by default.
 	This makes sense: since the just-created reference is the only one in existence, 
 	it naturally complies with the single reference restriction.</p>
