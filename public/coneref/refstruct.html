@@ -71,32 +71,14 @@ imm pt Point;
 	</ul>
 
 	<h3>Copy vs. Move</h3>
-	<p>Wherever possible, structs (like numbers) are copied whenever assigned to a variable or property, 
-		passed as a parameter, or returned as a value. Any change to one copy has no effect on the others.</p>
-<pre>
-imm pt = Point {x: 3f, y:4f}
-imm pt2 = pt     // pt2 is a full copy
-pt2.x = 4f       // pt2 changes but pt does not
-func(pt2)        // this function call creates a third copy
-</pre>
-	<p>However, a declared struct type will enforce move semantics if it either:</p>
-	<ul>
-		<li>Defines any property typed as a <a href="refperm.html#uni">non-aliasable reference</a>
-			and does not implement the .clone method), or</li>
-		<li>Implements the destructor method</li>
-	</ul>
-	<p>Values with move semantics are still copied to a new destination, but the original version is no longer accessible.
-	    Move semantics enforce that multiple copies of the same object cannot be usable at the same time.</p>
-<pre>
-struct Node
-    nbr: &amp;uni i32
-uni life = 42
-imm node1 = Node {nbr: &amp;uni life}
-imm node2 = node1
-imm node3 = node1   // ERROR! node1 is no longer usable
-</pre>
+	<p>By default, most declared structs are 'copy' types.
+	  However, if a struct defines any field whose type is 'move'
+	  (e.g., a 'lex' or 'uni' reference),
+	  the entire struct is treated as a 'move' type.
+	  For further information about 'copy' vs. 'move', please consult the
+	  <a href="refmove.html">move semantics</a> page.</p>
 
-	<h3>Object References</h3>		
+	<h3>Struct References</h3>		
 	<p>struct copying has two potential limitations: a) the larger the struct, the slower the copy,
 	b) changing a copy does not change the original. It is possible to address these limitations
 	by borrowing a reference to a struct and then passing around and using the reference

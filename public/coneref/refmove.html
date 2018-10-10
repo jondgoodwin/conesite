@@ -1,0 +1,145 @@
+<html>
+  <head>
+	  <title>Move semantics - Cone Reference</title>
+		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	  <link rel="stylesheet" type="text/css" href="standard.css" />
+	</head>
+  <body>
+		<div id="header">
+			<a href="/"><div id="title">Cone</div></a>
+			<div id="sub">Move semantics</div>
+		</div>
+
+    <div class="text">
+
+	<p>Values are usually copied as they flow from function-to-function
+		or variable-to-variable. 
+		Changes made to a copy won't alter the original value.</p>
+<pre>
+imm a = 3
+imm b = a  // b holds a copy of a's value
+b += 1     // b's value is changed to 4
+a          // is still 3
+</pre>
+	<p>Values of certain types, however, may <i>not</i> be copied.
+	  Such values may only be moved.</p>
+	<p>This "no-copy" restriction is typically oriented around non-aliasable references,
+		making possible some useful capabilities:</p>
+	<ul>
+	<li>Safe, single-owner memory management, free of runtime bookkeeping costs</li>
+	<li>Threads able to locklessly exchange mutable values</li>
+	</ul>
+	<p>Despite their usefulness, 'move' values do introduce some complications, 
+	  as they don't always behave like 'copy' values.
+	  In particular, moving a value deactivates its source variable and 
+	  changes its scope, thereby delaying or accelerating its demise.
+	  This page explains these important behaviors.</p>
+
+	<h2>Copy vs. Move Types</h2>
+	<p>A value's type dictates whether its values are treated as 'copy' or 'move'.
+	  By default, most types are 'copy'. The 'move' types include:</p>
+	<ul>
+		<li>Allocated references using the 'lex' allocator.</li>
+		<li>Any reference using the 'uni' or 'mut1' permission.</li>
+		<li>Any compound type (e.g., struct, array or variant)
+			in which any field or element type is 'move'.</li>
+		<li>A stack-allocated variable whose type implements the 'drop' method.</li>
+	</ul>
+	<p><b>Note:</b> Any user-defined type that implements the .clone method makes
+	  that type 'copy', even if it would otherwise be 'move'.
+	  This is because the .clone method is considered a copy constructor
+	  which implements a safe way to copy this type's values.</p>
+
+	<h2>Variable Deactivation</h2>
+	<p>Let's see what happens when we do a 'move':</p>
+<pre>
+imm nbr = &amp;lex 5
+imm newvar = nbr   // the ref has been moved to newvar
+imm b = *nbr       // **ERROR** nbr no longer has a usable value
+</pre>
+	<p>We have a simple reason for deactivating the variable 'nbr' after the move.
+	  If we had not done so, we would effectively end up with two copies of a
+	  value that is supposed to be non-copyable.
+	  By deactivating 'nbr', we ensure there is only ever one usable copy in existence.</p>
+	<p>The same principle holds true when passing a 'move' value to another function.</p>
+<pre>
+imm nbr = &amp;lex 5
+afunction(nbr)    // the ref is moved to the called function
+anotherfunc(nbr)  // **ERROR** nbr is deactivated
+</pre>
+
+	<h3>Borrowing references can deactivate variable</h3>
+	<p>Source variables are also deactivated whenever a borrowed reference is created to (or out of) a 'move' value.
+		This deactivation is only temporary; the original variable's use is restored after the borrowed reference expires:
+	</p>
+<pre>
+imm nbr = &amp;lex 5
+do
+  imm nbrref &u32 = nbr  // Create a borrowed reference
+  // nbr is no longer usable in this Scope
+afunction(nbr) // nbr is usable again now that nbrref is gone
+</pre>
+
+	<h3>Forbidden moves</h3>
+	<p>Sometimes a move is not allowed, even on a 'move' value.
+	  This happens whenever it is not possible to cleanly deactivate the source of the value.
+	  For this reason, you may not move a 'move' value out of any kind of array
+	  or by derefencing it out of a borrowed reference.</p>
+	<p>It <i>is</i> possible to move a 'move' value out of a particular struct's field, but doing so deactivates
+	  use of the entire original struct.
+	</p>
+
+	<h3>Swapping 'move' values</h3>
+	<p><span class="pre">swap</span> may be used to safely swap two 'move' values:</p>
+<pre>
+mut a = &amp;lex 5
+mut b = &amp;lex 6
+swap a,b
+// a now points to 6 and b points to 5
+</pre>
+	<p><span class="pre">swap</span> offers a helpful way to get around forbidden moves.
+	  One can temporarily extract a 'move' value out of a borrowed reference or array by swapping
+	  it with some arbitrary type-compatible value. After making use of the extracted value, simply swap it back in.</p>
+<pre>
+fn func(arrref &[] &lex u32, index u32)
+  mut work = &lex 0         // Set up the work area with a dummy value
+  swap work, arrref[index]  // Extract the desired 'move' value
+  imm retval = *work        // Make use of the extracted 'move' value
+  swap work, arrref[index]  // Restore the original value back into the array
+  retval
+</pre>
+	<p>The reason why this works is that the original source always has a usable 'move' value,
+		(even if it is only a dummy value).
+	  That ensures that the original source is always completely safe to use.</p>
+
+	<h2>Scope escapes and Destruction</h2>
+	<p>In addition to variable deactivation, moving a value effectively changes its lexical scope
+	  to that of its new variable that owns it.
+	  Why this matters is that 'move' values are effectively dropped and/or destroyed at the end of the
+	  last scope they are moved into.
+	  So, by allowing a move value to hop from scope to scope, you effectively lengthen or shorten
+	  its effective lifetime.</p>
+	<p>It is legal for 'move' values to move (or not)
+		based on conditional decisions made at run-time.
+		These are called conditional moves.
+	</p>
+
+	<h3>Explicit destruction</h3>
+	<p>There is an easy way to ensure the immediate destruction of a 'move' value.
+		Just assign it to the anonymous variable "_":
+	</p>
+<pre>
+imm ref = &amp;lex 5
+_ = ref
+callfn(ref)   // **ERROR**. ref is deactivated
+</pre>
+	<p>Doing this on a 'copy' value does nothing.</p>
+
+	<p style="text-align: right; margin-top: 2em;">
+		<a href="refptr.html"><img alt="_" src="next.png" /></a>
+	</p>
+
+	</div>
+	</body>
+</html>

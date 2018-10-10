@@ -52,7 +52,7 @@
 	However, <span class="pre">uni</span> carries a significant restriction:
 	there can only be <i>one</i> active reference to its value at a time.
 	Ownership of such a reference may not be shared,
-	it can only be transferred (moved) to another variable, function, or thread.</p>
+	it can only be transferred (<a href="refmove.html">moved</a>) to another variable, function, or thread.</p>
 	<p>The <span class="pre">uni</span> permission, and its single reference restriction,
 	may seem a bit unusual. However, the concept is incredibly valuable and not new to Cone.
 	Rust's &mut reference, C++'s unique_ptr&lt;&gt;, C's restrict keyword,
@@ -236,7 +236,7 @@ perm NewLock
 	<p>TBD</p>
 	
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refptr.html"><img alt="_" src="next.png" /></a>
+		<a href="refmove.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

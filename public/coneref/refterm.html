@@ -194,12 +194,8 @@ number = 42      // number's value has discovered the meaning of life
 		<h3>Copy, move and reference pointers</h3>
 		<p>For most value types, the assignment operator stores a <i>copy</i> of the value on the right
 		into the variable on the left.</p>
-		<p>However, if the value type is a reference pointer (or contains one),
-		aliasing rules kick into effect.
-		Depending on the pointer's information regarding permissions, allocators, lifetime and value types,
-		the assignment might be invalid (with a compiler error), trigger a change of ownership,
-		or be wrapped in aliasing/dealiasing logic specific to the allocator.
-		These rules are detailed in the <a href="refalloc.html">Pointers and Allocators</a> chapter.</p>
+		<p>However, if the value type contains non-aliasable references,
+		<a href="refmove.html">move semantics</a>> kick into effect.</p>
 		
 		<h3>Variable declaration initialization</h3>
 		<p>Variable declarations permit assignments as part of the declaration.

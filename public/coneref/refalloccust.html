@@ -57,7 +57,8 @@ alloc rc
 	which serves as a finalizer for any resources obtained by the allocated reference.</li>
 	</ul>
 	<p>Any allocator which does not define the alias method (e.g., the lex allocator)
-	ensures single-owner move semantics, as it prevents multiple copies of the reference from being created.
+	ensures single-owner <a href="refmove.html">move semantics</a>,
+	as it prevents multiple copies of the reference from being created.
 	The single-owner reference is moved instead of being copied.
 	This restriction also constrains the permissions on borrowed references,
 	effectively disallowing <span class="pre">mut</span> and all other shared mutable permissions.</p>
