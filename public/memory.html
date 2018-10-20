@@ -41,7 +41,7 @@
 	<p><b>Built-in Allocators</b></p>
 	<p>Cone supports three common "garbage collection" strategies as built-in allocators:</p>
 	<ul>
-	<li><b>lex</b> - Rust's lexical, single owner strategy (e.g., Box&lt;T&gt;),
+	<li><b>own</b> - Rust's lexical, single owner strategy (e.g., Box&lt;T&gt;),
 	which uses RAII and move semantics to determine
 	when to safely free the object. Since lifetimes are calculated at compile-time, there is no runtime
 	bookkeeping overhead (unlike the following two approaches).</li>
