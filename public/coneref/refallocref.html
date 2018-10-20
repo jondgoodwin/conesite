@@ -60,7 +60,7 @@
 	<p>To summarize, allocated reference type declarations always need to specify the allocator and value type.
 		A permission is specified when different from <span class="pre">uni</span>. For example:</p>
 <pre>
-imm aref1 &amp;lex i32
+imm aref1 &amp;own i32
 imm aref2 &amp;rc mut i32
 </pre>
 
@@ -70,7 +70,7 @@ imm aref2 &amp;rc mut i32
 		and then either specify its initial value or use a <a href="refmethod.html#initializer">type initializer</a>:
 	</p>
 <pre>
-imm rcref = &amp;lex 45                     // Allocate a new boxed value, initialized with 45
+imm rcref = &amp;own 45                     // Allocate a new boxed value, initialized with 45
 imm gcref = &amp;gc mut Point3(1f, 2f, 3f)  // Allocate a new Point3 value using an initializer
 </pre>
 	<p>Creating an allocated reference is quite different than creating a borrowed reference.
@@ -130,19 +130,19 @@ imm gcref = &amp;gc mut Point3(1f, 2f, 3f)
 	  The art lies in choosing the right mix of strategies that best meets the program's requirements
 	  for performance, memory utilization, and data structure complexity.</p>
 	</p>
-	<h3>lex - RAII with escape analysis</h3>
-	<p>Only one allocated reference may point to any lex-allocated value.
+	<h3>own - Single owner (RAII with escape analysis)</h3>
+	<p>Only one allocated reference may point to any own-allocated value.
 	  That reference may be passed around from function to function or from thread to thread.
 	  The memory for that value is automatically dropped and freed when its single reference goes out of its last scope.
-	  lex is similar to Rust's Box&lt;T&gt; single-owner mechanism.</p>
+	  'own' is similar to Rust's Box&lt;T&gt; single-owner mechanism.</p>
 	<p>The key benefits are performance, deterministic drops, and memory efficiency.
 	  The performance benefit comes from avoiding the need for runtime bookkeeping,
 	  since the allocated value's lifetime can be determined at compile time.
 	  The biggest downside is its data structure inflexibility.
 	  It cannot safely handle data structures that require multiple allocated references to the same value,
 	  such as all cyclic and many directed acyclic graphs.</p>
-	<p><b>Note:</b> A lex allocated reference only accepts the 'uni' or 'imm' permissions.
-	It is not possible to alias a lex allocated reference.
+	<p><b>Note:</b> An 'own' allocated reference only accepts the 'uni' or 'imm' permissions.
+	It is not possible to alias an own allocated reference.
 	Any attempt to do so simply <a href="refmove.html">moves</a> the reference to a new binding.</p>
 
 	<h3>rc - Reference Counting</h3>

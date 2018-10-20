@@ -56,7 +56,7 @@ alloc rc
 	Before executing its logic, the compiler will invoke the drop method on the object, if it exist,
 	which serves as a finalizer for any resources obtained by the allocated reference.</li>
 	</ul>
-	<p>Any allocator which does not define the alias method (e.g., the lex allocator)
+	<p>Any allocator which does not define the alias method (e.g., the 'own' allocator)
 	ensures single-owner <a href="refmove.html">move semantics</a>,
 	as it prevents multiple copies of the reference from being created.
 	The single-owner reference is moved instead of being copied.

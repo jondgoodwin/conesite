@@ -54,7 +54,7 @@ a          // is still 3
 	<h2>Variable Deactivation</h2>
 	<p>Let's see what happens when we do a 'move':</p>
 <pre>
-imm nbr = &amp;lex 5
+imm nbr = &amp;own 5
 imm newvar = nbr   // the ref has been moved to newvar
 imm b = *nbr       // **ERROR** nbr no longer has a usable value
 </pre>
@@ -64,7 +64,7 @@ imm b = *nbr       // **ERROR** nbr no longer has a usable value
 	  By deactivating 'nbr', we ensure there is only ever one usable copy in existence.</p>
 	<p>The same principle holds true when passing a 'move' value to another function.</p>
 <pre>
-imm nbr = &amp;lex 5
+imm nbr = &amp;own 5
 afunction(nbr)    // the ref is moved to the called function
 anotherfunc(nbr)  // **ERROR** nbr is deactivated
 </pre>
@@ -74,7 +74,7 @@ anotherfunc(nbr)  // **ERROR** nbr is deactivated
 		This deactivation is only temporary; the original variable's use is restored after the borrowed reference expires:
 	</p>
 <pre>
-imm nbr = &amp;lex 5
+imm nbr = &amp;own 5
 do
   imm nbrref &u32 = nbr  // Create a borrowed reference
   // nbr is no longer usable in this Scope
@@ -93,8 +93,8 @@ afunction(nbr) // nbr is usable again now that nbrref is gone
 	<h3>Swapping 'move' values</h3>
 	<p><span class="pre">swap</span> may be used to safely swap two 'move' values:</p>
 <pre>
-mut a = &amp;lex 5
-mut b = &amp;lex 6
+mut a = &amp;own 5
+mut b = &amp;own 6
 swap a,b
 // a now points to 6 and b points to 5
 </pre>
@@ -102,8 +102,8 @@ swap a,b
 	  One can temporarily extract a 'move' value out of a borrowed reference or array by swapping
 	  it with some arbitrary type-compatible value. After making use of the extracted value, simply swap it back in.</p>
 <pre>
-fn func(arrref &[] &lex u32, index u32)
-  mut work = &lex 0         // Set up the work area with a dummy value
+fn func(arrref &[] &own u32, index u32)
+  mut work = &own 0         // Set up the work area with a dummy value
   swap work, arrref[index]  // Extract the desired 'move' value
   imm retval = *work        // Make use of the extracted 'move' value
   swap work, arrref[index]  // Restore the original value back into the array
@@ -130,7 +130,7 @@ fn func(arrref &[] &lex u32, index u32)
 		Just assign it to the anonymous variable "_":
 	</p>
 <pre>
-imm ref = &amp;lex 5
+imm ref = &amp;own 5
 _ = ref
 callfn(ref)   // **ERROR**. ref is deactivated
 </pre>
