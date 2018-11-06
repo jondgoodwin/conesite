@@ -124,7 +124,120 @@ a =
 		<span class="pre">this</span> block may be used to focus on and build a value,
 		which is a particularly helpful and readable way to assemble containers.</p>
 
-	<h2>Enforcing safety rules</h2>
+	<h2>Block Variants</h2>
+	<p>There are several helpful variations on the basic, single use block.</p>
+
+	<h3>do blocks</h3>
+	<p>When using indentation to signify the start of a new block,
+		use 'do' in the unindented line before indentation begins:
+	</p>
+<pre>
+imm x = 3
+x += 1
+// Start a new block here
+do
+	mut x = 6
+// Old block resumes here
+</pre>
+	<p>Use of 'do' subblocks is typically only needed when one wants to diminish the lifetime
+		of variables or borrowed references.
+		Specifying 'do' is needed to distinguish a simple block from a 'this' block. 
+	</p>
+
+	<h3 id="thisblk">'this' and its block</h3>
+	<p>In conversations, we often use pronouns like "she" and "this" as a convenient way
+		to refer to some specific person or thing we are talking about.
+		Cone uses the pseudo-variable <span class="pre">this</span> for the same purpose.
+		It allows a block of code to focus its attention on some specified value
+		referred to by <span class="pre">this</span>.</p>
+	<p>A 'this' block is simply an expression followed by a code block.
+		Throughout the block, <span class="pre">this</span> is understood to hold
+		the value of the specified expression.
+		Multiple actions may be performed using that value.</p>
+<pre>
+// Calculate the value of 'this' (0.174533)
+Float.Pi/180
+	// 'this' block that makes use of calculated 'this' value
+	// to convert from degrees to radians
+	quarter = 90 * this
+	acute = 10 * this
+</pre>
+	<p>'this' blocks can be nested within each other.
+	For any statement, the value of <span class="pre">this</span> is established by
+	the inner-most 'this' block it lies within.</p>
+	<P>Although a 'this' block can focus on any value,
+	it is typically a copyable or borrowed mutable reference to some compound or collection value
+	whose parts we want to read or modify or whose methods we want to invoke over a sequence of statements.
+	'this' blocks offer an easy-to-read and more versatile alternative to method chaining or method cascades.</p>
+	
+	<h3>Operator support for implicit 'this'</h3>
+	<p>To make use of <span class="pre">this</span> more convenient and concise,
+		several operators implicitly work with <span class="pre">this</span>.
+	  When these operator are used as a prefix (rather than as infix operators),
+	  <span class="pre">this</span> is implied to the left.</p>
+	<dl>
+	<dt>.</dt>
+	<dd><b>Method call or property access</b>. 
+	(<span class="pre">.size</span> is equivalent to <span class="pre">this.size</span>)</dd>
+	<dt>&lt;&lt;</dt>
+	<dd><b>Append</b>, placing the value at the end of an ordered collection.
+	(<span class="pre">&lt;&lt;4.7</span> is equivalent to <span class="pre">this&lt;&lt;4.7</span>)</dd>
+	<dt>&gt;&gt;</dt>
+	<dd><b>Prepend</b>, inserting the value at the start of an ordered collection.
+	(<span class="pre">&gt;&gt;event</span> is equivalent to <span class="pre">this&gt;&gt;event</span>)</dd>
+	</dl>
+	<p>Additionally, the ':' infix operator implicitly works with 'this':
+<pre>
+color: 'brown'    # equivalent to: this.color = 'brown'
+</pre>
+	<p>So far, 'this' blocks and operators sound rather dull and boring...
+		What value does this syntactic sugar offer?  Let's finish with
+		examples that illustrate how use of 'this' sugar makes code more concise and readable.
+	</p>
+	
+	<p><b>Method chaining/cascade:</b></p>
+<pre>
+// Perform several methods on on root
+root.findById("canvas")
+	.add(anode)                    // Unlike chaining, the method need not return self
+	.hide(.statuspane)
+	angle = 20 * .degrees          // Unlike cascades, any logic can be placed between method calls
+	.add(anode2)
+	.add(node) each node in nodes  // ... even within conditional branches and loops
+</pre>
+	<p><b>Formatted stream output or string creation:</b></p>
+<pre>
+console
+	&lt;&lt; "Score: "       // Append to console stream
+	color: blue        // Alter a property
+	&lt;&lt; score           // Append with auto-conversion
+	color: white
+	&lt;&lt; "!\n"
+	.flush             // Invoke methods
+
+console &lt;&lt; {"And another thing ";name;"!\n"}
+</pre>
+	<p><b>List construction (or expansion):</b></p>
+<pre>
+// Use of &lt;&lt; at the start means append all the block's expression values
+names = &own List() &lt;&lt;
+	me
+	"Judy"
+	"Davos"
+	you.middlename
+</pre>
+
+  <p><b>Dictionary construction:</b></p>
+<pre>
+toDutch = &gc Dict{Text, Text}()
+	"girl": "meisje:
+	"horse": :paard"
+	"dog": "hond"
+</pre>
+	
+	<h3>Using blocks</h3>
+
+	<h3>Trust blocks: Relaxing Safety Checks</h3>
 
 	<p>The compiler comes with built-in guard rails to help protect your code
 		against a number of safety hazards, which is a good thing.
@@ -162,7 +275,6 @@ a =
 			that the programmer, who has the ultimate responsibility for safety,
 			may very clearly see what the compiler cannot.
 		</p>
-	
 
 		<p style="text-align: right; margin-top: 2em;">
 			<a href="refcondexp.html"><img alt="_" src="next.png" /></a>
