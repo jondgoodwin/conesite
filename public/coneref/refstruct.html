@@ -35,9 +35,8 @@ struct Point
 </pre>
 	<p>This defines a struct type named Point that contains two properties named x and y.
 		Both properties are floating point numbers.
-		It is common to capitalize the names of declared types.
 	</p>
-	<p>Property declarations look just like variable declarations:</p>
+	<p>Property declarations look like variable declarations:</p>
 	<ul>
 		<li>A permission may be specified before the property name.
 			If unspecified, <span class="pre">mut</span> is assumed.</li>
@@ -59,10 +58,10 @@ imm pt Point;
 		<a href="refallocref.html#initializer">initializer</a>.</p>
 
 	<h3>Literals</h3>
-	<p>A struct literal begins with the struct name followed by the initial values for all properties in curly braces.</p>
+	<p>A struct literal begins with the struct name followed by the initial values for all properties in square brackets.</p>
 	<pre>
-	imm pt = Point {x: 3., y: 4.}    // Using property names
-	imm pt2 = Point {3., 4.}         // When property names are omitted, order matters.
+	imm pt = Point [x: 3., y: 4.]    // Using property names
+	imm pt2 = Point [3., 4.]         // When property names are omitted, order matters.
 	</pre>
 	<p>Several rules apply to literals:</p>
 	<ul>
@@ -79,19 +78,19 @@ imm pt Point;
 	  <a href="refmove.html">move semantics</a> page.</p>
 
 	<h3>Struct References</h3>		
-	<p>struct copying has two potential limitations: a) the larger the struct, the slower the copy,
-	b) changing a copy does not change the original. It is possible to address these limitations
+	<p>struct copying has potential downsides: a) the larger the struct, the slower the copy,
+	b) changing a copy does not change the original. These limitations can be addressed
 	by borrowing a reference to a struct and then passing around and using the reference
 	in place of the struct.
 <pre>
 fn main()
-  imm pt = Point {x: 3f, y: 4f}
+  imm pt = Point [x: 3f, y: 4f]
   imm dist = dist(&amp;mut pt)  // dist may modify the contents of pt
 </pre>
 	<p>Similarly, an allocator may be used to allocate a new struct.
 	The allocator returns a reference to the struct:</p>
 <pre>
-imm pt = &amp;gc mut Point{x: 3f, y: 4f}
+imm pt = &amp;gc mut Point[x: 3f, y: 4f]
 </pre>
 
 	<h2>Property Access</h2>
@@ -123,7 +122,7 @@ fn setOrigin(self &amp;mut)
 	<p>It is possible to use the <span class="pre">&amp;</span> operator to 
 	obtain a borrowed reference to a specific property within a structure:</p>
 <pre>
-imm pt = Point{x: 3f, y: 4f}
+imm pt = Point[x: 3f, y: 4f]
 imm refx = &amp;pt.x
 *refx                     // 3f
 </pre>
