@@ -51,26 +51,34 @@ fn fact(nbr u32)
 	and thereafter expects explicit semicolons and closing braces.</p>
 	
 	<p><b>This blocks</b></p>
-	<p>'this' blocks are unique to Cone. They enable code to focus on a specific value,
-	usually a collection, for the duration of a block. 
-	A 'this' block starts with an expression which establishes the value to focus on.
+	<p>'this' blocks are one of Cone's more distinctive features.
+	They make it possible to create declarative-looking code blocks that
+	concisely build or manipulate complex data collections (such as 3D content).</p>
+	<p>A 'this' block starts with an expression which establishes the value/collection to focus on.
 	Throughout the course of the block, the pseudo-variable <span class="pre">this</span>
-	refers to that value. More importantly, the dot ('.') and colon (':') operators
+	refers to that value. More importantly, the dot ('.'), colon (':') and '&lt;&lt;' operators
 	can implicitly refer to <span class="pre">this</span>:</p>
 <pre>
 // A 'this' block, where 'this' refers to the Frosty npc
 $.npcs["Frosty"]
-  .size *= .reducer   // equivalent to: this.size = this.size * this.reducer
-  behavior: "jumping" // equivalent to: this.behavior = "jumping"
-  .jump(2.0)          // equivalent to: this.jump(2.0) 
+    .inventory // work with Frosty's inventory ..
+        &lt;&lt; magnifying_glass  // add to the inventory
+        &lt;&lt; cowboy_hat
+	.size *= .reducer   // equivalent to: this.size = this.size * this.reducer
+	.dictionary // work with Frosty's dictionary
+		"carrot": "wortel"  // add a word and its translation
+        "coal": "steenkool"
+    .jump(2.0)          // equivalent to: this.jump(2.0) 
 </pre>
-	<p>In human conversations, we regularly use pronouns like "it" or "we" as placeholders 
+	<p>Although 'this' blocks can sometimes resemble and act like method cascades,
+	  Cone's 'this' block mechanism is considerably more versatile and flexible.
+	In human conversations, we regularly use pronouns like "it" or "we" as placeholders 
 	to refer to something specific within the context of each conversation. 
 	Such pronouns make conversations pithier and less stilted.
 	'this' plays a similar role in Cone programs.</p>
 	<p>When used in conjunction with significant indentation,
 	'this' blocks make it possible for Cone, as a procedural language,
-	to express static content as concisely and declaratively as any markup language.
+	to express and work with content as concisely and declaratively as any markup language.
 	Furthermore, the indented, compositional structure of Cone's code greatly facilitates 
 	the modular "snap-together" assembly of strings, collections, and 3D world parts.</p>
 	
