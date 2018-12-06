@@ -195,23 +195,22 @@ x &gt;= 2          // Returns true if x is greater than or equal to 2 (&gt;, &lt
 
 	<h3>Boolean Operators</h3>
 	<p>Acorn has three boolean operators:  
-	and ('&&'), or ('||') and not ('!'). One can use either the word or the symbol. 
+	'and', 'or' and 'not' ('!').
 	For example:</p>
 <pre>
 0==3 or not 2&lt;3 and 3==3   // Returns true ('and' is evaluated before 'or')
-0==3 || !2&lt;3 && 3==3       // equivalent to above
 </pre>
 	<p>The logical operators work mostly how you would expect:</p>
 	<ul>
 	<li>As mentioned earlier, they treat 0, null and false as false. All other values are considered true.</li>
-	<li>The boolean operators && and || will stop evaluating any time the answer is known for sure.
+	<li>The boolean operators 'and' and 'or' will stop evaluating any time the answer is known for sure.
 	Thus, the .isEmpty method will never be performed in this expression (making it similar to a simple 'if' statement):
 <pre>
 false and list.isEmpty
 </pre>
 	</li>
 	<li>The logical operators have a lower precedence than evaluation operators, but higher than assignment.
-	! has the highest precedence, then &&, then ||.</li>
+	! has the highest precedence, then 'and', then 'or'.</li>
 	</ul>
 	<p><b>Note:</b> 
 	In case it is not obvious by now, these boolean operators are not the same
@@ -252,7 +251,7 @@ with 2,3,4
 	.jump
 </pre>
 
-	<h>Extracting match results</h3>
+	<h3>Extracting match results</h3>
 	<p>Some patterns do more than matching.
 	They also extract or transform matched elements within a successfully matched source value, 
 	returning one or more new digested value

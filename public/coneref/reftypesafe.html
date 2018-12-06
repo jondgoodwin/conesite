@@ -25,71 +25,92 @@
 	</ul>
 	<p>These constraints protect against the program manipulating a value in ways that make no sense or could be harmful,
 		due to acting as if the value has a different meaning than it actually does.</p>
-	<p>That said, Cone can handle certain type mismatches safely
-		by explicitly or implicitly coercing or converting a value from one type to another.
-		Conversion and coercion improve flexibility and can make code easier to write and more concise.</p>
+	<p>However, sometimes we <b>do</b> need to transform a value of one type to another type.
+		Cone supports three such capabilities:</p>
+	<ul>
+		<li><b>Coercion</b>,
+			which maps a value to its exact equivalent in a supertype.</li>
+		<li><b>Conversion</b>,
+			which chooses the closest "equivalent" value in another type.
+			This is not a perfect mapping: A valid mapping may not exist or some precision may be lost.</li>
+		<li><b>Reinterpretation</b>,
+			which keeps the original value but interprets it as if it has a different type.</li>
+	</ul>
+
+
+	<h2>Subtyping and Implicit Type Coercion</h2>
+	<p>In many cases, one type can be a <i>subtype</i> of another type.
+	  A subtype specializes its more general-purpose supertype, adding additional constraints.
+	  Many forms of subtyping are supported:</p>
+	<ul>
+		<li>A struct is a subtype of any trait it implements or interface it conforms to</li>
+		<li>A type is a subtype of any variant type that includes that type as a variation</li>
+		<li>A smaller number type is a subtype of a larger version of the same type
+			(e.g., u8 is a subtype of u32)</li>
+		<li>Some permissions are subtypes of others (e.g., 'const' is a subtype of 'imm')</li>
+		<li>Borrowed references are subtype of an equivalently typed allocated reference
+			(e.g., &Foo is a subtype of &own Foo)</li>
+	</ul>
+	<p>Coercion maps a value to its exact equivalent in a supertype.
+		Cone will automatically and implicitly coerce a value of some subtype to its supertype
+		when a supertype value is expected.
+		Commonly, this happens with assignments and function calls:</p>
+<pre>
+// Implicitly coerce a u8 to u32
+imm u8value = 101u8
+imm bigint u32 = u8value
+
+// Implicitly coerce &own uni Mat4 to &const Mat4
+mut matrix = &own Mat4[]
+imm det = mat4det(matrix)
+fn mat4det(mat &Mat4) f32
+   // ...
+</pre>
+	<p>Coercion can be requested explicitly by using the 'to' operator:</p>
+<pre>
+imm bigint = u8value to u32
+</pre>
 
 	<h2>Type Conversion</h2>
-	<p>Type conversion happens whenever a value of one type is transformed to an "equivalent" value of another type.
-		A common example of this would be serializing some encoded data value (like a number) into human-readable characters
-		(e.g., converting the integer 1 to the text "1").
+	<p>Type conversion involves transforming a value of one type to its "equivalent" value in another type.
+		For example, converting the integer 1 to the floating point number 1.0,
+		or serializing it to text:  "1".
+		Unlike coercion, conversion may not map perfectly: A valid mapping may not exist or some precision may be lost.
 	</p>
-	<p>In most cases, the type conversion of a value is explicitly requested as part of the expression.
-		Since the purpose of an initializer is to create a new value of a specific type,
-		defining a new initializer for each source value type (e.g., <span class="pre">+Text(1)</span>) is a straightforward approach.
-		Alternatively, it can be more convenient to define a method for the source type
-		able to return the conversion of the object's value to the desired type (e.g., <span class="pre">1.toText</span>).
-	</p>
-
-	<h3>Implicit Number Conversion</h3>
-	<p>When it comes to converting between Cone's built-in primitive number types (integers and floating point numbers),
-		no initializer or method is required; conversion
-		<a href="refexpr.html#numrconv">happens implicitly and automatically</a>.</p>
+	<p>Converting one number type to another uses the <a href="refexpr.html#numrconv">"literal" format</a>
+		or the 'to' operator:</p>
 <pre>
-mut v = 4.0
-v = 3  // implicitly converted from integer to 3.0 (floating point)
+imm float = f32[1]
+imm float = 1 to f32
 </pre>
-	<p>Most of the time, this will not result in the loss of significant information (e.g., u8 to u16 is lossless).
-		But it can. Converting a negative number to an unsigned one could trigger undesirable behavior.
-		Converting a float to an integer will round the number (and going the other way can experience rounding errors).
-		Implicit number conversion should be handled with care.
-	</p>
-		
-		<h2>Type Coercion</h2>
-	<p>Coercion works differently than conversion. As shown above, conversion changes the way a value is encoded.
-		Coercion reinterprets an existing value (without altering it) to mean something similar in the context of a different type.
-	</p>
-	<p>Explicit coercion uses the <span class="pre">as</span> infix operator.
+	<p>Beyond number types, conversion is typically requested using the new type's initializer or a method in the old type:</p>
+<pre>
+imm text = Text(1) // "1"
+imm text = 1.text
+</pre>
+
+	<h2>Type Reinterpretation</h2>
+	<p>Unlike coercion and conversion, reinterpretation does not create a new value.
+		It interprets the existing encoded value as if it has a different type.
+		The new type must have the same size as the current type of the value.</p>
+	<p>Reinterpretation uses the <span class="pre">as</span> infix operator.
 		Unlike other infix operators, <span class="pre">as</span> expects a type (rather than a value or expression) 
-		to the right of the operator.
-		Coercion is mostly used on references, such as when coercing a reference to a pointer (or vice versa).</p>
+		to the right of the operator.</p>
+	<p>Reinterpretation is mostly used on references, such as when turning a reference into a pointer.</p>
 <pre>
 	imm ptr = &amp;x as *Vector3
 </pre>
-  <p>Coercion can easily be dangerous, as an unchanged value could behave badly 
+	<p>Reinterpretation can be also be used on number types,
+		such as when we want to access a floating point number's bits:</p>
+<pre>
+	imm highword = u32[(pi as u64) >> 32]
+</pre>
+  	<p>Reinterpretation can be dangerous, as a value could behave badly 
 		when treated and manipulated within the constraints of a different type.
-		For example, a reference coerced to a pointer loses permission constraints,
-		thereby making it possible for a pointer to be used to alter an immutable object.
-		Because of this safety exposure, coercions are sometimes restricted to <span class="pre">trust</span> blocks,
-		where it becomes the responsibility of the programmer to ensure the coerced value
+		For example, a reference reinterpreted as a pointer loses permission constraints,
+		making it possible for a pointer to be used to alter an immutable object.
+		It is the responsibility of the programmer to ensure the reinterpreted value
 		is handled in a safe and useful manner.</p>
-
-	<h3>Implicit Subtype Coercion</h3>
-	<p>Cone supports subtypes, essentially types that are a perfect subset of other types.
-		Being perfect subsets, a reference to a value of a certain type can safely act as if it were a
-		reference to its subtype.
-		Thus, if type S is a valid subtype of some type T.
-		one may pass a value of type T to a function expecting a value of type S.
-		This is implicit subtype coercion.</p>
-	<p>
-	<p>Implicit subtype coercion is valuable in several situations:</p>
-	<ul>
-		<li>Interfaces and Traits act as a viewing window into a number of different structs they are valid subtypes of.</li>
-		<li>Slices enable "windowed" access to a subset of a collection's values.</li>
-		<li>Some permissions have a subtyping relationship.
-			This allows polymorphic functions to safely and temporarily override the permissions of a passed reference value.
-		  (e.g., <span class="pre">mut</span> to <span class="pre">const</span>).</li>
-	</ul>
 
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refstruct.html"><img alt="_" src="next.png" /></a>

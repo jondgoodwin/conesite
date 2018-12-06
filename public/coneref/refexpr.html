@@ -92,17 +92,13 @@ pow(10f, 2f)
 </pre>
 
 	<h3 id="numrconv">Numeric conversions</h3>
-	<p>Numbers are automatically converted whenever copied from one number type to another.</p>
+	<p>To convert a number from one type to another, enclose the number in square brackets
+		with the intended type on the left:</p>
 <pre>
-imm six i32 = 6u8    // Converts 8-bit unsigned integer to 32-bit signed integer
-imm sixf f64 = six   // Converts 32-bit signed integer to 64-bit floating point number
+imm six = i32[6u8]    // Converts 8-bit unsigned integer to 32-bit signed integer
+imm sixf = f64[six]   // Converts 32-bit signed integer to 64-bit floating point number
 </pre>
-	<p>If the receiving number type is smaller, numeric information may be lost.</p>
-	<p>The type of a number that results from an arithmetic operation is that of the left-hand number.
-	If necessary, the right hand number is converted prior to the operation.</p>
-<pre>
-imm r = 5.0 + 2  // 7.0f32
-</pre>
+	<p>If the receiving number type is a smaller size, numeric information may be lost.</p>
 
 	<h2>Logical expressions</h2>
 	<p>The logical operators operate on true/false values:</p>
@@ -145,9 +141,8 @@ flags |= 0x01u   // 0xC1u
 		relevant to their common use:</p>
 	<ul>
 	<li><a href="refcondexp.html">Match and conditional operators</a></li>
-	<li>Collection (this block) operators</li>
+	<li><a href="refblock.html">'this' block operators</a></li>
 	<li>Range (`..`)</li>
-	<li>New prefix operator (`+`)</li>
 	</ul>
 	
 		
