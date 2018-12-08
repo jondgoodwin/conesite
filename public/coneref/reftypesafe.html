@@ -66,9 +66,9 @@ imm det = mat4det(matrix)
 fn mat4det(mat &Mat4) f32
    // ...
 </pre>
-	<p>Coercion can be requested explicitly by using the 'to' operator:</p>
+	<p>Coercion can be requested explicitly by using the 'into' operator:</p>
 <pre>
-imm bigint = u8value to u32
+imm bigint = u8value into u32
 </pre>
 
 	<h2>Type Conversion</h2>
@@ -78,10 +78,10 @@ imm bigint = u8value to u32
 		Unlike coercion, conversion may not map perfectly: A valid mapping may not exist or some precision may be lost.
 	</p>
 	<p>Converting one number type to another uses the <a href="refexpr.html#numrconv">"literal" format</a>
-		or the 'to' operator:</p>
+		or the 'into' operator:</p>
 <pre>
 imm float = f32[1]
-imm float = 1 to f32
+imm float = 1 into f32
 </pre>
 	<p>Beyond number types, conversion is typically requested using the new type's initializer or a method in the old type:</p>
 <pre>
