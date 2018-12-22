@@ -263,14 +263,15 @@ fn refone(ref1 &'a i32, ref2 &i32) &'a i32
 		to a value retrieved from a different reference parameter,
 		it has insufficient information to know that lifetime constraints are safely enforced.</p>
 <pre>
-fn refchange(refmut &amp;mut i32, refval &amp;i32)
-	*refmut = *refval
+fn refchange(refmut &amp;mut &amp;i32, refval &amp;i32)
+	*refmut = refval
 	
 fn tryit()
-	mut a = 5
+	imm i = 5
+	mut a = &amp;i
 	do
 		imm b = 10
-		refchange(&a, &b) // Oops!
+		refchange(&amp;a, &amp;b) // Oops!
 </pre>
   <p>In the absence of lifetime annotations, Cone will once again
 		apply the most conservative assumptions.
