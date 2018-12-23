@@ -178,13 +178,13 @@ do
 	<span class="pre">mut1</span> <b>must</b> be specified as the permission
 	when allocating the first reference to that value.</p>
 
-	<h2>id</h2>
-	<p><span class="pre">id</span> (identifier)
+	<h2>opaq</h2>
+	<p><span class="pre">opaq</span> (opaque)
 	declares that this reference will never be used to read or modify its value.
 	It may be compared with another reference.
 	It may be derived (coerced) from any reference.
-	Its primary value is for invokable references to functions and other executables,
-	without the ability to see or change their state.</p>
+	Its primary value is for invokable references to opaque structs or functions
+	where it makes no sense to try to dereference them to see or change their data state.</p>
 
 	<h2>Runtime (Synchronization) Permissions</h2>
 	<p>In addition to the static permissions, Cone also offers runtime permissions.
@@ -207,25 +207,18 @@ do
 	that accept <span class="pre">const</span> or <span class="pre">mut1</span> references.
 	They can only use functions whose reference parameters declare the same runtime permission.</p>
 	
-	<h3>Lock</h3>
-	<p>The Lock permission enables multiple, mutable references to be shared and used across threads.
+	<h3>mutex</h3>
+	<p>The mutex permission enables multiple, mutable references to be shared and used across threads.
 	It makes use of hardware intrinsics to ensure only one reference at a time can
 	read or modify the contents of the reference.</p>
 <pre>
-imm point &amp;Lock Point = &amp;Gc Lock Point(x:2, y: 3)
+imm point &amp;mutex Point = &amp;Gc Lock Point(x:2, y: 3)
 thread.sendPoint(point)  // Now another thread has a copy of this reference
-point.x += point.y  // Access to point safely protected by Lock twice
-</pre>
-	
-	<h3>Custom Permissions</h3>
-	<p>It is possible to define additional runtime permissions ... TBD</p>
-<pre>
-perm NewLock
-  ....
+point.x += point.y  // Access to point safely protected by mutex twice
 </pre>
 	
 	<h2>Permissions and Threads</h2>
-	<p>Only <span class="pre">imm</span>, <span class="pre">id</span>,
+	<p>Only <span class="pre">imm</span>, <span class="pre">opaq</span>,
 	and the runtime "locked" permissions may be shared freely between threads.
 	Furthermore, a <span class="pre">uni</span> reference may be 
 	moved from one thread to another. References with any other permission
