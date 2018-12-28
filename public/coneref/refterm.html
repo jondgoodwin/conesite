@@ -13,70 +13,77 @@
 
     <div class="text">
 
-		<p>This chapter talks about the term: a literal, a variable, 
-		or a <a href="#pseudo">pseudo-variable</a> (e.g., 'this' or 'self').
-		Each term references a single value of a specific type.
-		The term is the basic building block for an expression.</p>
-		<p>You might be tempted to skip over this chapter,
-		because it seems to cover concepts familiar to you from other languages.
-		That is somewhat, but not entirely, true.</p>
-		<p>Importantly, this chapter introduces the distinction that Cone makes between
-		different kinds of types: value, permission, allocator and lifetime.
-		This fundamental distinction impacts many aspects of the language,
-		including how variables are declared and how assignment works.</p>
+	<p>Let's begin with literals and variables,
+		two basic building blocks for any expression.
+		Along the way, additional concepts will be introduced,
+		such as types, permissions, scope, variable declarations and assignment.</p>
 
-		<h2 id="vtype">Value type</h2>
-		<p>A <b>value type</b> specifies how a value is encoded inside the computer.
-		For example, an integer is encoded differently than a collection of characters.
-		Value type also establishes what sort of things you can do with a value
-		(e.g., add two numbers together).</p>
-		<p>Cone provides a number of built-in value types.
-		Later on, we will describe how to define new compound value types 
-		(e.g., struct, array, reference, interface).<p>
-		<p>The names of value types are capitalized by convention.
-		This helps cleanly separate the global namespace between value types and variables,
-		reducing unexpected naming conflicts and improving code clarity.
-		One notable exception to this naming convention is the type names for the primitive numeric types:
-		<ul>
-		<li><span class="pre">i8</span>, <span class="pre">i16</span>,
-		<span class="pre">i32</span> and <span class="pre">i64</span>
-		are the names of types for signed integers of the specified bit-size.</li>
-		<li><span class="pre">u8</span>, <span class="pre">u16</span>,
-		<span class="pre">u32</span> and <span class="pre">u64</span>
-		are the type names for unsigned integers.</li>
-		<li><span class="pre">f32</span> and <span class="pre">f64</span>
-		are the type names for floating point numbers.</li>
-		</ul>
-		<p>Although there are other kinds of types (e.g., allocator or permission type),
-		when we talk about the type of a value, we are typically referring to its value type.</p>
-		
-		<h2>Literal</h2>
-		<p>A literal is a specific unchangeable value,
-		as represented by a <a href="reftoken.html#number">number</a> token, 
-		<a href="reftoken.html#string">string</a> token,
-		<a href="reftoken.html#char">character</a> token,
-		or the reserved names <span class="pre">null</span>, 
-		<span class="pre">true</span> or <span class="pre">false</span>.
-		For example (with comments to indicate each literal's type):</p>
+	<h2>Literals</h2>
+	<p>A literal is a specific, unchangeable value.
+		Each of these <a href="reftoken.html#number">numbers</a> is a literal:</p>
 <pre>
-123     // i32: signed 32-bit integer
-3.4     // f32: 32-bit floating point number
-"Hello" // String
-'a'     // u32: utf-8 character code
-false   // Bool
-null    // Null (represents the absence of a value)
+123
+3.14159
+1e6          // 1000000.0
+-1_000_000   // underscores are ignored
+0x1000       // Hexadecimal
+1p10         // 1024. (power-of-two exponent)
 </pre>
-		<p>Numeric literals default to the appropriate signed, 32-bit value type.
-		If a different value type is desired for a number, simply append the desired
-		type to the number (e.g., <span class="pre">65u8</span> is an unsigned 8-bit byte literal).</p>
-		<p>The presence of a decimal point, exponent or floating point type suffix 
-		signals that a number is a floating point literal.
-		<span class="pre">d</span> may be used instead of <span class="pre">f64</span> 
-		to specify a 64-bit floating point number.</p>
-		<p><b>Note</b>
-		All literals are flagged as immutable. Any attempt to modify them will generate an error message.
-		This ensures literals can never be corrupted by any downstream code.</p>
-		
+	<p>Beyond numbers, other forms of literals will be introduced later, including:</p>
+	<ul>
+	<li><a href="reftoken.html#string">string</a> and
+		<a href="reftoken.html#char">character</a> literals
+		(e.g., "Hello" and 'a')
+	</li>
+	<li>boolean <span class="pre">true</span> and <span class="pre">false</span></li>
+	<li><span class="pre">null</span> value for a nullable reference</li>
+	<li>struct, array, and other compound literals</li>
+	</ul>
+
+	<h3 id="vtype">Types</h3>
+	<p>Every value has a type it belongs to.
+	Although we will cover <a href="reftypes.html">types</a> more thoroughly later, let's simply say for now
+	that each type corresponds to a specific collection of allowed values.
+	Thus, the <span class="pre">Bool</span> type only supports <span class="pre">true</span> and <span class="pre">false</span> as values.
+	Integer types only support integer number values.
+	Floating point types support floating point number values.
+	... and so on.</p>
+	<p>Each type also establishes what operations can be performed on values of that type.
+		Thus, an integer type permits two integers to be added together,
+		the result of which is another integer value.</p>
+	<p>For the next few pages, examples will only use Cone's built-in number types,
+		which specify their bit-size as part of the type's name. Here they are:</p>
+	<ul>
+	<li><b>Signed integer</b> types: <span class="pre">i8</span>, <span class="pre">i16</span>,
+	<span class="pre">i32</span> and <span class="pre">i64</span></li>
+	<li><b>Unsigned integer</b> types: <span class="pre">u8</span>, <span class="pre">u16</span>,
+	<span class="pre">u32</span> and <span class="pre">u64</span></li>
+	<li><b>Floating point</b> types: <span class="pre">f32</span> and <span class="pre">f64</span></li>
+	</ul>
+	  
+	<h3>Typed Number Literals</h3>
+	<p>To explicitly specify the type for a numeric literal,
+		append the type name right after the number:</p>
+<pre>
+65u8       // 8-bit unsigned integer
+1f64       // 64-bit floating point number
+</pre>
+	<p>If the type is omitted, the number is understood to be 32-bits.
+		When the number explicitly includes a decimal point or exponent,
+		it is treated as a floating point number (f32).
+		Otherwise, it is considered to be a signed integer (i32).</p>
+<pre>
+3.14159    // f32 (because of the decimal point)
+1e6        // f32 (because of the exponent)
+1_000_000  // i32 (no decimal point or exponent)
+</pre>
+	<p>Type name shortcuts are also supported:</p>
+<pre>
+1000u      // u32
+1f         // f32
+1d         // f64
+</pre>
+	
 		<h2 id="vars">Variable</h2>
 		<p>A variable holds a single value of a specific value type. 
 		A variable's value is set and retrieved using its "unique" name.</p>
