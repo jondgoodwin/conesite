@@ -13,13 +13,14 @@
 
     <div class="text">
 
-	<p>Expressions use operators, methods and functions calls to calculate new values using existing values.
-	Although the expression examples on this page use numbers,
-	similar expressions may be formulated that manipulate values of other types.</p>
+	<p>Now that we have literals and variables, we can construct more complex expressions that
+	use operators, methods and functions calls to calculate new values.
+	Although the expression examples on this page work with integer and floating point values,
+	similar expressions can be formulated that manipulate values of other types.</p>
 	
 	<h2>Arithmetic expressions</h2>
 	<h3 id="arithops">Arithmetic Operators</h3>
-	<p>Integer and floating point numbers may be calculated using arithmetic operators:</p>
+	<p>Integer and floating point numbers may be computed using arithmetic operators:</p>
 	<dl>
 	<dt>'+'</dt>
 	<dd>Add</dd>
@@ -41,16 +42,8 @@
 2 * (4 + 1) // 10 (parentheses override operator precedence)
 </pre>
 
-	<h3>Arithmetic Assignment</h3>
-	<p>The arithmetic assignment operators (e.g., '+=', '-=', '*=', '/=') offer a convenient way to update
-		an existing stored value:</p>
-<pre>
-counter = 3
-counter += 1  // 4. Equivalent to: counter = counter + 1
-</pre>
-
-	<h3 id="method">Numeric methods</h3>
-	<p>Additional numeric calculations can be performed using built-in methods.
+	<h3 id="method">Method Calls</h3>
+	<p>Additional calculations can be performed using method calls.
 	The name of the desired method follows the value, separated by the dot operator ('.'):
 <pre>
 (-1).abs    // 1 (the absolute value, making a number positive)
@@ -61,7 +54,7 @@ counter += 1  // 4. Equivalent to: counter = counter + 1
 <pre>
 4.max(5)    // 5 (returns the larger of the two numbers)
 </pre>
-	<p>Method use is very common and convenient. It is helpful to know that:
+	<p>Method calls are very common and convenient. It is helpful to know that:
 	<ul>
 	<li>The logic a method performs depends on the type of the value it is applied to.
 	Thus, a method named 'max' applied to an integer is actually a different method than
@@ -90,14 +83,6 @@ counter += 1  // 4. Equivalent to: counter = counter + 1
 <pre>
 pow(10f, 2f)
 </pre>
-
-	<h3 id="parallel">Parallel Assignment</h3>
-	<p>Parallel assignment makes it possible to simultaneously assign multiple values to multiple variables.
-	This can be convenient when swapping the values held by two variables:</p>
-	<pre>
-	// Swap the variable values for a and b
-	a,b = b,a
-	</pre>
 
 	<h3 id="numrconv">Numeric conversions</h3>
 	<p>To convert a number from one type to another, enclose the number in square brackets
@@ -136,21 +121,64 @@ true ^ ~true          // true
 <pre>
 0x0Cu &lt;&lt; 1    // 0x18, after shifting bits left once
 </pre>
+
+	<h2>Lval-based Expressions</h2>
+	<p>An 'lval'-based expression is one where the expression to the "left" represents a memory "container"
+		which holds a value. Lval-based expressions will change the stored value.
+		The <i>assignment</i> expression introduced on the previous page is lval-based,
+		as examples specified a variable to the left of the <span class="pre">=</span>.
+	</p>
+	<h3 id="parallel">Parallel Assignment</h3>
+	<p>Parallel assignment makes it possible to simultaneously assign multiple values to multiple variables.
+	This can be convenient when swapping the values held by two variables:</p>
+<pre>
+// Swap the variable values for a and b
+a,b = b,a
+</pre>
+	<p>This is also useful for capturing multiple values returned by a function or method call:</p>
+<pre>
+min, max = minmax(5, 4)
+</pre>
+
+	<h3>Increment/decrement Operators</h3>
+	<p>When used to the left of an lval, <span class="pre">++</span> will increment the number and
+	<span class="pre">--</span> will decrement it.</p>
+<pre>
+mut cnt = 10
+++cnt          // 11
+--cnt          // 10
+</pre>
+	<p>When used to the right of an lval, it will still increment and decrement, but the expression
+		will return the original value.</p>
+<pre>
+mut cnt = 10
+imm x = cnt++  // x is 10, cnt is 11
+</pre>
+
+	<h3>Arithmetic Assignment</h3>
+	<p>The arithmetic assignment operators (e.g., '+=', '-=', '*=', '/=') offer a convenient way to update
+		an existing stored value:</p>
+<pre>
+counter = 3
+counter += 1  // 4. Equivalent to: counter = counter + 1
+</pre>
+
 	<h3>Logical assignment operators</h3>
-	<p>These work in a similar manner to the arithmetic assignment operators:</p>
+	<p>These work similarly to the arithmetic assignment operators:</p>
 <pre>
 mut flags = 0xC0u
 flags |= 0x01u   // 0xC1u
+flags &gt;&gt;= 1      // 0x60u
 </pre>
 
-	<h2>Other Expression Operators</h2>
+
+<h2>Other Expression Operators</h2>
 	<p>Cone supports several more expression operators.
 		Descriptions may be found in the chapters
 		relevant to their common use:</p>
 	<ul>
 	<li><a href="refcondexp.html">Match and conditional operators</a></li>
 	<li><a href="refblock.html">'this' block operators</a></li>
-	<li>Range (`..`)</li>
 	</ul>
 	
 		
