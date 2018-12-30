@@ -39,7 +39,7 @@ area = Float.pi * square(r)
 	The block contains indented statement(s) that represent the logic to be performed by the function.</li>
 	</ul>
 	 
-	<h3 id="parms">Parameters</h3>
+	<h3 id="parms">Parameter Variables</h3>
 	<p>The declaration of a functions's parameters is a comma-separated list of variable names, 
 	enclosed in parentheses.
 	Each parameter variable corresponds on a one-to-one basis to the value arguments passed to the function when it is called.
@@ -54,27 +54,14 @@ add(2)    // ERROR! add() needs exactly two values, not one or three
 add(2.0, 4.0)  // ERROR! add() needs integers, not floating point numbers
 </pre>
 
-	<p>Cone functions do not support:</p>
-	<ul>
-	<li><i>Variadic parameters</i>, where a varying number of parameters can be passed to a function.
-	To achieve a similar result, make use of collections.
-	In particular, the <span class="pre">&lt;&lt;</span> operator provides a more flexible
-	way of building a string value than the traditional "printf" function.</li>
-	<li><i>Ad hoc polymorphism</i>, where multiple functions can be defined with the same name,
-	each with a different type signature.
-	(<b>Note:</b> unlike functions, methods <i>do</i> support ad hoc polymorphism.)
-	</ul>
-	
-	<h4>Parameters are local variables</h4>
-	<p>Within the statement block, a parameter variable is treated just like a local variable.
-	Indeed, the declaration for each parameter looks very much like a declaration for a local variable,
-	with the value type being specified after the variable's name.
-	In the common case where the permission is omitted,
-	the <span class="pre">imm</span> permission is assumed.
-	That restricts the function's logic from changing the value of a passed parameter.</p>
+	<p>Parameters are variables, usable within the function.
+	The function's signature effectively declares the parameter variables in the same format as any variable declaration.
+	In the example above, the permission is not specified and therefore
+	<span class="pre">imm</span> is assumed.
+	That restricts the function's logic from changing the value of these passed parameters.</p>
 	<p>To allow a parameter's value to be changed, precede the name with <span class="pre">mut</span>.
-	Unless references (pointers) are involved, mutation of the parameter's value will
-	have no effect on the caller since the parameter's value is a copy of the caller's value.
+	Mutation of the parameter's value has
+	no effect on the caller since the parameter's value is a copy of the caller's value.
 	Changes to one value do not affect the other.</p>
 <pre>
 fn weird(a i32, mut b i32)
@@ -99,15 +86,33 @@ next(4)   // returns 5 (using incr's default value of 1)
 next()    // ERROR! no default value for nbr
 </pre>
 
-	<h3 id="stmtblk">Implementation Block</h3>
-	<p>The indented statements that follow the function's signature are its implementation block.
-	The block consists of a sequence of statements that represents the function's logic.
-	Generally, each statement is performed in order.</p>
-	<p>Each statement is often an expression (including an assignment or block expression).
-	A block's statement could also be a local variable declaration,
-	some nested block, or one of a set of special statements supported by Cone.
-	The <a href="refblock.html">Block</a> chapter offers detailed information about
-	what you can do with different kinds of blocks.</p>
+	<h2 id="stmtblk">Implementation Block</h2>
+	<p>The function's implementation block is represented by a sequence of indented statements
+		that perform the function's logic.
+		Generally, each statement is performed in order.</p>
+	<p>Most statements are just expressions.
+	A statement could also be a local variable declaration,
+	some nested <a href="refblock.html">block</a>, or one of a set of special statements
+	(e.g., 'return').</p>
+
+	<h3 id="local">Local Variable Declarations</h3>
+	<p>Any variable declared wihin a function (including its parameters) has a 
+		scope that is <i><a href="refterm.html#scope">local</a></i> to that function.
+		It cannot be referenced or used outside of that scope.</p>
+<p>Local variables provide a working state for the function.
+		Every time a function is called, space is allocated on the execution stack
+		for all its declared local variables.
+		When the function is finished and returns to its caller, 
+		its local variable space is automatically freed from the stack.</p>
+<pre>
+fn summult(a f32, b f32) f32
+	imm sum = a + b    // local variable declaration
+	imm mult = a * b   // local variable declaration
+	return sum / mult
+</pre>
+	<p>This means that local variables are exclusive to that call.
+		Two identically-named local variables in different functions,
+		or even two calls to the same function, will not collide with each other.</p>
 
 	<h3 id="return">Return Statement</h3>
 	<p>A <span class="pre">return</span> statement may be placed at the end of any block.

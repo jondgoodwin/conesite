@@ -81,20 +81,21 @@
 		<li><b>Concurrency</b>. Multiple sets of statements can be performed concurrently.</li>
 	</ul>
 
-	<h2>Local variables and the lexical context</h2>
-	<p>A block may carry its own state information in the form of local, named variables.
+	<h2 id="blockscope">Local variables and the lexical context</h2>
+	<p>A block may carry its own state information in the form of 
+		<a href="reffunc.html#local">local</a>, named variables.
 		This block state is transient; space for it is effectively allocated when execution of the block begins.
 		When execution of the block ends (by any means), appropriate clean up activity is triggered
 		(where defined) and then the state information disappears.</p>
-	<p>Local variables are declared exactly the same way as described for
-		<a href="refterm.html#var">global variables</a>. They are known to be local
-		simply because they are declared within a function's block.</p>
+	<p>Such variables are local to a block simply by being declared within a block:</p>
 <pre>
-fn summult(a f32, b f32) f32
-    imm sum, mult = a + b, a * b  // local variable declaration
-    return sum / mult
+fn a_function()
+	mut loco f32
+	while true
+		mut x i32  // indentation shows x's lifetime is bounded by while block
+	x // Error!! x is not accessible here outside the while block
 </pre>
-				
+						
 	<p>Once a local variable has been declared, it may be used anywhere after in the same (or inner) block.
 		However, if an inner block declares a local variable of the same name
 		(allowed but not always good practice), the outer scoped variable is effectively invisible
@@ -106,7 +107,12 @@ fn summult(a f32, b f32) f32
 		Such mechanisms enforce aliasing and shared use permission constraints
 		and trigger appropriate allocator de-aliasing events.
 		Further details are covered in the <a href="refrefs.html">reference</a> chapters.</p>
-
+	<p>The lifetime of a local variable is bounded by the inner-most lexical block
+		the variable is declared within.
+		(Additional indentation of lines typically signals entrance into a new inner block.)
+		The variable is unknown outside its declared scope;
+		any attempt to access it outside its lexical block will fail.</p>
+		
 	<h2>Building and/or returning a block value</h2>
 	<p>In many cases (depending on the kind of block), a block can be used as an expression.</p>
 <pre>

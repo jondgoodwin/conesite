@@ -89,6 +89,19 @@ include "../useme"
 	  Modules help to avoid situations where different source programs accidentally collide
 	  because they use the same name to refer to different things.</p>
 	
+	<h3 id="global">Global variables</h3>
+	<p>Global variables are declared outside of all function blocks.
+		Space for them is allocated automatically when a program is loaded for execution.
+		Global variables are shared across and accessible by any function at any time.</p>
+	<p>Thus:</p>
+<pre>
+imm glowy i32     // Global immutable variable
+fn a_function()
+  mut loco f32    // Local mutable variable
+</pre>
+  <p>The lifetime of global variables is the same as the program's lifetime.
+		Global variables come into being when the program starts and disappear when the program stops.</p>
+
 	<h3>Modules as separate files</h3>
 	<p>Typically, a nested module is defined in its own source file and then referenced by any module
 	that needs access to its named members. 

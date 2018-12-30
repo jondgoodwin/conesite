@@ -16,7 +16,7 @@
 	<p>Let's begin with literals and variables,
 		two basic building blocks for any expression.
 		Along the way, additional concepts will be introduced,
-		such as types, permissions, scope, variable declarations and assignment.</p>
+		such as types, permissions, variable declarations, assignment, and scope.</p>
 
 	<h2>Literals</h2>
 	<p>A literal is a specific, unchangeable value.
@@ -84,146 +84,96 @@
 1d         // f64
 </pre>
 	
-		<h2 id="vars">Variable</h2>
-		<p>A variable holds a single value of a specific value type. 
-		A variable's value is set and retrieved using its "unique" name.</p>
-		
-		<h3>Variable declarations</h3>
-		<p>Variables must be declared prior to use.
-		The purpose of a variable declaration is to specify its value type, permission, and scope (lexical lifetime)
-		in advance of its use later in the program.
-		Doing so provides invaluable context to the variable's use, 
-		allowing the compiler to optimize execution performance and memory use,
-		as well as enforce safety constraints.</p>
-		<p>A variable declaration statement typically begins with either
-		<span class="pre">imm</span> or <span class="pre">mut</span> followed by the variable name
-		(an <a href="reftoken.html#ident">identifier token</a>) and then the value type.
-		For example:
+	<h2 id="vars">Variable</h2>
+	<p>A variable is a named container which holds a value of some specific type.</p>
+
+	<h3>Variable declarations</h3>
+	<p>Before a variable can be used, it must first be declared and initialized.
+		This example explicitly does both:</p>
 <pre>
-imm height f32  // height holds a floating point number
+imm height f32 = 1.86
+</pre>
+	<p>Let's examine each part of this variable declaration statement:</p>
+	<ul>
+	<li><span class="pre">imm</span> at the beginning announces that
+	this statement is a variable declaration. It also indicates that the variable is immutable:
+	once given its initial value, it can never be given a different value.</li>
+	<li><span class="pre">height</span> is the name of the variable.
+		A variable name is an <a href="reftoken.html#ident">identifier</a>
+		which typically begins with an alphabetic letter, followed by letters or numbers.
+		Underscores are also permissible.</li>
+	<li><span class="pre">f32</span> is the variable's declared type.
+		The variable can only hold values of this type.</li>
+	<li>Following the <span class="pre">=</span> is an expression that establishes the initial
+		value for the variable. In this example, height's value is 1.86.</li>
+	</ul>
+
+	<p>When an initial value is specified, the type can usually be omitted.
+		It will be inferred, as this example shows:</p>
+<pre>
+imm height = 1.86     // f32 type is inferred
+imm width  = height   // its value is 1.86 and type is f32
+</pre>
+	<p>Notice that the second statement makes use of the variable 'height'
+		after it has been declared and initialized.</p>
+
+	<h3>Delayed initialization</h3>
+	<p>It is often preferable to initialize a variable as part of declaration.
+		When that is not realistic, initialization may be performed later
+		using an <b>assignment</b>:</p>
+<pre>
+imm height f32
+// ... some statements here ...
+height = 1.86         // Initialize height now
+</pre>
+	<p>An <i>assignment</i> essentially copies the evaluated value of the expression
+		to the right of the <span class="pre">=</span> into the value container specified to the left.
+		In this case, the value container is a variable.
+		Other sorts of containers are possible and will be described later.
+		Any assignment is itself an expression, and may be used wherever expressions are allowed.</p>
+	<p>It is worth pointing out that any attempt to re-assign 'height' later
+	to another value will trigger an error message:</p>
+<pre>
+height = 2.12         // **ERROR** since height is immutable and initialized
 </pre>
 
-		<h3 id="varperm">Permissions</h3>
-		<p>The difference between <span class="pre">imm</span> and <span class="pre">mut</span>
-		rests with the permission you are granting the variable.
-		A variable's permission enables and constrains how it may be used, 
-		properties which can help improve a program's safety and comprehensibility.
-		The compiler enforces a permission's constraints on every use of the variable.</p>
-		<ul>
-		<li><span class="pre">imm</span> (immutable)
-		declares that the variable's value will never change after it is initialized.</li>
-		<li><span class="pre">mut</span> (mutable) allows a variable value to be changed after initialization.</li>
-		</ul>
-		<p>Cone supports a number of other permissions in addition to
-		<span class="pre">imm</span> and <span class="pre">mut</span>.
-		The <a href="refperm.html">Permissions</a> chapter offers a more thorough
-		treatment of all permissions, the capabilities they enable and deny,
-		and the implications for using each.
-		There is no one perfect permission that can do everything.
-		Each has its advantages and limitations.
-		That said, <span class="pre">imm</span> and <span class="pre">mut</span> are a good starter set.</p>
-		
-		<h3 id="scope">Scope, Lifetime and Allocator</h3>
-		<p>The location of the variable declaration statement implicitly determines the variable's scope.
-		This scope establishes several things about the variable: which part of memory it resides within,
-		how long the it lives (its lexical lifetime) and which parts of a program's code can access it.</p>
-		<p>There are two key places where a variable can be located:</p>
-		<ul>
-		<li><b>global</b> variables are declared outside of all function blocks.
-		Space for them is allocated automatically when a program is loaded for execution.
-		Global variables are shared across and accessible by any function at any time.</li>
-		<li><b>local</b> variables are declared within a function block.
-		Every time a function is called, space is allocated on the current stack
-		for all its declared local variables.</p>
-		<p>Local variables are exclusive to that call.
-		Two identically-named local variables in different functions,
-		or even two calls to the same function, will not collide with each other.
-		Local variables provide a working state for the function.
-		When the function is finished and returns to its caller, 
-		its local variable space is automatically freed from the stack.</li>
-		</ul>
-		<p>Thus:</p>
+	<h3>Mutable Variables</h3>
+	<p>What if we need to change a variable's value after initialization?
+		To allow that, use <span class="pre">mut</span>
+		(instead of <span class="pre">imm</span>) on the declaration statement:
+	</p>
 <pre>
-imm glowy i32     // Global immutable variable
-fn a_function()
-  mut loco f32    // Local mutable variable
+mut age = 23      // type is i32
+// ... some statements here ...
+age = 24          // alters age to hold 24 instead
 </pre>
-		<p>The lifetime of global variables is the same as the program's lifetime.
-		Global variables come into being when the program starts and disappear when the program stops.</p>
-		<p>By contrast, the lifetime of a local variable is bounded by the inner-most lexical block
-		the variable is declared within.
-		(Additional indentation of lines typically signals entrance into a new inner block.)
-		The variable is unknown outside its declared scope;
-		any attempt to access it outside its lexical block will fail.</p>
-<pre>
-fn a_function()
-  mut loco f32
-  while true
-    mut x i32  // indentation shows x's lifetime is bounded by while block
-  x // Error!! x is not accessible here outside the while block
-</pre>
-		<p>As a side note: Cone considers <span class="pre">global</span> and <span class="pre">local</span>
-		to be <b>allocators</b>. Cone has other allocators which focus on heap and reference pointers.
-		The <a href="refalloc.html">Pointers and Allocators</a> chapter offers an extensive treatment
-		of allocators and reference pointers.
-		It explains how variable lifetimes can constrain the aliasing and use of variables and reference pointers.</p>
-		
-		<h2 id="#pseudo">Pseudo-variables</h2>
-		<p>Pseudo-variables look like variables, but are not, as their value is managed by Acorn based on the
-		context where they are encountered. They need not be declared, as the compiler already
-		knows their value type, scope, allocator, and permission (usually <span class="pre">imm</span>).
-		<p>Two commonly used pseudo-variables are:</p>
-		<ul>
-		<li><a href="refmethod.html#self"><span class="pre">self</span></a>,
-		the value which is passed to a method, indicating what the method is supposed to be acting on.</li>
-		<li><a href="refcollect.html#this"><span class="pre">this</span></a>,
-		the value that is the focus of attention within a 'this' block.</li>
-		</ul>
+	<p><span class="pre">mut</span> and <span class="pre">imm</span> are called <b>permissions</b>.
+	Cone supports a number of other permissions.
+	These are discussed more fully on the <a href="refperm.html">Permissions</a> page.</p>
+	<p><b>Note:</b> If we had tried to re-assign age to 24.0,
+	we would have gotten an error message.
+	This is because age is declared to only hold integer values,
+	and 24.0 is a floating point number.
+	Type safety of variables requires that the expression's type be the same or
+	<a href="reftypesafe.html#coercion">coerceable</a>.
+	</p>
 
-		<h2 id="assign">Assignment</h2>
-		<p>The value of a variable is set using an assignment.
-		Variables placed to the left of the assignment operator <span class="pre">=</span> set the variable's value. 
-		Variables found to the right (or most anywhere else) retrieve the value of the variable.</p>
-<pre>
-height = 3.4     // height's value is now 3.4
-depth = height   // weight's value is now 3.4
-number = 42      // number's value has discovered the meaning of life
-</pre>
-
-		<h3>Assignment type checking</h3>
-		<p>In order for an assignment to be valid, the variable on the left has to be mutable
-		and the value types have to match on both sides of the <span class="pre">=</span>.
-		The most obvious way for them to match is if they are the same.
-		However, in some cases it is possible for them to be different and still match,
-		as happens with <a href="refexpr.html#numconv">automatic number conversion</a>
-		and <a href="refsubtype.html">subtyping</a>.</p>
-		
-		<h3>Copy, move and reference pointers</h3>
-		<p>For most value types, the assignment operator stores a <i>copy</i> of the value on the right
-		into the variable on the left.</p>
-		<p>However, if the value type contains non-aliasable references,
-		<a href="refmove.html">move semantics</a>> kick into effect.</p>
-		
-		<h3>Variable declaration initialization</h3>
-		<p>Variable declarations permit assignments as part of the declaration.
-		These assignments establish the initial value of the declared variable:</p>
-<pre>
-mut height f32 = 5.2
-</pre>
-		<p>Variable declarations offer one more trick up their sleeve: <i>type inference</i>.
-		If typing information is omitted on the left-hand variable,
-		the variable's value type is declared to be the value type of the expression to the right.</p>
-<pre>
-mut height = 5.2
-</pre>
-		
-		<h3 id="parallel">Parallel Assignment</h3>
-		<p>Parallel assignment makes it possible to simultaneously assign multiple values to multiple variables.
-		This can be convenient when swapping the values held by two variables:</p>
-<pre>
-// Swap the variable values for a and b
-a,b = b,a
-</pre>
+	<h3 id="scope">Scope and Visibility</h3>
+	<p>As we have seen, variables have a name, permission, type and value.
+		They also have a scope and visibility.
+		Scope and visibility restrict (isolate) where a variable may be
+		referenced and used in a program.</p>
+	<ul>
+	<li><i>Scope</i> is established by where the variable's declaration is found.
+		Based on this position, the scope can be <a href="refmodule.html#global">global</a>, 
+		<a href="reffunc.html#local">local</a> to a function,
+		local to a <a href="refblock.html#blockscope">block</a>,
+			or a <a href="refstruct.html">field</a> in a type.</li>
+	<li><i>Visibility</i> is determined by the variable name.
+		If the name starts with an underscore, it is private. Otherwise, it is public.
+		Visibility determines whether a global variable or type field is visible outside
+		its owning <a href="refnamespace.html">namespace</a>.</li>	
+	</ul>
 
 		<p style="text-align: right; margin-top: 2em;">
 			<a href="refexpr.html"><img alt="_" src="next.png" /></a>
