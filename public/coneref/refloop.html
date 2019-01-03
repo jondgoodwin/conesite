@@ -29,7 +29,7 @@ while x&lt;=5
 </pre>
 
 	<h3>while suffix</h3>
-	<p>Like <span class="pre">if</span>, <span class="pre">while</span> may be used as a control suffix
+	<p><span class="pre">while</span> may be used as a control suffix
 	following a statement:</p>
 <pre>
 $$.show(list.extract) while !list.isEmpty
@@ -57,7 +57,42 @@ while true    // without the break, this loop would run forever
 	control back to the top of the while block where the conditional expression is re-evaluated.</p>
 	
 	<h2 id="each">each</h2>
-	<p>TBD.</p>
+	<p>Although <span class="pre">while</span> is sufficient to support any kind of loop,
+		<span class="pre">each</span> offers a more convenient way to iterate over some sequence of values.
+	 As with <span class="pre">while</span>, <span class="pre">each</span> may be used as a control prefix.
+		<span class="pre">break</span> and <span class="pre">continue</span> are supported within an 
+		<span class="pre">each</span> block.
+	</p>
+
+	<h3>Iterating over numbers</h3>
+	<p>If one simply wants to iterate evenly over a range of integer or floating point numbers:</p>
+<pre>
+mut sum = 0
+each x in 0 &lt;= 5 // iterates:  0, 1, 2, 3, 4, 5
+  sum += x
+sum                // 15
+</pre>
+	<p>Let's examine the elements of this <span class="pre">each</span> statement:</p>
+	<ul>
+		<li><span class="pre">x</span> is a new mutable variable that will successively hold a single
+		number within a range of numbers.</li>
+		<li><span class="pre">0</span> is the start of the range of numbers.
+			x's first value in the loop will be 0.
+			Each subsequent iteration of the loop increments x by 1.</li>
+		<li><span class="pre"><= 5</span> indicates when the loop should stop, when x <= 5.
+		That is, 5 will be the last value of x. After that, the loop ceases.</li>
+	</ul>
+	<p>One may use any of the four comparison operators:
+		<span class="pre">&lt;</span>, <span class="pre">&lt;=</span>,
+		<span class="pre">&gt;</span>, or <span class="pre">&gt;=</span>.
+		With the latter two, the variable will be decremented instead of incremented.
+	</p>
+	<p>Optionally, the statement can specify a step value using <span class="pre">by</span>:</p>
+<pre>
+mut sum = 0
+each x in 0 &lt;= 10 by 2 // iterates: 0, 2, 4, 6, 7, 10
+	sum += x	
+</pre>
 	
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refcollect.html"><img alt="_" src="next.png" /></a>
