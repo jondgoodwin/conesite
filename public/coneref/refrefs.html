@@ -20,7 +20,7 @@
 	<p>Let's illustrate this with a simple example.
 	The <span class="pre">&</span> operator obtains a reference to a variable,
 	and therefore to the value it holds.
-	The <span class="pre">*</span> operator can then be applied to the reference
+	The <span class="pre">*</span> (de-referencing) operator can then be applied to the reference
 	to get or change the value pointed to by the reference:</p>
 <pre>
 mut a = 3
@@ -74,12 +74,13 @@ imm val = *ref  // val is now 3
 	  Pointers are not subject to such constraints, making them more versatile but also potentially more dangerous.
 	</p>
 	
-	<h2>Reference Mechanisms and Flavors</h2>
+	<h2>Reference Type Signature</h2>
 	<p>The way that Cone handles references is unusual among programming languages.
 	  Although many capabilities are similar to those found in other languages, Cone's distinctive approach
 	  optimizes for versatility, safety and ease-of-use.</p>
-	<p>Getting comfortable with Cone's references begins with understanding
-		the four fundamental mechanisms	that underlie their capabilities and constraints.</p>
+	<p>Getting comfortable with Cone's references begins with an introduction to
+		the four fundamental mechanisms	that underlie their capabilities and constraints.
+	  These mechanisms are formalized as part of the type signature for every reference.</p>
 	<ul>
 	  <li><a href="refallocref.html"><b>Allocators</b></a>.
 		A reference's allocator is responsible for allocating new values.
@@ -107,11 +108,87 @@ imm val = *ref  // val is now 3
 		References are often treated as simply a stand-in for a value of this type.
 		The value type helps protect type safety.</li>
 	</ul>
+	<p>The following pages provide details on each of these mechanisms.
+		For now, it is helpful to know that
+	the type signature for a reference always begins with <span class="pre">&</span>
+	followed by qualifiers for each of the above mechanisms in the listed order. 
+	Here are examples of reference type signatures:</p>
+<pre>
+imm ref1 &rc imm i32   // ref-counted, immutable reference to an integer value
+imm ref2 &i32          // borrowed, 'const' reference to an integer value. Lifetime assumed.
+imm ref2 &'a mut i32   // borrowed, 'mut' reference with specified lifetime annotation
+</pre>
 
-	<p>In addition to basic references, Cone also supports more complex reference types
-		that carry more than a pointer:</p>
+	<h2>Nullable References</h2>
+	<p>By default, references can only point to valid values.
+		However, it is possible to explicitly declare and use
+		<a href="refnullref.html">nullable references</a>.
+		A nullable reference can have the value <span class="pre">null</span>,
+		which means the reference does not point to any valid value.</p>
+		<p>The type signature for a nullable reference specifies a <span class="pre">?</span>
+		after the ampersand:</p>
+<pre>
+imm ref4 &?i32		    	// borrowed, 'const' nullable reference
+</pre>
+		
+		<p>To ensure safety, access to a nullable reference's value is only possible if
+			the code first ensures the reference does not have the value of <span class="pre">null</span>:
+		</p>
+<pre>
+// This condition is true only if maybePoint is not null ...
+if (!maybePoint)
+		imm point = *maybePoint // ... allowing us to obtain its value
+imm point2 = *maybePoint    // **ERROR** We don't know if maybePoint is null here
+</pre>
+	
+	<h2>Reference Operations</h2>
+	<p>References are values. As such, they can be stored and passed around a program.
+		Whether such transfers are simple copies or moves depends on the reference's type
+		(particularly its permission and allocator).
+		Reference transfers also check reference type information to ensure everyone is in agreement
+		about what you can do with any passed-around reference.</p>
+	<p>In general, references are treated as stand-ins for the values they refer to.
+		Operations on references will nearly always apply to the value the reference refers to,
+		rather than the references themselves.
+	  However, there are a few operations which do operate directly on references:
+		dereferencing, comparison, and reinterpretation.</p>
+
+	<h3>De-referencing</h3>
+	<p>As several examples have demonstrated, the <span class="pre">*</span> operator is used to access a reference's value.
+		This is called de-referencing. De-referencing a reference is sometimes prohibited based on
+		its permission or whether it might have null as a value.</p>
+	<p>For most operations on a reference, a reference is automatically de-referenced before performing the operation.
+		For example:</p>
+<pre>
+// Assume ref1 is a reference to an integer
+imm sum = ref1 + 4        // equivalent to *ref1 + 4
+</pre>
+
+	<h3>Comparison</h3>
+	<p>Two references may be compared for equality, but only if they have the same type signature</p>
+<pre>
+// Do ref1 and ref2 point to the same value?
+if ref1 == ref2
+    // do some stuff
+</pre>
+	<p>It is also possible to compare whether one pointer is greater than another.
+		This is typically only meaningful if both refer to somewhere within the same object.</p>
+
+	<h3>Reinterpretation</h3>
+	<p>The 'as' operator may be used to take an existing reference and create a new reference
+		with a different type signature.
+		Whenever this might create some safety risks, use of the 'as' operator will need to happen within a 'trust' blocks.
+	</p>
+<pre>
+imm newref = oldref as &Point  // Coerce a reference to a borrowed reference
+</pre>
+
+	<h2>Array and Interface References</h2>
+	<p>In addition to the basic references introduced on this page and explored over the next few pages,
+		Cone supports more complex reference types that carry more than a pointer.
+		These are covered elsewhere:</p>
 	<ul>
-		<li><a href="refarrau.html#arrref"><b>Array references</b></a>,
+		<li><a href="refarray.html#arrref"><b>Array references</b></a>,
 		which point to a collection of identically-typed elements.
 		These elements are contiguous in memory with the reference pointing to the first element.
 		The number of elements is carried as part of the array reference.</li>
@@ -120,18 +197,11 @@ imm val = *ref  // val is now 3
 		In addition to the object pointer, the reference also points to runtime type information about the value's type,
 		such as a vtable for dynamically dispatching method calls on the object.</li>
 	</ul>
-	<p>The default condition for references is that they can only point to valid values.
-		However, it is possible to also declare and create
-		<a href="refnullref.html">nullable references</a>.
-		A nullable reference can have the value <span class="pre">null</span>,
-		which means the reference does not point to any valid value.
-		Protective measures ensure that one can never
-	  dereference a nullable reference whose value is <span class="pre">null</span>.</p>
-	
-	<p style="text-align: right; margin-top: 2em;">
-		<a href="refborref.html"><img alt="_" src="next.png" /></a>
-	</p>
 
+		<p style="text-align: right; margin-top: 2em;">
+			<a href="refborref.html"><img alt="_" src="next.png" /></a>
+		</p>
+	
 	</div>
 	</body>
 </html>

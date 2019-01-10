@@ -13,60 +13,74 @@
 
     <div class="text">
 
-	<p>Although pointers offer a similar capability to references, they are handled quite differently.
-	Pointers offer more power and versatility than references, 
-	but do so without the security of compiler-enforced safety.</p>
-	<p>Specifically:</p>
-	<ul>
-	<li>Pointers are declared using <span class="pre">*</span> 
-	(rather than <span class="pre">&amp;</span> for references).</li>
-	<li>Pointers have no allocator, lifetime or permission constraints (or capabilities).</li>
-	<li>Pointer arithmetic is supported.</li>
-	<li>Pointers are never automatically dereferenced.
-	The <span class="pre">*</span> operator must be explicitly used to view or change the object it points to.</li>
-	<li>Pointers may only be used within a trust block.</li>
-	<li>Like borrowed references, pointers never belong to an allocator nor are managed by one.</li>
-	<li>Using pointers safely is solely the responsibility of the programmer.
-	No memory safety enforcement mechanisms, such as lifetime constraints, apply to pointers.</li>
-	</ul>
+	<p>Pointers are a more powerful (but potentially unsafe) alternative to references.
+	   As compared to references, pointers have these superpowers: they support pointer arithmetic and
+	   they are never constrained by lifetimes, permissions or allocators.
+	   However, being freed from these constraints means that pointers may be used
+	   in unsafe ways, such as accessing memory locations that are invalid or protected.
+	   Using pointers safely is solely the responsibility of the programmer.</p>
 
-	<h2>Pointer Creation</h2>
-	<p>A pointer is typically created by copying (coercing) a reference.
-	Such pointer creation need not happen within a trust block:</p>
+	<h2>Pointer Declaration and Creation</h2>
+	<p>The type of a pointer is declared using <span class="pre">*</span> 
+	(rather than <span class="pre">&amp;</span> for references).
+	No allocator, lifetime or permission is specified after the asterick;
+	only the value type is required:</p>
 <pre>
-imm nbr = 3
-imm nbrptr *mut i32 = &amp;nbr   // Create a pointer from a reference
-trust
-    *nbrptr = 4    // trust block required to use the pointer
+imm ptr1 *i32   // Pointer to an integer
 </pre>
-	<p>The reverse is also possible, going from a pointer back to a reference.
+	<p>Pointers typically get their initial value from a reference or an external function.
+	   When coming from a reference, one can use the <span class="pre">as</span> operator
+	   to reinterpret the reference's type (the value type should match):
 	</p>
 <pre>
-trust
-    val.nbrref = nbrptr
+imm ptr2 = ref1 as *i32  // This always creates a copy of the reference
 </pre>
-	<p>However, this must be done within a trust block because the usual safety checks are not performed.
-	The only type checks performed are for matching value type and permissions.
-	No attempt is made to verify that the pointer (or reference) points to a valid object
-	nor that it is managed by the reference's allocator.</p>
-	<p>Another way to create a pointer is to call an FFI function that returns a pointer.</p>
-	
-	<h2>Pointer Arithmetic</h2>
-	<p>Pointers support addition and subtraction with unsigned integers.
-	The integer dispacement is automatically multipled by the byte size of the object pointed to.</p>
-	
+	<p><b>Note:</b> Since pointers (unlike references) don't belong to an allocator,
+		if the pointer has been obtained via memory allocation (e.g., malloc),
+		the programmer is responsible for ensuring that the memory segment
+		is properly freed.
+	</p>
+
+	<h2>Pointer Arithmetic and Comparison</h2>
+	<p>Unlike references, pointers are not a stand-in for the value they point at.
+	  Thus, operations on a pointer typically affect the pointer itself.
+	  This is true for pointer arithmetic and comparisons.</p>
+	  <p>Pointer arithmetic allows one to move a pointer
+	  forward or backwards across elements of the same type and size
+	  using the <span class="pre">++</span>, <span class="pre">--</span>,
+	  <span class="pre">+</span>, <span class="pre">-</span>, 
+	  <span class="pre">+=</span> or <span class="pre">-=</span> operators.
+	  For example:
+	</p>
+<pre>
+++ptr1	// increment pointer to point to next element
+</pre>
+	<p><b>Note:</b> Although the above example increments the pointer by "one",
+	the effect is to actually point to an address that is 4 bytes after.
+	This happens because it increments (or decrements) by the size of the type it points to.
+	Since a 32-bit integer is 4 bytes large, any value added to such an integer pointer
+	is effectively multiplied by 4.</p>
+
+	<p>Pointer comparisons work just like they do for references.
+	So long as two pointers have the same type, they can be compared for equality.
+	It can also be valuable to know when some pointer's address is greater or less than
+	another pointer's address.</p>
+
+	<h2>De-referencing a pointer</h2>
+	<p>As with references, the <span class="pre">*</span> operator is used to
+	access the value the pointer points to.
+	However, such pointer dereferencing may only be done within a trust block.
+	This requirement signals to the programmer that such de-referencing may be
+	potentially unsafe.</p>
 <pre>
 trust
-    imm nbrptr *mut i32 = &amp;nbr
-	nbrptr += 1;  // Adds 4 to the pointer's address, the byte-size of i32
+	while (*ptr2++ = *ptr1++)
 </pre>
-	<p>Notice how this last example works differently when applied to a reference.
-	Using the <span class="pre">+=</span> on a reference applies that method's operation
-	to the object it refers to, as opposed to changing the reference itself.</p>
-	<p>Additionally, two pointers may be subtracted from each other or compared.</p>
+	<p>For dot-based method calls or property access, pointers may be automatically de-referenced.
+		Even such implicit dereferences are only allowed when enclosed in a trust block.</p>
 	
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refconcur.html"><img alt="_" src="next.png" /></a>
+		<a href="refstruct.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>
