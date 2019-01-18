@@ -77,8 +77,11 @@ imm ptr2 = ref1 as *i32  // This always creates a copy of the reference
 trust
 	while (*ptr2++ = *ptr1++)
 </pre>
-	<p>For dot-based method calls or property access, pointers may be automatically de-referenced.
-		Even such implicit dereferences are only allowed when enclosed in a trust block.</p>
+	<p>Pointers also support [], the index operator, in effect treating a pointer
+		as if it were a pointer to an array of indexable values:</p>
+<pre>
+ptr1[2] = ptr2[1]
+</pre>
 	
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refstruct.html"><img alt="_" src="next.png" /></a>
