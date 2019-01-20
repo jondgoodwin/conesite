@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>arrays - Cone Reference</title>
+	  <title>Arrays and Slices - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -8,158 +8,235 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Arrays</div>
+			<div id="sub">Arrays and Slices</div>
 		</div>
 
     <div class="text">
 
-	<p>Array types are for indexed collections of values that have the same type.
-    There are many variations of built-in array types, distinguished by how they are declared:</p>
+    <p>What if we want the ability to manipulate several values of the same type,
+        all stored together sequentially in memory?
+        Cone offers these safe, built-in types to support this capability:
+    </p>
+    <ul>
+        <li><b>Static Array</b> - a fixed-size collection of elements whose size is known at compile-time.</li>
+        <li><b>Dynamic Array</b> - a resizable collection of elements allocated on the heap at runtime.</li>
+        <li><b>Slice</b> - a borrowed reference providing access to a subset of elements stored in some array.</li>
+    </ul>
+    <p>Other indexed collection types (e.g., vectors and maps) use these
+        built-in types (or raw pointers) as a foundation.</p>
+
+    <h2>Declaration and Creation</h2>
+    <p>As a quick glance, these examples show the type signatures for the built-in array types listed above:</p>
 <pre>
-imm staticarray [10] f32      // Static array (C-style)
-imm arrref      &amp;gc [] f32    // Array reference  
-imm slice       &amp;[] f32       // Array slice (borrowed array reference)
-imm vecarray    [u32] f32     // Vector variable-sized array struct
-imm maparray    [Text] f32    // Map: variable-sized associated array struct
+imm staticarray [10] f32      // Static array
+imm arrref      &amp;own [] f32   // Dynamic array (allocated array reference)
+imm slice       &amp;[] f32       // Slice (borrowed array reference)
 </pre>
-    
-    <p>Generally, the presence of square brackets in a declaration signals that you are working with
-        some kind of indexed collection.
-        Similarly, square brackets are used to access one or more elements of an indexed collection.
-        Square brackets are also used to define an array literal.
-    </p>
+    <p>Note that dynamic arrays and slices are in fact a special kind of reference: an array reference.
+    Dynamic arrays are array references managed by an allocator.
+    Slices are borrowed array references.</p>
 
-    <h2>Array type primitives</h2>
-    <p>Let's start with the core language features that make support for array types possible:
-        static arrays, array references, and use of pointers as arrays.
-    </p>
-
-    <h3>Static arrays</h3>
-    <p>The size of a static array is fixed and declared using an unsigned integer literal
-        inside square brackets:</p>
+    <h3>Static Arrays</h3>
+    <p>A static array is a fixed-size collection of elements whose size is known at compile-time.
+        It can exist as a global variable or allocated on the stack like any other local variable.
+        The type signature for a static array specifies the number of elements as an unsigned integer literal
+        inside square brackets, followed by the type of every element:</p>
 <pre>
 mut text [4] u32
 </pre>
-    <p>An array literal creates a static array:</p>
+    <p>A static array is initialized using an array constructor,
+        a comma-separated enumeration of same-typed values enclosed within square brackets:</p>
 <pre>
 mut list = [1f, 4f, 5f]   // [3] f32
 </pre>
-    <p>An element within a static array is accessed using square brackets:</p>
+    <p>As one would expect, a global variable declaration requires the array constructor
+        to contain only literal values. All other uses of the array constructor
+        allow the array values to be expressions.</p>
+    <p>A static array may also be initialized using a string literal:</p>
 <pre>
-c_array[3] = c_array[2]
-</pre>
-    <p>Array indexing is automatically bounds-checked by its known size.</p>
-    <p>Elements may be accessed using ranges as well:</p>
-<pre>
-    mut clk = "Abc"
-    clk[0..1] = "Ti"          // clk is now "Tic"
+imm hellotext = "Hello!"  // [6] u8
 </pre>
 
-    <h3 id="arrref">Array References</h3>
-    <p>Arrays created while the program is running are represented using array references.
-        An array reference (unlike a regular reference) is a 2-value tuple containing:</p>
+    <h3 id="arrref">Dynamic Array</h3>
+    <p>A dynamic array is a dynamically-sized collection of elements allocated on the heap at runtime.
+        A dynamic array is represented by an array reference, 
+        which is effectively a tuple containing:</p>
     <ul>
         <li>a pointer to the first element of the array</li>
         <li>an unsigned integer specifying how many elements are in the array</li>
     </ul>
-    <p>An array reference is returned from an array allocation.
-        This example allocates an array containing four floating point numbers:</p>
+    <p>Allocation of a dynamic array looks similar to 
+        <a href="refallocref.html">simple allocations</a>,
+        returning an array reference as a result.
+        There are several different ways to allocate a dynamic array:</p>
+    <ul>
+    <li><b>Copy another array</b>. Specify the array to copy from as part of the allocation:
 <pre>
-imm n = 4
-imm newarr = &amp;gc [n] 0.   // newarr's type:  &amp;gc [] f32
+imm dynarr1 = &own [1,2,3]
 </pre>
-    <p>Array references may index elements in the same way as for static arrays.
-        A run-time check is made to ensure the index is less than the
-        size known to the array reference.
-    </p>
-    <p>Since an array reference is a tuple, its parts can be retrieved
-        within a trust block.</p>
+    </li>
+    <li><b>Replicate an element</b>. 
+        Specify a count in square brackets followed by the initial value for all elements:
 <pre>
-mut ptr, size = arrref
+imm dynarr2 = &amp;gc [4] 0.   // newarr's type:  &amp;gc [] f32
+</pre>
+       <p>Both the count and the value may be expressions.</p>         
+    </li>
+    <li><b>Use an element value generator</b>. 
+        Specify a count in square brackets followed by a function (or closure) that calculates each element's initial value:
+<pre>
+imm dynarr3 = &amp;rc [4] squarefn
+</pre>
+    <p>The function will be called for each element, passing it the index number.
+        The function's return value becomes the element's initial value and type.</p>
+    </li>
+    </ul>
+
+    <h4>Resizing</h4>
+    <p>Resizing is only possible for an &own-based dynamic array (array reference).
+        This restriction ensures memory safety, protecting against invalidating other references
+        as a result of altering the size or position of a dynamic reference.
+    </p>
+    <p>Resizing uses the <span class="pre">resize</span> command with similar format as above:</p>
+    <ul>
+    <li><b>Append another array</b>. 
+        This increases the size by the number of elements being added,
+        then copies the specified array to the end:
+<pre>
+resize dynarr1 [4,5]
+</pre>
+    </li>
+    <li><b>Shrink or grow via element replication</b>.
+        Specify a new count in square brackets followed by the initial value for all added elements:
+<pre>
+resize dynarr2 [10] 0. // Grow it. Added elements initialized to zero
+resize dynarr2 [2]     // shrink it. No initial value needed
+</pre>
+        <p>Both the count and the value may be expressions.</p>         
+    </li>
+    <li><b>Use an element value generator</b>. 
+        Like above, specifying a function (or closure) that calculates each added element's initial value:
+<pre>
+resize dynarr2 [10] squarefn
+</pre>
+    <p>The function will be called for each added element, passing it the index number.</p>
+    </li>
+    </ul>
+        
+    <h3>Slices</h3>
+    <p>A slice is a borrowed array reference providing direct access to a subset of elements stored in some array.
+        It is created by applying an index range to an existing array or slice via the ampersand (&) operator.
+        The range specifies two unsigned integers within square brackets,
+        separated using the '..', '...' or 'by' operator.
+        '..' excludes the last specified element, whereas '...' includes it.
+        The second number on 'by' specifies how many elements are in the slice.</p>
+<pre>
+imm x = &amp;"Abcd"[1..3]    // a slice pointing to "bc"
+imm y = &amp;"Abcd"[1...3]   // a slice pointing to "bcd"
+imm z = &amp;"Abcd"[2 by 1]  // a slice pointing to "c"
+</pre>
+    <p>If either index integer is unspecified, 0 and end are assumed.</p>
+<pre>
+imm r = &amp;y[1..]        // a slice pointing to "cd" (end assumed)
+imm s = &amp;y[..]         // a slice pointing to "bcd" (0 and end assumed)
+</pre>
+    <p>A slice may also be created from a normal reference or a pointer:</p>
+<pre>
+imm slice1 = &ref[..]      // Slice count from reference is always 1
+imm slice2 = &ptr[0...5]
+</pre>
+    <p>And, finally, If a static array is passed as a call argument where a slice is expected, 
+    it is automatically converted into a slice.</p>
+    <p><b>Safety Note:</b>
+        Because a slice is a borrowed reference, its lifetime is limited,
+        ensuring it can never outlive the source array it provides a view into.
+        Depending on permissions, it may temporarily lock out access to the variable it borrows from,
+        thereby ensuring the original array cannot be moved or restructured while the slice is active.
+        A slice may not be created from an array that has the shared, mutable permission 'mut',
+        as this could lead to potential memory safety problems.
+    </p>
+
+
+    <h2>Array Operations</h2>
+    <p>Arrays may be indexed, copied, compared, iterated over, resized, and queried for their properties.
+        These operations work the same way on static arrays, dynamic array, and slices,
+        except where otherwise noted.</p>
+
+    <h3>Indexing</h3>
+    <p>A <b>single element</b> within an array may be accessed using 
+        an unsigned integer value enclosed in square brackets.
+        This supports both getting and setting the values at a specific index:</p>
+<pre>
+c_array[3] = c_array[2]    // the 4th element is now the same as the third
+</pre>
+    <p>Array indexing is automatically bounds-checked by its known size.
+        This technique works with pointers as well, but never performs any bounds-check.
+        Using a pointer this way can improve performance where we know the index is safe.
+    </p>
+    <p>A <b>borrowed reference to a single element</b> can be obtained using the
+        ampersand (&amp;) operator:</p>
+<pre>
+imm borref = &amp;sliceref[4]   // borrow reference to 5th element
+</pre>
+    <p><b>Multiple elements</b> of an array may be extracted 
+        and copied into another array using a range in square brackets.
+        Both content segments must have the same type and size.</p>
+<pre>
+arrref[1 by 2] = sliceref[0 by 2]
+greetings[n by 5] = "Kevin"
 </pre>
 
-    <h4>Slices</h4>
-    <p>A slice is a borrowed array reference.
-      A slice is created from an array or another slice using a range within square brackets.
-    </p>
+    <h3>Iteration</h3>
+    <p>The <span class="pre">each</span> block provides an easy way to iterate over
+    a static array, dynamic array, or slice:</p>
 <pre>
-imm x = &amp;"Abc"[1..3]  // x is a slice pointing to "bc"
-imm y = &amp;"Abc"[..]    // y is a slice pointing to "Abc" (0 and end assumed)
+mut sum = 0
+each x in intslice
+    sum += x
 </pre>
-    <p>A slice is always an alias; a fixed-size view into an array it was created from
-        and cannot outlive or re-structure.
-      Since slices are always borrowed references, they must conform to lifetime rules.
-      Because slices use interior references, they cannot 
-      be created from an array that has the shared, mutable permission 'mut',
-      as this could lead to potential memory safety problems.
-    </p>
-    <p><b>Note:</b> If a static array is passed as a parameter, it is automatically
-    converted into a slice.</p>
-
-    <h3>Pointers as arrays</h3>
-    <p>Any pointer can be treated as if it were a pointer into an array,
-        simply by indexing it within a trust block:
-    </p>
+    <p>Iteration can return a borrowed reference instead of the value:</p>
 <pre>
-p[3]    // Equivalent to *(p+3)
-</pre>
-    <p>No boundary checking is performed when indexing a pointer.
-        This can be a useful performance boost if the index is already known to be valid.
-    </p>
-  
-    <h2>Struct-based arrays</h2>
-    <p>Structs are useful for creating a variable-sized array type.
-        Use of a struct makes it possible to offer a useful range of methods
-        and then wrap its implementation as private properties.
-    </p>
-    <p>Square brackets may be used to index into a struct once the '[]' method is implemented:</p>
-<pre>
-struct VarArray
-    _array &amp;gc [] f32
-
-    fn init(size usize)
-        _array = &amp;gc [size] f32
-
-    fn `[]`(index usize) f32 trust
-        if index &lt; _size       // Should do bounds check
-            _array[index]
-        else
-            0f                 // or panic
-</pre>
-    <p>This struct acts like an array simply by responding to the <span class="pre">[]</span> method:</p>
-<pre>
-mut var VarArray
-var[3] = var[2]
+each &mut x in intslice
+    ++x
 </pre>
 
-    <p>A slice may be obtained from a struct in the same way as from a fixed-size array,
-        again after implementing the '&amp;[]' method:</p>
+    <h3>Comparison</h3>
+    <p>Two array references may be compared for equality, so long as they have the same element type,
+        even if one is a borrowed reference and the other an allocated reference.
+        This comparison checks for equality of both the starting pointer and the element count.</p>
 <pre>
-&amp;vararray[..]
+if ownref == borref
+   ....
 </pre>
-    <p>This invokes the <span class="pre">&amp;[]</span> method with two arguments.
-    That method returns a slice. For example:</p>
-<pre>
-    fn `&amp;[]`(from usize, to usize) &amp;[] f32 trust
-        // .. boundary checking before this
-        &amp;_array[from .. to]
-</pre>
+    <p>Comparing for order (e.g., &lt;) is not possible directly.
+        One can of course compare the component parts of an array reference separately (see below).</p>
+    <p>Use iteration to compare the contents in two arrays.</p>
 
-<h2>Vec: Variable-size arrays</h2>
-    <p>Vec is the language standard template for a resizeable array.
-    For ease-of-use, the language supports sugar for its use:
+    <h3>Property Queries</h3>
+    <p>The component parts of an array or array reference can be retrieved separately:</p>
 <pre>
-vec_array [u32] i32   // Equivalent to Vec[i32, u32]
+imm ptr = array.ptr     // The pointer to the first element
+imm len = array.len     // The number of elements
+imm count = array.count // The number of elements
+imm size = array.size   // The memory size used
 </pre>
-    <p>The dimension must be an unsigned integer.</p>
-    
-    <h2>Map: Variable-size associated arrays</h2>
-    <p>Map is the language standard template for a resizeable dictionary map.
-    For ease-of-use, the language supports sugar for its use:
-<pre>
-map_marray [Text] i32  // Equivalent to Map[i32, Text, usize]
-</pre>
-    <p>The dimension here must be a type that supports the hash method.</p>
+    <p>Although .count and .len returns the same value for these types,
+        this is not necessarily true for other types,
+        where .len represents the capacity and .count represents how many elements contain a stored value.
+    </p>
+
+    <h2>Structs as indexed collections</h2>
+    <p>More complex collections may be created using the built-in array types as a foundation.
+        This is typically accomplish by defining a struct with a dynamic array as one of the fields.
+        This custom collection can handle all of the operations described earlier
+        because these capabilities are invoked as methods on the struct object.
+        The struct's methods can then forward these requests down to the dynamic array as appropriate.</p>
+    <p>These are the implicit names for these methods:</p>
+    <ul>
+        <li><b>[]</b> - single-element indexing (get and set) if there is one argument,
+            and multi-element indexing if there are two.</li>
+        <li><b>&[]</b> - get borrowed reference to a single element</li>
+    </ul>
 
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refalloc.html"><img alt="_" src="next.png" /></a>
