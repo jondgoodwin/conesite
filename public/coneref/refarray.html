@@ -185,6 +185,10 @@ imm borref = &amp;sliceref[4]   // borrow reference to 5th element
 arrref[1 by 2] = sliceref[0 by 2]
 greetings[n by 5] = "Kevin"
 </pre>
+    <p>Similarly, a single value can be repeatedly filled into a slice's elements:</p>
+<pre>
+arrref[1 .. 3] = 2
+</pre>
 
     <h3>Iteration</h3>
     <p>The <span class="pre">each</span> block provides an easy way to iterate over
@@ -198,6 +202,11 @@ each x in intslice
 <pre>
 each &mut x in intslice
     ++x
+</pre>
+    <p>Iteration can also show the index number for each value:</p>
+<pre>
+each i, x in intslice
+    newslice[i] = x
 </pre>
 
     <h3>Comparison</h3>

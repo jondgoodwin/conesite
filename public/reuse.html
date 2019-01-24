@@ -18,23 +18,19 @@
 	</div>
 
 	<div class="text">
-	<p>Despite the significant performance and safety benefits of static typing, there are downsides. 
-		The intentional rigidity of static types can mean that general-purpose algorithms
-		(e.g., sort or hashed collections) have to be replicated
-		and customized by hand for each type the algorithms are applied to,
-		adversely impacting programmer productivity and code size.
-		Type inflexibility also makes it harder to support heterogeneous collections,
+	<p>Cone is a statically typed language, offering the expected range of built-in, concrete types,
+		such as integers, floating point, boolean, record structures, arrays, references and pointers.
+		Encoding values using these static types yields significant performance and safety benefits.
+		However, restricting programs to only these concrete types would degrade
+		versatility and programmer productivity.
+		For example, the code for certain general-purpose algorithms (e.g., sort or hashed collections)
+		would have to be replicated and customized by hand for each type the algorithms are applied to.
+		Type inflexibility would also make it harder to support heterogeneous collections,
 		where each value in the collection could have a different type.</p>
 	<p>To support greater code flexibility and reuse, while still enforcing type safety,
-		Cone offers various techniques to improve type flexibility and help generalize algorithmic logic
+		Cone offers various techniques to help generalize algorithmic logic
 		across diverse types and conditions.</p>
 
-	<p><b>Method Overloading</b></p>
-	<p>Multiple methods in a type can be given the same name but different type signatures and implementations.
-		When a method of a certain name is used, the most appropriate implementation
-		is automatically picked and dispatched based on the types
-		of the passed arguments and the get/set context.</p>
-		
 	<p><b>Interfaces and Traits</b></p>
 	<p>When multiple types offer methods with the same names and signatures,
 		an interface type may be defined declaring this common subset of methods.
@@ -47,20 +43,26 @@
 		This further improves code reuse over interfaces.
 	</p>
 
-	<p><b>Fluid Permissions and Borrowed References</b></p>
-	<p>To improve safety, every reference must specify its permission type.
-		Similarly, to support multiple memory management strategies, every reference also
-		specifies its allocator type.
-		If separate logic were needed for every combination of permission and allocator types, this could get messy.</p>
-	    <p>Fortunately, static permissions allow a reference
-		to be safely treated as if it had a lesser permission. 
-		For example, <span class="pre">const</span> is the popular default permission for a method's reference parameter,
-		because it is a valid substitute for most static permissions
-		(when we know a method or function won't change the value).</p>
-	<p>Similarly, any reference may be coerced to a borrowed reference, regardless of which allocator manages it.
-		Designing logic around the preferred use of borrowed const references,
-		wherever lifetime and mutability constraints allow,
-		helps significantly reduce the complexity of type libraries and program functions.</p>
+	<p><b>Method Overloading</b></p>
+	<p>Multiple methods in a type can be given the same name but different type signatures and implementations.
+		When a method of a certain name is used, the most appropriate implementation
+		is automatically picked and dispatched based on the types
+		of the passed arguments and the get/set context.
+		Method dispatch may be static (normally) or dynamic (when using interfaces or traits).</p>
+		
+	<p><b>Implicit Type Coercions</b></p>
+	<p>In many situations, a value of one type can be safely coerced to another type.
+		Cone recognizes when this is safe to do it, and automatically coerces a value to the type
+		expected by the variable or function it is being sent to.
+		This makes it possible for a single function to serve the needs of diversely-typed values.</p>
+	<p>This is particularly useful for references, since:
+		<ul>
+			<li>allocated references coerce to borrowed references</li>
+			<li>most permissions coerce to <span class="pre">const</span></li>
+			<li>concrete types can coerce to traits or interfaces</li>
+			<li>non-nullable references can coerce to nullable references</li>
+		</ul>
+	<p>If separate logic were needed for every combination of permission and allocator types, code could get quite verbose!</p>
 	
 	<p><b>Variant types</b></p>
 	<p>Variant types are useful when a value might be one of several, seemingly-unrelated types 
@@ -96,7 +98,7 @@
 	</p>
 	<ul>
 		<li>Compile-time execution, enabling conditional logic and calculation of values at compile-time</li>
-		<li>Reflection for accessing to compiler information (esp. types) to compile-time execution</li>
+		<li>Access to compiler information (esp. types) to guide compile-time execution</li>
 		<li>Macros that expand code every time they are used</li>
 	</ul>
 	<p>Metaprogramming is valuable for customizing, replicating or calculating logic or data at compile-time.
