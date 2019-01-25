@@ -18,93 +18,96 @@
 	</div>
 
 	<div class="text">
-	<p>Cone is a statically typed language, offering the expected range of built-in, concrete types,
-		such as integers, floating point, boolean, record structures, arrays, references and pointers.
-		Encoding values using these static types yields significant performance and safety benefits.
-		However, restricting programs to only these concrete types would degrade
-		versatility and programmer productivity.
-		For example, the code for certain general-purpose algorithms (e.g., sort or hashed collections)
-		would have to be replicated and customized by hand for each type the algorithms are applied to.
-		Type inflexibility would also make it harder to support heterogeneous collections,
-		where each value in the collection could have a different type.</p>
-	<p>To support greater code flexibility and reuse, while still enforcing type safety,
-		Cone offers various techniques to help generalize algorithmic logic
-		across diverse types and conditions.</p>
+	<p>For optimal performance, Cone supports a full set of CPU-friendly concrete, static types:
+		integers, floating point, boolean, record structures, arrays, safe references, slices and raw pointers.
+		More complex data structures are easily defined by composing these built-in primitive types.
+		As helpful as this is, it is not enough for a modern language.</p>
+	<p>Programmers are short on time. They need to write a piece of logic once,
+		and have it work across many data types and diverse operating environments.
+		This kind of code reuse is called polymorphism.
+		Cone offers a comprehensive range mechanisms that make polymorphism easy to accomplish:
+		implicit, lossless type coercions, interfaces and traits, generics, and metaprogramming.</p>
+	<p>Programmers also need the ability to work with data whose precise type may not be known until the program runs.
+		Such dynamic typing makes it easy to support heterogeneous collections, optional values,
+		success/failure results, and more.
+		Cone's variant type mechanisms make dynamic type versatility both easy and safe.</p>
+	<p>The following sections elaborate on these code reuse and variant type mechanisms.</p>
 
-	<p><b>Interfaces and Traits</b></p>
-	<p>When multiple types offer methods with the same names and signatures,
-		an interface type may be defined declaring this common subset of methods.
-		Any object whose type complies with the interface can be coerced to an interface type reference.
-		By collapsing the logic for multiple types through common interface dispatch, 
-		less code is needed for each distinct type.</p>
-	<p>Traits work similarly to interfaces, but add support for code and property inheritance
-		for types that explicitly implement them.
-		A type can mix in methods and properties from multiple traits.
-		This further improves code reuse over interfaces.
-	</p>
-
-	<p><b>Method Overloading</b></p>
-	<p>Multiple methods in a type can be given the same name but different type signatures and implementations.
-		When a method of a certain name is used, the most appropriate implementation
-		is automatically picked and dispatched based on the types
-		of the passed arguments and the get/set context.
-		Method dispatch may be static (normally) or dynamic (when using interfaces or traits).</p>
-		
 	<p><b>Implicit Type Coercions</b></p>
-	<p>In many situations, a value of one type can be safely coerced to another type.
-		Cone recognizes when this is safe to do it, and automatically coerces a value to the type
+	<p>Sometimes, a value of one type can be safely coerced to another type.
+		Cone recognizes when this is safe to do, and automatically coerces a value to the type
 		expected by the variable or function it is being sent to.
 		This makes it possible for a single function to serve the needs of diversely-typed values.</p>
 	<p>This is particularly useful for references, since:
 		<ul>
-			<li>allocated references coerce to borrowed references</li>
-			<li>most permissions coerce to <span class="pre">const</span></li>
-			<li>concrete types can coerce to traits or interfaces</li>
-			<li>non-nullable references can coerce to nullable references</li>
+			<li>Allocated references coerce to borrowed references</li>
+			<li>Nearly all reference permissions coerce to <span class="pre">const</span></li>
+			<li>Concrete types can coerce to traits or interfaces</li>
+			<li>Non-nullable references can coerce to nullable references</li>
 		</ul>
-	<p>If separate logic were needed for every combination of permission and allocator types, code could get quite verbose!</p>
+	<p>If separate logic were needed for every combination of permission and allocator types, code could get quite verbose!
+		Better yet, use of implicit coercions is "free": 
+		it neither bloats the size of generated code nor carries a runtime performance penalty.</p>
 	
-	<p><b>Variant types</b></p>
-	<p>Variant types are useful when a value might be one of several, seemingly-unrelated types 
-	(but we won't know which until run-time).
-	Variant types are useful for optional values (and nullable references), returned result/error, and many other uses.
-	The type flexibility of dynamic languages, including their support for heterogeneous collections,
-	is based on the use of variant types.
-	Downcasting an interface reference to its original tagged struct requires the use of variant types.</p>
-	<p>Information about the value's current type is carried as a part of the value.
-	Pattern matching is used to safely extract a properly typed value for appropriate manipulation.</p>
-	<p>Similar to interfaces, variant types can help reduce redundant logic.
-		Variant types are more flexible in some ways than interfaces, 
-		since the types contained within a variant type need not share common methods.
-	   However, variant types do bear some added memory and performance costs.</p>
-	
+	<p><b>Interfaces and Traits</b></p>
+	<p>Often a program uses several types that define identically-typed methods or fields.
+		It can be useful for some part of the program to act on values of these types in the same way by virtue of this similarity.
+		By restricting itself to a common subset, a code's behavior can be written in a general-purpose way,
+		yet automatically specialize its logic based on the actual types of values,
+		using either static or virtual dispatch.</p>
+		<p>Cone offers two distinct mechanisms for this:</p>
+	<ul>
+	<li>User-defined <b>interfaces</b> define type similarities structurally, 
+		defining only the method and field signatures in common.
+		The advantage of interfaces is that they can be implicitly applied to <i>any</i> value whose type complies to the signature.</li>
+	<li>User-defined <b>traits</b> define type similarities nominally,
+		requiring all compliant types to explicitly declare they implement the trait.
+		The advantage of traits over interfaces is their support for code and field inheritance.
+		A type may implement (mix in) multiple traits.</li>
+	</ul>
+	<p>Cone also supports a related dispatch capability: <b>method overloading</b>,
+		which permits the creation of multiple methods that have the same name but different method signatures.
+		This extends the ability of differently-typed values
+		to participate in a named method's intended functionality,
+		by dispatching to the method implementation whose type signature best matches the types of the method call arguments.</p>
+
 	<p><b>Generics</b></p>
-	<p>Generics enable the creation of type or function logic that works across a range
-		of compliant types. A type's compliance is measured similarly to a type's conformance to an interface or trait,
-		but is not restricted to just references.
+	<p>Generics enable the creation of type or function logic that works across all types that conform
+		to specified interface or trait guard(s).
 		Collection types are well served by this approach, as a single generic
-		can encapsulate the same algorithmic logic across all the types the collection stores or indexes with.</p>
+		can apply the same algorithmic logic across all types the collection stores or indexes with.</p>
 	<p>Depending on the nature of the generic's parametric types, the instantiation of a generic can vary.
-		Sometimes, instantiation is a compile-time mechanism, using a macro-like mechanism to generate multiple versions
-		for each type. Other times, the generic is transformed into a runtime mechanism similarly to interfaces,
-		where a single piece of runtime logic can use runtime type information to generalize
-	    the logic successfully across values from many different types.</p>
+		Sometimes, instantiation is a compile-time "monomorphization" mechanism, using a macro-like mechanism to generate multiple versions
+		for each type. Other times, the generic is transformed into a runtime mechanism that uses virtual dispatch
+		to specialize the logic across values from many different types.</p>
 	</p>
 
 	<p><b>Metaprogramming</b></p>
-	<p>Metaprogramming involves the use of a scripting language "on top" of the programming language.
-		This scripting language, whose syntax looks nearly identical to Cone, provides programmatic control over the
-		program's compilation, offering such features as:
-	</p>
+	<p>Metaprogramming supports polymorphism by enabling program logic to be re-shaped while it is being compiled. 
+		In effect, metaprogramming layers a syntactically-similar, compile-time "scripting language" over the core language,
+		which alters or elaborates on the program's code being compiled.</p>
+	<p>Metaprogramming enables several helpful capabilities:</p>
 	<ul>
-		<li>Compile-time execution, enabling conditional logic and calculation of values at compile-time</li>
-		<li>Access to compiler information (esp. types) to guide compile-time execution</li>
-		<li>Macros that expand code every time they are used</li>
+		<li>Conditional compilation, which customizes a program's logic for its target runtime environment.</li>
+		<li>Macros for concise specification of repetitive program logic or data.</li>
+		<li>Compile-time execution for pre-calculating complex data structures.</li>
 	</ul>
-	<p>Metaprogramming is valuable for customizing, replicating or calculating logic or data at compile-time.
-	The downsides of metaprogramming are: the increased complexity of writing generalizable code,
-	slower compilation times, and generated-code size increases due to code expansion.</p> 
 	
+	<p><b>Variant types</b></p>
+	<p>Cone's variant types promote type versatility when we don't know what the type of a value is going to be
+		until we run the program.
+		User-defined variant types allow a compliant value to be one of several, seemingly-unrelated types.
+	Variant types are useful for optional values (and nullable references), returned result/error, and many other uses.
+	The type flexibility of dynamic languages, including their support for heterogeneous collections,
+	is based on the use of variant types.
+	Downcasting an interface reference to its original tagged type requires the use of variant types.</p>
+	<p>Information about the value's current type is carried as a part of the value.
+	Pattern matching is used to safely extract a properly typed value for appropriate manipulation.</p>
+	<p>Similar to interfaces, variant types can also help reduce redundant logic.
+		Variant types are more flexible in some ways than interfaces, 
+		since the types contained within a variant type need not share common methods.
+	   However, variant types do bear some added memory and performance costs.</p>
+			   
 	</div>
 
 </body>

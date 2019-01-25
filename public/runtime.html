@@ -18,14 +18,20 @@
 	</div>
 
 	<div class="text">
-	<p>Optimal performance and minimal code footprint are essential to a responsive 3D web experience.
+	<p>Optimal performance and minimal code footprint are essential to a responsive 3D experience.
 	3D worlds are punishing to deliver, as they have to perform millions of rendering and motion
 	calculations reliably every 16 milliseconds. Internet bandwidth constraints magnify these challenges;
 	if we cannot keep world assets and the underlying engine's code compact, it will be impossible
 	to stream them from the server to the client on a timely basis.</p>
 
 	<p><b>Performance</b></p>
-	<p>Cone has been designed to deliver blazingly-fast runtime performance (and to compile quickly too!).</p>
+	<p>
+	  Although Cone's initial focus is on web-delivered 3D, it is designed to also support
+	  native platform 3D experiences. It is also intended to be usable for building 3D world servers,
+	  keeping multi-player clients synchronized to the most recent state of the world.
+	  To satisfy these focus areas,
+	  Cone has been designed to deliver blazingly-fast runtime performance (and to compile quickly too!).
+	</p>
 	<p>A large part of Cone's performance story comes from obvious architectural choices.
 	Cone's statically-typed programs are compiled to native executables
 	supporting all popular platforms:  Windows, Linux, Macintosh, Android, iOS, and WebAssembly.
