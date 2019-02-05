@@ -66,7 +66,7 @@ imm ref <span class="pre">&i32</span> = &amp;a
 
 	<h2>Creating a Borrowed Reference</h2>
 	<p>There are several ways to create a borrowed reference.</p>
-	<h3>From a variable</h3>
+	<h3>Borrowing from a variable</h3>
 	<p>As already demonstrated, one may borrow a reference to any global, local or parameter variable:</p>
 <pre>
 imm glovar = 2
@@ -74,55 +74,92 @@ fn func(imm parm)
 	mut localvar = 3
 	imm ref1 = &amp;glovar
 	imm ref2 = &amp;parm
-	imm ref3 = &amp;localvar
+	imm ref3 = &amp;mut localvar
 </pre>
 
-	<p>The permission of the borrowed reference will match that of the variable it borrows the address to.
-    Thus, <span class="pre">ref3</span> is a mutable borrowed reference, usable to change the value it points at.
-		An alternative permission may be specified after the &amp;, if a more constrained
-		permission is desired for the borrowed reference.</p>
+	<p>If no permission is specified, <span class="pre">const</span> is assumed.
+		A permission may be explicitly specified, as was done for <span class="pre">ref3</span>,
+		where the reference is given the shared, mutable permission, allowing it to change the value it points to.
+		A requested permission must be allowed by the source variable. 
+		For example, it would be prohibited to obtain a mutable reference to an immutable variable.</p>
 	<p>Notice that the <i>variable</i> 'ref3' that holds the reference is itself immutable
 		(it can only ever refer to 'localvar'). However, it holds a <i>reference</i> able to change (mutate) 'localvar'.
 		In this statement, 'imm' prohibits the variable 'ref3' from being changed,
 		whereas the implicit 'mut' allows the value pointed at by ref3 to be changed.
 		These are separable concerns.</p>
 			
-	<h3>From another reference</h3>
+	<h3>Borrowing from another reference</h3>
 	<p>Any kind of reference (including an <a href="refallocref.html">allocated reference</a>) 
-		may be coerced into a borrowed reference.
-		This sort of coercion commonly happens when passing any reference to a function or method
-		that expects a borrowed reference:</p>
+		may be implicitly coerced into a borrowed reference.
+		This sort of coercion happens when passing any reference to a function or method
+		that expects a differently-typed reference:</p>
 <pre>
-// This function accepts a borrowed reference
-fn incr(nbr &amp;mut i32)
-	 *nbr += 1
+// This function accepts a borrowed const reference
+fn incr(nbr &amp;i32)
+	 *nbr + 1
 
 fn main()
 	imm allocref = &amp;rc 1   // An allocated reference pointing to an allocated value of 1
-	incr(allocref)         // Coerces the allocated reference to a borrowed reference
-	// allocref now points to the value 2
+	incr(allocref)         // 2. Coerces the allocated uni reference to a borrowed const reference
 </pre>
 	<p>Because <i>any</i> reference may be safely coerced to a borrowed reference,
 		functions and methods typically accept borrowed references as parameters.
 		This offers two huge benefits:</p>
 	<ul>
-		<li>it makes these functions and methods polymorphic across allocators (memory management strategies)</li>
+		<li>it makes these functions and methods polymorphic across allocators and permissions at no cost</li>
 		<li>it eliminates the runtime performance overhead of reference counting (for the rc allocator)
 			and reference tracing (for a tracing GC allocator) within these functions.</li>
 	</ul>
+	<p>It is also possible to explicitly borrow a reference from an existing reference.
+		Do so by de-referencing the source reference as part of the borrow:</p>
+<pre>
+imm allocref = &amp;rc 1
+imm borref = &*allocref
+</pre>
 
-	<h3>From a substructure</h3>
-	<p>One can borrow a reference to a value contained within a compound value,
-		such as a named property of a <a href="refstruct.html">struct</a>
-		or an element or slice in an <a href="refarray.html">array</a>.</p>
+	<h3>Borrowing within a struct or array</h3>
+	<p>Only a borrowed reference may point to some value that lies within an allocated value,
+		such as a property in a <a href="refstruct.html">struct</a> 
+		or an element in a <a href="refarray.html">array</a>-based collection.
+		This is how to do it:
+	</p>
 <pre>
 imm ref1 = &amp;apoint.x   // a property within a struct
 imm ref2 = &amp;vec[a]     // an element within an array
+</pre>
+	<p>This interior reference capability is versatile in several ways:</p>
+	<ul>
+		<li><b>Reference sources are auto-dereferenced</b>.
+		When the expression begins with a struct or array reference, it is automatically dereferenced
+		(for programmer convenience):
+<pre>
+// pointref is a reference to a Point structure
+imm ref3 = &amp;pointref.x   // equivalent to:  &amp;*pointref.x
+</pre>
+		</li>
+		<li><b>Methods can return the requested reference</b>.
+			Rather than directly calculating an interior address statically, 
+			it is possible to invoke a method capable of taking a reference as self and
+			logically calculating some interior reference based on that and other parameters.
+			For example:
+<pre>
+imm ref4 = &amp;pointer.someref(key)  // passes &amp;pointer as self to someref method. Returns a reference
+</pre>
+		<p>For some types, this is how borrowing a reference using [] indexing may be processed: invoking a method named `&[]`.</p>
+		</li>
+		<li><b>Interior borrows support address chains</b>.
+			Obtaining a borrowed reference follows the entire sequence of post-fix based operations in an expression,
+			making possible address chains like:
+<pre>
 imm ref3 = &amp;vec[3].point.x
-</pre></li>
-<p>This technique applies whether the variable holds the compound value or holds a reference to one.</p>
+</pre>
+		<p>Each stage of such an address chain begins with a reference and ends with an interior reference.
+			Parentheses should be used, where needed, to clearly demark where such an address chain ends.
+		</p>			
+		</li>
+	</ul>
 
-	<h3>From a function or method</h3>
+	<h3>Borrowing a function or method reference</h3>
 	<p>A reference may be borrowed from any named function or method.
 	That reference may be used to call the function it refers to.</p>
 <pre>
