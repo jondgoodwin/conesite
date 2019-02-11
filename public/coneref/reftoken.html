@@ -89,7 +89,9 @@
 		<h2 id="char">Character Literal</h2>
 		<p>A character literal begins and ends with a single quote (')
 		within which must be found a single UTF-8 unicode character.
-		Its type is u32: an unsigned, 32-bit integer.</p>
+		Its type is u8 if its value fits in a byte.
+		Otherwise it is u32 (an unsigned, 32-bit integer) if its does not fit in a byte
+		or has a 'u' appended at the end of the literal (e.g., <span class="pre">'a'u</span>).</p>
 		<p>Any character whose Unicode value is 0x0020 or higher can be specified explicitly.
 		Alternatively, one of the following escape sequences that begin with '\' may be used:</p>
 		<dl id="escape">
