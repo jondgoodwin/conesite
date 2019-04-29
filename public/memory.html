@@ -18,66 +18,80 @@
 	</div>
 
 	<div class="text">
-	<p>Choosing a programming language often means accepting how that language handles
+	<p>Choosing a programming language means accepting how that language manages
 	the allocation and use of memory:</p>
 	<ul>
 	<li>Java, C# and Go use tracing garbage collection.</li>
 	<li>Python and Swift use reference-counted objects.</li>
-	<li>With C, the allocation and freeing of memory is explicitly performed by the programmer</li>
-	<li>Rust supports two approaches: a lexical, single owner mechanism and reference-counted objects</li>
+	<li>C requires the programmer to explicitly manage memory</li>
+	<li>Rust encourages use of its static, single-owner mechanism</li>
 	</ul>
-	<p>There is no one perfect memory management strategy;
-	each has well-known advantages and disadvantages. Some offer faster throughput or more predictable performance,
-	some offer guaranteed memory safety, and others support a broader range of data structures.
-	Such trade-offs make a big difference to the consistent, performance of real-time 3D,
-	particularly when stressed by memory-intensive realistic graphics.</p>
-	<p>Cone handles memory differently: It gives the choice to the programmer, allowing
-	the memory management strategy to be selected on an object-by-object basis.
-	Making this choice is surprisingly easy: instead of saying "new Point(1., 2.)" to create a new Point object,
-	you say: <span class="pre">&gc Point(1., 2.)</span>, where <span class="pre">&amp;gc</span>
-	means the tracing garbage collection allocator will allocate and manage 
-	the lifetime of this new Point object.</p>
+	<p>Unfortunately, there is no perfect memory management strategy.
+	Some specialize in faster throughput or more predictable performance.
+	Others are easier-to-use for programmmers and support a broader range of data structures.
+	C's approach gives powerful control to the programmer, 
+	but it is inconvenient and offers no memory safety guarantees.
+	So, when a language restricts programs to a single strategy,
+	that may work out for some programs,
+	but it could easily be a poor fit for others.</p>
 	
-	<p><b>Built-in Allocators</b></p>
-	<p>Cone supports three common "garbage collection" strategies as built-in allocators:</p>
+	<p><b>Region-based Allocation</b></p>
+	<p>Like Cyclone, Cone enables the programmer to choose the memory
+	management strategies a program uses.
+	In effect, available memory is partitioned into regions,
+	each with its own strategy for allocating and freeing memory
+	as needed for data.
+	Every newly-created object names the region that provides its memory.
+	It is the job of each region to decide when it is safe to dispose of its
+	no-longer-accessible objects.</p>
+
+	<p>In addition to the global and stack regions, 
+	Cone offers a broad range of region strategies for dynamically creating new objects:</p>
 	<ul>
-	<li><b>own</b> - Rust's lexical, single owner strategy (e.g., Box&lt;T&gt;),
-	which uses RAII and move semantics to determine
-	when to safely free the object. Since lifetimes are calculated at compile-time, there is no runtime
-	bookkeeping overhead (unlike the following two approaches).</li>
-	<li><b>rc</b> - Reference-count strategy, which keeps track of the number of references to the
-	object, freeing it when the count goes to zero.</li>
-	<li><b>gc</b> - Tracing garbage collection, which periodically scans all references from the root set,
-	freeing any objects that are no longer reachable by the active program.</li>
+	<li><b>Arenas.</b> These use a bump pointer to quickly allocate memory.
+	An arena's objects are all freed when the arena's lifetime ends.
+	Arenas offer the best performance and great data structure versatility, but they can waste memory.</li>
+	<li><b>Pool.</b> These use a free-list to quickly allocate and free memory.
+	Pools can be good for performance, but they limit object size to a certain maximum.</li>
+	<li><b>Single-owner.</b> This frees an allocated object
+	at the end of the last lexical block it is moved into.
+	These are medium performers, benefitting by the lack of runtime bookkeeping costs,
+	but they are limited to modeling hierarchical data structures.</li>
+	<li><b>Tracing GC.</b> This periodically scans all references from the root set,
+	freeing any objects that are no longer reachable by the active program.
+	This strategy is versatile and convenient across all data structures and 
+	minimizes memory leaks. 
+	However, its runtime mechanisms can negatively impact throughput and latency.</li>
+	<li><b>Reference counting.</b> This counts the number of references to an object,
+	freeing it when the count gets to zero. This typically offers the worst performance
+	and can leak memory in the presence of cycles. However, it supports complex
+	data structures, is slim to implement, and has better determinism and latency than tracing.</li>
 	</ul>
-	<p>In addition, Cone provides built-in support for pools and arenas:
-	<ul>
-	<li><b>pool</b> - rapid allocation and free of fixed-size objects through the use of
-	bump pointer and free-list management against a large contiguous block of memory.
-	Not only does this dramatically improve allocation/free performance, but can also
-	facilitate support for cache-friendly data-oriented design approaches such as ECS.</li>
-	<li><b>arena</b> - rapid bump pointer allocation of variable-sized objects within a
-	specific lexical scope. When the lexical scope ends, all memory used by that scope is freed at once.</li>
-	</ul>
-	<p>Because Cone supports hybridized memory management, 
-	the programmer can better optimize performance, latency, safety, and data structure flexibility
-	as best meets the overall needs of a specific program.
-	High-speed strategies (lex, pool, arena) can be used where data structures permit,
-	dramatically reducing the overhead imposed by more flexible, but slower memory strategies (rc or gc)
-	used by the remaining objects.
-	Significant use of lex, for example, might significantly reduce the relevance of the "generational hypothesis",
-	thereby minimizing or eliminating the need for a generational nursery.</p>
 	
-	<p><b>Borrowed References</b></p>
-	<p>Cone supports Rust-like borrowed references, an important feature that further optimizes
-	performance and polymorphic reuse. Borrowed references are safe because
-	the lifetime of the borrowed reference is guaranteed (by the compiler) to be shorter than the
-	owner reference it borrows from. In effect, the continued live-ness of the owner reference
-	"pins" the object and keeps it alive for at least as long as the lifetime of the borrowed reference.</p>
-	<p>Cone allows references to be borrowed from any allocator, including rc and gc.
-	Using a borrowed reference, rather than aliasing the rc or gc reference, reduces the runtime
-	overhead of these memory management strategies, as borrowed references are never counted nor traced.</p>
-	
+	<p>Cone also supports <b>borrowed references</b>.
+	A lifetime-constrained borrowed reference can be obtained from any region-allocated reference,
+	or even within an object.
+	They are particularly useful for easily making code polymorphic.
+	Their use can also improves performance, as they require no runtime logic to manage.</p>
+
+	<p><b>Benefits</b></p>
+	<p>Cone's versatile regional memory managers give the programmer the power 
+	to architect a program's use of memory for optimal throughput and latency,
+	without sacrificing safety, convenience, or data structure flexibility.</p>
+	<p>The performance benefit of region-based memory is particularly important given
+	how many CPU cycles are wasted allocating, freeing, copying, and liveness tracking
+	thousands or millions of small data objects in most programs today
+	(not to mention accessing those objects indirectly in cache-unfriendly ways).
+	High-speed strategies (arenas, pools, and single owner) can be used
+	where they are a good fit to a program's data structure and memory use requirements.
+	The slower ref-counting and tracing strategies can then be used for
+	objects that require their flexibility and memory efficiency.
+	Even then, extensive use of borrowed references can significantly minimize the throughput
+	and latency overhead usually experienced with reference counting and tracing.</p>
+	<p>All of the region strategies are memory safe, even though they use different
+	techniques for ensuring that an object's memory is only reclaimed when
+	all references to it are gone.</p>
+
 	</div>
 
 </body>
