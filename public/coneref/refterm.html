@@ -13,7 +13,7 @@
 
     <div class="text">
 
-	<p>Let's begin with literals and variables,
+	<p>We begin with literals and variables,
 		two basic building blocks for any expression.
 		Along the way, additional concepts will be introduced,
 		such as types, permissions, variable declarations, assignment, and scope.</p>
@@ -37,21 +37,21 @@
 	</li>
 	<li>boolean <span class="pre">true</span> and <span class="pre">false</span></li>
 	<li><span class="pre">null</span> value for a nullable reference</li>
-	<li>struct, array, and other compound literals</li>
+	<li>struct, array, and other compound values</li>
 	</ul>
 
 	<h3 id="vtype">Types</h3>
 	<p>Every value has a type it belongs to.
 	Although we will cover <a href="reftypes.html">types</a> more thoroughly later, let's simply say for now
-	that each type corresponds to a specific collection of allowed values.
+	that each type corresponds to a specific set of allowed values.
 	Thus, the <span class="pre">Bool</span> type only supports <span class="pre">true</span> and <span class="pre">false</span> as values.
 	Integer types only support integer number values.
-	Floating point types support floating point number values.
-	... and so on.</p>
+	Floating point types support floating point number values,
+	and so on.</p>
 	<p>Each type also establishes what operations can be performed on values of that type.
 		Thus, an integer type permits two integers to be added together,
 		the result of which is another integer value.</p>
-	<p>For the next few pages, examples will only use Cone's built-in number types,
+	<p>For the next few pages, examples will only use the built-in number types,
 		which specify their bit-size as part of the type's name. Here they are:</p>
 	<ul>
 	<li><b>Signed integer</b> types: <span class="pre">i8</span>, <span class="pre">i16</span>,
@@ -85,7 +85,7 @@
 </pre>
 	
 	<h2 id="vars">Variable</h2>
-	<p>A variable is a named container which holds a value of some specific type.</p>
+	<p>A variable is like a named container which holds a value of some specific type.</p>
 
 	<h3>Variable declarations</h3>
 	<p>Before a variable can be used, it must first be declared and initialized.
@@ -127,9 +127,9 @@ imm height f32
 height = 1.86         // Initialize height now
 </pre>
 	<p>An <i>assignment</i> essentially copies the evaluated value of the expression
-		to the right of the <span class="pre">=</span> into the value container specified to the left.
-		In this case, the value container is a variable.
-		Other sorts of containers are possible and will be described later.
+		to the right of the <span class="pre">=</span> into the variable specified to the left.
+		(Later, we will show that assignment can also be used to place values into structures
+		that lie "within" a variable's value.)
 		Any assignment is itself an expression, and may be used wherever expressions are allowed.</p>
 	<p>It is worth pointing out that any attempt to re-assign 'height' later
 	to another value will trigger an error message:</p>
@@ -161,7 +161,7 @@ age = 24          // alters age to hold 24 instead
 	<h3 id="scope">Scope and Visibility</h3>
 	<p>As we have seen, variables have a name, permission, type and value.
 		They also have a scope and visibility.
-		Scope and visibility restrict (isolate) where a variable may be
+		Scope and visibility restrict where a variable may be
 		referenced and used in a program.</p>
 	<ul>
 	<li><i>Scope</i> is established by where the variable's declaration is found.
