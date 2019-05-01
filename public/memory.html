@@ -34,6 +34,8 @@
 	So, when a language restricts programs to a single strategy,
 	that may work out for some programs,
 	but it could easily be a poor fit for others.</p>
+	<p>With Cone, you can do-it-your-way, using the strategy
+	(or mix of strategies!) that best fit the requirements.</p>
 	
 	<p><b>Region-based Allocation</b></p>
 	<p>Like Cyclone, Cone enables the programmer to choose the memory
@@ -64,8 +66,9 @@
 	However, its runtime mechanisms can negatively impact throughput and latency.</li>
 	<li><b>Reference counting.</b> This counts the number of references to an object,
 	freeing it when the count gets to zero. This typically offers the worst performance
-	and can leak memory in the presence of cycles. However, it supports complex
-	data structures, is slim to implement, and has better determinism and latency than tracing.</li>
+	and can leak memory in the presence of cycles. However, it supports more complex
+	data structures than single-owner, has a simple low-impact implementation, 
+	and has better determinism and typically better latency than tracing.</li>
 	</ul>
 	
 	<p>Cone also supports <b>borrowed references</b>.
@@ -77,9 +80,10 @@
 	<p><b>Benefits</b></p>
 	<p>Cone's versatile regional memory managers give the programmer the power 
 	to architect a program's use of memory for optimal throughput and latency,
-	without sacrificing safety, convenience, or data structure flexibility.</p>
+	without sacrificing safety, convenience, or data structure flexibility.
+	This powerful region choice can be made on an object-by-object basis.</p>
 	<p>The performance benefit of region-based memory is particularly important given
-	how many CPU cycles are wasted allocating, freeing, copying, and liveness tracking
+	how many CPU cycles are spent allocating, freeing, copying, and liveness tracking
 	thousands or millions of small data objects in most programs today
 	(not to mention accessing those objects indirectly in cache-unfriendly ways).
 	High-speed strategies (arenas, pools, and single owner) can be used
