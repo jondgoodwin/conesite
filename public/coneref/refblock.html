@@ -8,279 +8,125 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Blocks, Control Flow, and Local Variables</div>
+			<div id="sub">Blocks and Local Context</div>
 		</div>
 
     <div class="text">
 
-	<p>Blocks were briefly introduced in the function chapter.
-	  They provide a modular way to package a function's logic.</p>
-	  <p>There are several kinds of blocks, each with a different approach
-	  to supporting these key roles:</p>
+	<p>On the previous page, we called the function's implementation a "block".
+	  Blocks offer a versatile, easy-to-apprehend way to structure logic.
+	  Their well-defined single point of entry and exit establishes clear
+	  boundaries around control flow as well as the local context it manages.
+	  Versatility comes from being able to nest different kinds of block easily within each other.
+	  This inherent modularity is useful when used in conjunction
+	  with control flow statements or to establish a context for compiler operations
+	  (e.g., safety constraints).</p>
+	<p>All blocks support these key roles:</p>
 	  <ul>
 		<li>Holding an ordered collection of statements</li>
-		<li>Controlling the execution flow</li>
 		<li>Establishing a lexical scope for a local context</li>
 		<li>Building and/or returning a value</li>
-		<li>Establishing how rigorously to enforce safety rules</li>
 	  </ul>
-	</p>
-	<p>Blocks offer a versatile, comprehensible way to structure logic.
-	  Their well-defined single point of entry and exit
-	  simplifies both control flow and context management.
-	  Versatility comes from being able to nest different kinds of block easily within each other.
 	</p>
 
 	<h2>Ordered Collection of Statements</h2>
 	<p>At its simplest, a block is merely a ordered set of statements.
 	You can tell which statements are part of the same block,
 	as they are indented more than the statements that come before and after the block.
-	This indentation typically consists of spaces, although tabs are supported if used consistently.
-	Alternatively, curly braces may be used (rather than indented lines) to enclose a block's statements.
-	</p>
+	This indentation typically consists of spaces, although tabs are supported if used consistently:</p>
+	<p>Let's illustrate this with the most basic kind of block, the <span class="pre">do</span> block:</p>
+<pre>
+fn addPlusOne(a i32, b i32) i32
+  ++a
+  do
+    ++b
+	--a
+  a + b
+</pre>
+	<p>The statements incrementing <span class="pre">b</span>
+	and decrementing <span class="pre">a</span> comprise an interior block within
+	the function's main block. This particular example is a bit contrived,
+	as there is no good reason for us to use an interior block here,
+	since the function would work the same if those statements were placed in the main block.</p>
+	<p>Note that the <span class="pre">do</span> keyword need not be specified if explicit curly
+	braces are used to delimit the basic block.
+	(The reason we need the <span class="pre">do</span> with significant indentation
+	is because it might otherwise be confused with 
+	a <a href="refthis.html"><span class="pre">this</span></a> block.)</p>
+<pre>
+fn addPlusOne(a i32, b i32) i32 {
+  ++a;
+  {
+    ++b;
+	--a;
+  }
+  a + b;
+}
+</pre>
 	<p>Each statement typically has its own line.
 	  However, multiple statements may be placed on the same line, separated with semicolons.
 	  Use of the backslash continuation character can be used whenever a line needs to
 	  span multiple lines. The detailed styling rules are explained
 	  <a href="reftoken.html#line">here</a>.
 	</p>
-	<p>A statement can be:</p>
-	<ul>
-		<li>An <a href="refexpr.html">expression</a>.
-			This could be a function call, arithmetic calculation, assignment,
-			or even another nested block (as a block can be an expression that evaluates to a value).
-			The return value of an expression used as a statement is often simply discarded.
-		</li>
-		<li>A local variable or function declaration (discussed further below).</li>
-		<li>A special-purpose statement or block, typically beginning with a reserved keyword
-			(e.g., <span class="pre">return</span>, <span class="pre">if</span> or <span class="pre">while</span>)
-		</li>
-	</ul>
 		
-	<h2>Blocks and Control Flow</h2>
-	<p>Cone supports many different kinds of blocks.
-	  From a control flow perspective, these can be categorized as:</p>
-	<ul>
-		<li><b>Single use</b>. All of the block's statements are executed just once, in sequence.
-			In addition to the unadorned basic block, 
-			<span class="pre">this</span>, <span class="pre">build</span> and 
-			<span class="pre">using</span> blocks are also single use.
-		</li>
-		<li><b><a href="refcondexp.html">Path selection</b></a>.
-			One or more conditional expressions are used to select which (of several)
-			block's statements to perform.
-			<span class="pre">if</span> and <span class="pre">match</span> blocks offer path selection.</li>
-		<li><b><a href="refloop.html">Loop</b></a>.
-			One or more conditional expressions are used to determine how many times
-			a set of statements are repeatedly performed.
-			<span class="pre">while</span> and <span class="pre">each</span> blocks offer loop control.</li>
-		<li><b>Exception handling</b>.
-			Certain errors will stop the normal execution of a block's statements.
-			Instead, execution is shunted off to exception handling logic.
-		</li>
-		<li><b>Concurrency</b>. Multiple sets of statements can be performed concurrently.</li>
-	</ul>
-
-	<h2 id="blockscope">Local variables and the lexical context</h2>
-	<p>A block may carry its own state information in the form of 
+	<h2 id="blockscope">Lexical Context</h2>
+	<p>Execution of a block's statements always begins with the first statement,
+	as one cannot jump into the middle of a block. 
+	Likewise, execution of the block always finishes at the end of the block.
+	This single-entrance and single-exit nature makes it possible for a block
+	to create a temporary execution context that persists for the lifetime of the block
+	and then is automatically cleaned up at the end of the block.</p>
+	
+	<h3>Local Variables</h3>
+	<p>The block's execution context is created by declaring
 		<a href="reffunc.html#local">local</a>, named variables.
-		This block state is transient; space for it is effectively allocated when execution of the block begins.
-		When execution of the block ends (by any means), appropriate clean up activity is triggered
-		(where defined) and then the state information disappears.</p>
-	<p>Such variables are local to a block simply by being declared within a block:</p>
+		The following example is a bit silly, but it illustrates
+		local variables being declared and used in both the function's block
+		and the interior block.</p>
 <pre>
-fn a_function()
-	mut loco f32
-	while true
-		mut x i32  // indentation shows x's lifetime is bounded by while block
-	x // Error!! x is not accessible here outside the while block
+fn addPlusOne(a i32, b i32) i32
+  mut result = 0;
+  do
+    mut sum = a + b
+	result = sum
+  ++result
 </pre>
-						
-	<p>Once a local variable has been declared, it may be used anywhere after in the same (or inner) block.
-		However, if an inner block declares a local variable of the same name
-		(allowed but not always good practice), the outer scoped variable is effectively invisible
-		throughout the lexical scope of that inner block.</p>
+	<p>The block where a variable is defined is considered to be its lexical scope.
+	Scopes are nested from outer to inner, with global variables having the outer-most scope.
+	Variables declared in outer scopes are accessible in any inner scope.
+	However, the reverse is not true.
+	Thus, the function's outer block may not refer to <span class="pre">sum</span>.</p>
+	<p>If an inner block declares a local variable of the same name
+	as an outer scope (including global variables), 
+		the outer-scoped variable is effectively inaccessible
+		throughout the lexical scope of that inner block.
+		To avoid potential confusion, this should be avoided.</p>
 
-	<p>Blocks use a number of mechanisms under the covers to ensure that
-		resources attached to local variables are handled safely.
-		This is particularly true when references are involved.
-		Such mechanisms enforce aliasing and shared use permission constraints
-		and trigger appropriate allocator de-aliasing events.
-		Further details are covered in the <a href="refrefs.html">reference</a> chapters.</p>
-	<p>The lifetime of a local variable is bounded by the inner-most lexical block
-		the variable is declared within.
-		(Additional indentation of lines typically signals entrance into a new inner block.)
-		The variable is unknown outside its declared scope;
-		any attempt to access it outside its lexical block will fail.</p>
+	<h3>Resource Disposal</h3>
+	<p>The execution lifetime of a local variable does not last beyond its lexical scope.
+	At the end of the block, any resources acquired by local variables
+	are automatically reclaimed. 
+	As we will describe later when talking about 
+	<a href="refmethod.html#drop">"drop semantics"</a>,
+	reclamation might encompass a wide variety of possible activities,
+	including: freeing heap-allocated memory, decrementing counters,
+	releasing locks, closing files or channels, joining threads, 
+	removing dependencies to other objects, etc.
+	Once all resources attached to local variables are reclaimed,
+	any stack space made available to store the values of these local variables is also reclaimed.</p>
 		
-	<h2>Building and/or returning a block value</h2>
-	<p>In many cases (depending on the kind of block), a block can be used as an expression.</p>
+	<h2>Returning a block value</h2>
+	<p>Blocks are expressions, which mean they can evaluate to a value.
+	When a block is used as an expression,
+	its value is that of the last statement in the block
+	(much like implicit returns for functions):</p>
 <pre>
+// Using a block as an expression
 a =
     3.14
     6      // a's value will become 6
 </pre>
-  <p>The value of an expression block is the value of its last expression statement,
-		in effect working exactly the same way as a function's implicit return.
-		As you will see later, the same principle applies to
-		<span class="pre">if</span> and <span class="pre">match</span> control blocks.
-	</p>
-
-	<p>Additionally, a <span class="pre">build</span> or 
-		<span class="pre">this</span> block may be used to focus on and build a value,
-		which is a particularly helpful and readable way to assemble containers.</p>
-
-	<h2>Block Variants</h2>
-	<p>There are several helpful variations on the basic, single use block.</p>
-
-	<h3>do blocks</h3>
-	<p>When using indentation to signify the start of a new block,
-		use 'do' in the unindented line before indentation begins:
-	</p>
-<pre>
-imm x = 3
-x += 1
-// Start a new block here
-do
-	mut x = 6
-// Old block resumes here
-</pre>
-	<p>Use of 'do' subblocks is typically only needed when one wants to diminish the lifetime
-		of variables or borrowed references.
-		Specifying 'do' is needed to distinguish a simple block from a 'this' block. 
-	</p>
-
-	<h3 id="thisblk">'this' and its block</h3>
-	<p>In conversations, we often use pronouns like "she" and "this" as a convenient way
-		to refer to some specific person or thing we are talking about.
-		Cone uses the pseudo-variable <span class="pre">this</span> for the same purpose.
-		It allows a block of code to focus its attention on some specified value
-		referred to by <span class="pre">this</span>.</p>
-	<p>A 'this' block is simply an expression followed by a code block.
-		Throughout the block, <span class="pre">this</span> is understood to hold
-		the value of the specified expression.
-		Multiple actions may be performed using that value.</p>
-<pre>
-// Calculate the value of 'this' (0.174533)
-Float.Pi/180
-	// 'this' block that makes use of calculated 'this' value
-	// to convert from degrees to radians
-	quarter = 90 * this
-	acute = 10 * this
-</pre>
-	<p>'this' blocks can be nested within each other.
-	For any statement, the value of <span class="pre">this</span> is established by
-	the inner-most 'this' block it lies within.</p>
-	<P>Although a 'this' block can focus on any value,
-	it is typically a copyable or borrowed mutable reference to some compound or collection value
-	whose parts we want to read or modify or whose methods we want to invoke over a sequence of statements.
-	'this' blocks offer an easy-to-read and more versatile alternative to method chaining or method cascades.</p>
-	
-	<h3>Operator support for implicit 'this'</h3>
-	<p>To make use of <span class="pre">this</span> more convenient and concise,
-		several operators implicitly work with <span class="pre">this</span>.
-	  When these operator are used as a prefix (rather than as infix operators),
-	  <span class="pre">this</span> is implied to the left.</p>
-	<dl>
-	<dt>.</dt>
-	<dd><b>Method call or property access</b>. 
-	(<span class="pre">.size</span> is equivalent to <span class="pre">this.size</span>)</dd>
-	<dt>&lt;&lt;</dt>
-	<dd><b>Append</b>, placing the value at the end of an ordered collection.
-	(<span class="pre">&lt;&lt;4.7</span> is equivalent to <span class="pre">this&lt;&lt;4.7</span>)</dd>
-	<dt>&gt;&gt;</dt>
-	<dd><b>Prepend</b>, inserting the value at the start of an ordered collection.
-	(<span class="pre">&gt;&gt;event</span> is equivalent to <span class="pre">this&gt;&gt;event</span>)</dd>
-	</dl>
-	<p>Additionally, the ':' infix operator implicitly works with 'this':
-<pre>
-color: 'brown'    # equivalent to: this.color = 'brown'
-</pre>
-	<p>So far, 'this' blocks and operators sound rather dull and boring...
-		What value does this syntactic sugar offer?  Let's finish with
-		examples that illustrate how use of 'this' sugar makes code more concise and readable.
-	</p>
-	
-	<p><b>Method chaining/cascade:</b></p>
-<pre>
-// Perform several methods on on root
-root.findById("canvas")
-	.add(anode)                    // Unlike chaining, the method need not return self
-	.hide(.statuspane)
-	angle = 20 * .degrees          // Unlike cascades, any logic can be placed between method calls
-	.add(anode2)
-	.add(node) each node in nodes  // ... even within conditional branches and loops
-</pre>
-	<p><b>Formatted stream output or string creation:</b></p>
-<pre>
-console
-	&lt;&lt; "Score: "       // Append to console stream
-	color: blue        // Alter a property
-	&lt;&lt; score           // Append with auto-conversion
-	color: white
-	&lt;&lt; "!\n"
-	.flush             // Invoke methods
-
-console &lt;&lt; {"And another thing ";name;"!\n"}
-</pre>
-	<p><b>List construction (or expansion):</b></p>
-<pre>
-// Use of &lt;&lt; at the start means append all the block's expression values
-names = &own List() &lt;&lt;
-	me
-	"Judy"
-	"Davos"
-	you.middlename
-</pre>
-
-  <p><b>Dictionary construction:</b></p>
-<pre>
-toDutch = &gc Dict{Text, Text}()
-	"girl": "meisje:
-	"horse": :paard"
-	"dog": "hond"
-</pre>
-	
-	<h3>Using blocks</h3>
-
-	<h3>Trust blocks: Relaxing Safety Checks</h3>
-
-	<p>The compiler comes with built-in guard rails to help protect your code
-		against a number of safety hazards, which is a good thing.
-		However, these safety guards are extremely cautious and not always very clever.
-		They stop your code from doing things that, under the worst of all possible conditions,
-		could cause memory or race conditions.
-		Sometimes this means they stop your code from doing things that you want to do,
-		and which you can ensure by other means is perfectly safe,
-		but the compiler just does not know how to verify.
-	  The compiler is trying to be helpful, but is just getting in the way.</p>
-	<p>In such situations, Cone provides a built-in escape hatch from the guard rails,
-		in the form of an annotation. 
-		By preceding any block with <span class="pre">trust</span> 
-		(as in:  "trust me on this"), several safety checks are turned off,
-		thereby allowing:</p>
-		<ul>
-		  <li>Raw pointer dereferences, arithmetic, and re-casts.
-				This provides a way to get around the many constraints imposed on references
-				by permissions, lifetimes, allocators and bounds-checks.
-			</li>
-			<li>Use of functions written in and imported from other languages.
-				This is normally disallowed since most other languages are not as
-				rigorous in verifying the safety of the code.
-			</li>
-			<li>Static mutable variable access and mutation.
-				This guard exists to protect against race conditions in multi-threaded code.
-			</li>
-		</ul>
-		<p>Safety is enriched when the programmer and the compiler work together
-			towards that end, each bringing different gifts to bear on the problem.
-			It would not be fair to imply that the compiler's inability to verify safety
-			means that the code is inherently unsafe.
-			By using this "trust" mechanism, compiler-unverifiable code can be
-			isolated and highlighted as such, while still acknowledging
-			that the programmer, who has the ultimate responsibility for safety,
-			may very clearly see what the compiler cannot.
-		</p>
 
 		<p style="text-align: right; margin-top: 2em;">
 			<a href="refcondexp.html"><img alt="_" src="next.png" /></a>

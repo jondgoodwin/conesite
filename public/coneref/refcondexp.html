@@ -13,12 +13,9 @@
 
     <div class="text">
 
-	<p><span class="pre">if</span> and <span class="pre">match</span> are control structures
+	<p><span class="pre">if</span> are control structures
 	that determine which code block to perform based on the evaluated result of one or more conditional expressions.</p>
 	
-	<h2>if vs. match</h2>
-	<p>Let's use a simple number comparison to illustrate how 
-	<span class="pre">if</span> and <span class="pre">match</span> work.
 	<h3 id="if">if</h3>
 	<p>In this heavily commented example, the code block to perform is determined
 	by comparing a combined roll of two die with 7:</p>
@@ -77,25 +74,6 @@ if nbr &gt; 100
   bignumber = true
 </pre>
 
-	<h3 id="match">match</h3>
-	<p>The <span class="pre">match</span> statement works similarly to <span class="pre">if</span>.
-	Its purpose is to match a single value against a list of patterns.
-	In effect, it splits up a conditional expression into two parts: the value to match and a list of 
-	patterns to match it against using the <span class="pre">~~</span> operator.</p>
-	<p>Here is the earlier example rewritten using match:</p>
-<pre>
-result = match roll
-with 7
-  "Perfect"
-with 1 .. 6    // Using a range of values as a match pattern
-  "Too low!"
-else
-  "Too high!"
-</pre>
-	<p><span class="pre">match</span> has a number of other tricks up its sleeves,
-	described in depth <a href="#match">later in this chapter</a> once we have
-	described the powerful <a href="#matchop">match operator</a>.</p>
-	
 	<h2 id="condexp">Conditional Expressions</h2>
 	<p>A wide variety of conditional expressions can be formulated, from simple equivalence or comparisons
 	to complex algorithms that use logical operators, pattern matching, functions or methods.</p>
@@ -157,42 +135,6 @@ x &gt;= 2          // Returns true if x is greater than or equal to 2 (&gt;, &lt
 	<p>Use of the <span class="pre">Comparable</span> trait would then implement the other
 	comparison operators using the rocket-ship operator.</p>
 
-	<h3 id="matchop">Pattern Matching Operator</h3>
-	<p>The <span class="pre">~~</span> pattern match operator is used to match a value to a specific pattern.
-	For example:</p>
-<pre>
-5 ~~ i32      // true, since the type of 5 is i32
-5 ~~ 1 .. 7   // true, since 5 is within the range between 1 and 7
-</pre>
-	<p>The <span class="pre">~~</span> operator is powerful and unusual:</p>
-	<ul>
-	<li>It may be used to match a value to a type. 
-	The match also succeeds if the value's type is a subtype of the specified type.
-	This match could happen at compile-time or run-time.</li>
-	<li>If the match pattern is not a type,
-	it uses the <span class="pre">~~</span> method on the match pattern.
-	Thus, in the example above, the Range type implements the <span class="pre">~~</span> method
-	that is used to determine if a value lies within the Range's interval of values.
-	<p>Notice that this reverses the usual order for operators which are implemented using methods:
-	it is the right-hand value (the match pattern) that must implement the <span class="pre">~~</span> method,
-	and the left-hand value which is passed as a parameter to that method.
-	Thus, <span class="pre">a~~b</span> is implemented as: <span class="pre">b.`~~`(a)</span>.
-	This exception makes the code easier to read and mirrors the order on the 'match' statement, 
-	while still putting the matching work on the pattern, where it belongs.</p></li>
-	<li>Any type that implements the <span class="pre">==</span> method should
-	also implement the <span class="pre">~~</span> method,
-	even if only to the same method. Doing so allows the use of the <span class="pre">match</span>
-	statement for simple multi-value comparisons.</li>
-	<li>The <span class="pre">~~</span> method may be used as an match-and-extract mechanism,
-	by returning an extracted value upon a successful match, or else <span class="pre">null</span> if the match fails.
-	For example, the match pattern might be a regular expression that returns an extracted string or list of strings
-	on a successful match.</li>
-	</ul>
-	<p>Use of the powerful <span class="pre">~~</span> operator is made possible by the 
-	richness of pattern-matching types it is capable of supporting:
-	set membership, regular expression, search selectors (e.g., for parts), parsers, input decoder, 
-	translater, information analysis, etc.</p>
-
 	<h3>Boolean Operators</h3>
 	<p>Acorn has three boolean operators:  
 	'and', 'or' and 'not' ('!').
@@ -221,65 +163,9 @@ false and list.isEmpty
 	that wants a conditional expression (e.g., if), in most cases it will evaluate to a value of 'true' or 'false'.
 	If the conditional expression just uses 'and' or 'or' operators, its value will be the
 	last value evaluated in that expression.</p>
-
-	<h2 id="match">Match statement</h2>
-	<p>Now that we have talked about the <span class="pre">~~</span> pattern match operator,
-	let's return to the <span class="pre">match</span> statement which makes use of that operator.
-	By default, the 'match' statement uses the '~~' method 
-	to match each successive pattern against the value of the 'match' statement's value.</p>
-
-	<h3>The 'using' clause</h3>
-	<p>Append a 'using' clause to the 'match' statement to specify a 
-	specific method to use for matching (as opposed to using the default '~~'):</p>
-<pre>
-match number using `==`
-with 0
-	.turn
-with 1
-	.jump
-</pre>
-	<p>The using clause can specify any method name or an executable function or closure.</p>
-
-	<h3>Multiple patterns on a 'when'</h3>
-	<p>A 'with' statement can list multiple match patterns, separated by commas.
-A match on any of those match patterns activates that code block.</p>
-<pre>
-match number using '=='
-with 0,1
-	.turn
-with 2,3,4
-	.jump
-</pre>
-
-	<h3>Extracting match results</h3>
-	<p>Some patterns do more than matching.
-	They also extract or transform matched elements within a successfully matched source value, 
-	returning one or more new digested value
-	(so long as the first returned value is not false or null, which indicates a match failure).
-	Specify the variables names that hold these returned values with an 'into' clause
-	at the end of the 'match' statement:</p>
-<pre>
-match command into thing
-with +Regex"fight [*]"
-	combat: true
-	opponent: thing
-with +Regex"use [*]"
-	.use(thing)
-</pre>
-	<p>Regex returns the portion of the Text that lies within the square brackets.
-	So, if command was "fight Lux", the first match would succeed and thing would be set to "Lux".</p>
-	<p>Alternatively, the return variable name(s) may be specified on any specific 'with' statement:</p>
-<pre>
-match command
-with +Regex"fight [*]" into npc
-	combat: true
-	opponent: npc
-with +Regex"use [*]" into item
-	.use(item)
-</pre>
 		
 		<p style="text-align: right; margin-top: 2em;">
-			<a href="refloop.html"><img alt="_" src="next.png" /></a>
+			<a href="refmatch.html"><img alt="_" src="next.png" /></a>
 		</p>
 
 	</div>
