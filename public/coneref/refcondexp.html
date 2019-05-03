@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>If, Match and Conditional Logic - Cone Reference</title>
+	  <title>If and Conditional Expressions - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -8,75 +8,80 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">If, Match and Conditional Logic</div>
+			<div id="sub">If and Conditional Expressions</div>
 		</div>
 
     <div class="text">
 
-	<p><span class="pre">if</span> are control structures
-	that determine which code block to perform based on the evaluated result of one or more conditional expressions.</p>
+	<p><span class="pre">if</span> decides which code block
+	to perform based on the truth of one or more conditional expressions.
+	Consider:</p>
+
+<pre>
+fn abs(x i32) i32
+  imm result i32;
+  if x &lt; 0
+    result = -x
+  else
+    result = x
+  result
+</pre>
+	<p><span class="pre">if</span> is used by this function to correctly
+	return the positive, absolute value of x.
+	<span class="pre">x &lt; 0</span> is a conditional expression that evaluates
+	to true whenever x is a negative number. When the conditional evaluates as true,
+	the subsequent block is performed, which converts x to its positive equivalent.
+	When the conditional is not true, the block after the
+	<span class="pre">else</span> is performed instead, which captures the value of x.</p>
 	
-	<h3 id="if">if</h3>
-	<p>In this heavily commented example, the code block to perform is determined
-	by comparing a combined roll of two die with 7:</p>
+	<h2 id="if">if variations</h2>
+	<p>Before covering the logic of conditional expressions,
+	let's summarize various ways to use
+	<span class="pre">if</span>.</p>
+	
+	<h3>if as statement suffix</h3>
+	<p>The <span class="pre">else</span> clause is optional; it need not be specified if there
+	is no alternative action to perform when the condition is false.
+	Furthermore, if the block consists of just one statement,
+	then the <span class="pre">if</span> and condition can be written <b>after</b> the statement.
+	Using this capability, we can re-implement the above function more concisely:
 <pre>
-// Is roll equal to 7?
-if roll == 7
-  // If so, assign result to "Perfect"
-  result = "Perfect"
-
-// Otherwise ("else if"), is roll less than 7?
-elif roll &lt; 7
-  // If so, assign result to "Too low!"
-  result = "Too low!"
-
-// Otherwise (since the roll is not 7 nor less than 7)
-else
-  // Assign result to "Too high!"
-  result = "Too high!"
+fn abs(x i32) i32
+  return -x if x &lt; 0
+  x
 </pre>
-	<p>Every <span class="pre">if</span> structure follows these rules:</p>
-	<ul>
-	<li>It begins with <span class="pre">if</span> followed by a
-	<a href="#condexp">conditional expression</a> and then a block of statements.
-	In this example, <span class="pre">roll == 7</span> is the conditional expression.
-	A block may hold one or more multiple statements.</li>
-	<li>Any number of <span class="pre">elif</span> structures may follow (including none).
-	Each specifies its own conditional expression and a block of statements.</li>
-	<li>If specified, a single <span class="pre">else</span> structure comes last.
-	It has no conditional expression; only a block of statements.</li>
-	</ul>
-	<p>Since <span class="pre">if</span> may be used as an expression, the above code can be simplified to:</p>
+	
+	<h3>if as expression</h3>
+	<p>As with blocks, <span class="pre">if</span> can be used as an expression.
+	This (along with implicit return) provides us with another way to write this function:</p>
 <pre>
-result = if roll == 7
-  "Perfect"
-elif roll &lt; 7
-  "Too low!"
-else
-  "Too high!"
-</pre>
-	<p>If a block has multiple statements, the expression in the last statement of the block
-	is used as the value of that block.</p>
-	<p>The above example can also be written on a single line:</p>
-<pre>
-result = if roll == 7 {"Perfect"} elif roll&lt;7 {"Too low!"} else {"Too high!"}
+fn abs(x i32) i32
+  if x &lt; 0
+    -x
+  else
+    x
 </pre>
 
-	<h4>if clause</h4>
-	<p>When an <span class="pre">if</span> structure has only a single block containing only a single statement,
-	this can be written on a single line by appending an <span class="pre">if</span> clause to the statement:</p>
+	<h3>Multiple conditions</h3>
+	<p>If we have more than one condition to test, each corresponding to
+	a different block to perform, every condition after the first
+	is preceded with <span class="pre">elif</span> (short for "else if").
+	For example:</p>
 <pre>
-bignumber = true if nbr &gt; 100
-</pre>
-	<p>That line is exactly equivalent to:</p>
-<pre>
-if nbr &gt; 100
-  bignumber = true
+fn abs(x i32) i32
+  if x &lt; 0
+    -x
+  elif x == 0
+    0
+  else
+    x
 </pre>
 
 	<h2 id="condexp">Conditional Expressions</h2>
-	<p>A wide variety of conditional expressions can be formulated, from simple equivalence or comparisons
-	to complex algorithms that use logical operators, pattern matching, functions or methods.</p>
+	<p>Conditional expressions are often just simple comparisons, as shown above.
+	However, complex conditional expressions can be formulated that use
+	logical operators, pattern matching, functions or methods.
+	Let's walk through the possibilities, beginning with the basics.</p>
 
 	<h3>True vs. False</h3>
 	<p>A conditional expression evaluates to <span class="pre">true</span> or <span class="pre">false</span>.
@@ -86,23 +91,19 @@ if nbr &gt; 100
 	Thus:</p>
 <pre>
 // This statement will never execute
-a += 1 if 0   // since 0 is equivalent to false
+a += 1 if 0   // since 0 evaluates to false
 
 // This statement will always execute
 a += 1 if "hello"
 </pre>
-	<p>These rules make it possible to use function or method calls as part of a conditional expression:</p>
+	<p>This applies to the (first) value returned by a function or method call:</p>
 <pre>
 a += 1 if a.isOdd
 </pre>
-	<p>Conditional expressions are not just for <span class="pre">if</span> and <span class="pre">while</span>.
-	A conditional expression may be used within any expression:</p>
-<pre>
-imm isOne Bool = (a == 1)    // isOne will be either true or false
-</pre>
 	
-	<h3>Equivalence Operators</h3>
-	<p>The <span class="pre">==</span> operator returns true if two values have the same content and type.
+	<h3>Equivalence</h3>
+	<p>With most values, we can compare whether they are the same by using an equivalence operator.
+	The <span class="pre">==</span> operator returns true if two values have the same content and type.
 	<span class="pre">!=</span> (not equal) is true if they do not. For example:</p>
 <pre>
 x == 3.0        // Returns true if the local variable x's value is 3.0
@@ -115,30 +116,24 @@ true != false   // Returns true
 	For example, two floating point numbers could be evaluated as equal
 	if they are within some margin of error (resulting from floating point calculation rounding errors).
 	Similarly, two lists might be equal if they have the exact same contents.
-	Some types may not implement the <span class="pre">==</span> method.</p>
+	A type must implement the <span class="pre">==</span> method to ensure its values can be compared.</p>
 
-	<h3>Comparison Operators</h3>
+	<h3>Ordered Comparison</h3>
 	<p>Comparison operators determine whether one value is greater or less than some other value. 
 	They work only on types that are comparable, such as numbers.</p>
 <pre>
 x &gt;= 2          // Returns true if x is greater than or equal to 2 (&gt;, &lt;, &lt;= are variants)
 2 &lt;= 2.0        // Returns false any time the types do not agree
 </pre>
-	<p>Float values are compared using the same closeness criteria described above.
-	For one Float value to be less than another, it must be less by at least the comparable closeness.</p>
-	<p>In some cases, a type can make its values comparable by implementing just the
-	<span class="pre">&lt;=&gt;</span> (rocket-ship) operator/method.
-	This returns an integer (rather than true or false): -1 if less, 0 if equal, and 1 if greater.</p>
-<pre>
--2 <=> 4      // Returns -1
-</pre>
-	<p>Use of the <span class="pre">Comparable</span> trait would then implement the other
-	comparison operators using the rocket-ship operator.</p>
 
 	<h3>Boolean Operators</h3>
-	<p>Acorn has three boolean operators:  
-	'and', 'or' and 'not' ('!').
-	For example:</p>
+	<p>Sometimes a conditional expression requires checking multiple conditions
+	and then combining those results together into a single true/false determination.
+	The boolean operators
+	'and', 'or' and 'not' ('!') are used to accomplish this.
+	These operators are distinctly different than the bitwise logic operators
+	('&', '|', and '~') introduced in an earlier section.</p>
+	<p>For example:</p>
 <pre>
 0==3 or not 2&lt;3 and 3==3   // Returns true ('and' is evaluated before 'or')
 </pre>
@@ -146,23 +141,22 @@ x &gt;= 2          // Returns true if x is greater than or equal to 2 (&gt;, &lt
 	<ul>
 	<li>As mentioned earlier, they treat 0, null and false as false. All other values are considered true.</li>
 	<li>The boolean operators 'and' and 'or' will stop evaluating any time the answer is known for sure.
-	Thus, the .isEmpty method will never be performed in this expression (making it similar to a simple 'if' statement):
+	Thus, the .isEmpty method will never be performed in this expression:
 <pre>
 false and list.isEmpty
 </pre>
 	</li>
 	<li>The logical operators have a lower precedence than evaluation operators, but higher than assignment.
-	! has the highest precedence, then 'and', then 'or'.</li>
+	'not' has the highest precedence, then 'and', then 'or'.</li>
 	</ul>
-	<p><b>Note:</b> 
-	In case it is not obvious by now, these boolean operators are not the same
-	as the boolean bit-wise logical operators described earlier.</p>
 
-	<p><b>Note 2:</b>
-	If a comparison operator or boolean operator is used outside the context of a control structure
-	that wants a conditional expression (e.g., if), in most cases it will evaluate to a value of 'true' or 'false'.
-	If the conditional expression just uses 'and' or 'or' operators, its value will be the
-	last value evaluated in that expression.</p>
+	<h3>Expression usage</h3>
+	<p>Conditional expressions need not only be found on control flow statements
+	like <span class="pre">if</span>. They may also be incorporated as part of any
+	arbitrary expression. For example:</p>
+<pre>
+imm isOne = (a == 1)    // isOne will be either true or false
+</pre>
 		
 		<p style="text-align: right; margin-top: 2em;">
 			<a href="refmatch.html"><img alt="_" src="next.png" /></a>
