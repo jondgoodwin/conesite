@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>Match - Cone Reference</title>
+	  <title>Pattern Matching - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -8,124 +8,154 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Match</div>
+			<div id="sub">Pattern Matching</div>
 		</div>
 
     <div class="text">
 
-	<p><span class="pre">match</span> is a control structure
-	that determine which code block to perform based on the evaluated result of one or more conditional expressions.</p>
-	
-	<h3 id="match">match</h3>
-	<p>The <span class="pre">match</span> statement works similarly to <span class="pre">if</span>.
-	Its purpose is to match a single value against a list of patterns.
-	In effect, it splits up a conditional expression into two parts: the value to match and a list of 
-	patterns to match it against using the <span class="pre">~~</span> operator.</p>
-	<p>Here is the earlier example rewritten using match:</p>
+	<p>As with <span class="pre">if</span>, pattern matching is about deciding
+	which code path to perform. 
+	Its approach is to match a single value against a multiple patterns.
+	When some pattern matches, the code block associated with that pattern is performed.</p>
+	<p>Let's illustrate this with a simple (but mathematically bizarre) example:</p>
 <pre>
-result = match roll
-with 7
-  "Perfect"
-with 1 .. 6    // Using a range of values as a match pattern
-  "Too low!"
-else
-  "Too high!"
+fn power(n i32, pow i32) i32
+  match pow
+    0: 1
+    1: n
+    2: n * n
+    _: -1
 </pre>
-	<p><span class="pre">match</span> has a number of other tricks up its sleeves,
-	described in depth <a href="#match">later in this chapter</a> once we have
-	described the powerful <a href="#matchop">match operator</a>.</p>
-	
-	<h3 id="matchop">Pattern Matching Operator</h3>
-	<p>The <span class="pre">~~</span> pattern match operator is used to match a value to a specific pattern.
-	For example:</p>
-<pre>
-5 ~~ i32      // true, since the type of 5 is i32
-5 ~~ 1 .. 7   // true, since 5 is within the range between 1 and 7
-</pre>
-	<p>The <span class="pre">~~</span> operator is powerful and unusual:</p>
+	<p>In this example, we are returning a different value based on the value of pow.
+	So, if pow is zero, we return 1. If pow is 1, we return n.
+	If pow is two, we return n squared. 
+	Finally, if pow is any other value, we return -1.</p>
+	<p>The structure of this form of pattern matching is straightforward:</p>
 	<ul>
-	<li>It may be used to match a value to a type. 
-	The match also succeeds if the value's type is a subtype of the specified type.
-	This match could happen at compile-time or run-time.</li>
-	<li>If the match pattern is not a type,
-	it uses the <span class="pre">~~</span> method on the match pattern.
-	Thus, in the example above, the Range type implements the <span class="pre">~~</span> method
-	that is used to determine if a value lies within the Range's interval of values.
-	<p>Notice that this reverses the usual order for operators which are implemented using methods:
-	it is the right-hand value (the match pattern) that must implement the <span class="pre">~~</span> method,
-	and the left-hand value which is passed as a parameter to that method.
-	Thus, <span class="pre">a~~b</span> is implemented as: <span class="pre">b.`~~`(a)</span>.
-	This exception makes the code easier to read and mirrors the order on the 'match' statement, 
-	while still putting the matching work on the pattern, where it belongs.</p></li>
-	<li>Any type that implements the <span class="pre">==</span> method should
-	also implement the <span class="pre">~~</span> method,
-	even if only to the same method. Doing so allows the use of the <span class="pre">match</span>
-	statement for simple multi-value comparisons.</li>
-	<li>The <span class="pre">~~</span> method may be used as an match-and-extract mechanism,
-	by returning an extracted value upon a successful match, or else <span class="pre">null</span> if the match fails.
-	For example, the match pattern might be a regular expression that returns an extracted string or list of strings
-	on a successful match.</li>
+	<li>Any normal expression can be used after <span class="pre">match</span>.
+	This expression's evaluated value is what patterns are matched with.
+	If desired, an assignment expression can be used here to capture
+	this matchee value for later use in matched code blocks.</li>
+	<li>Any number of pattern blocks may follow. Each is comprised of a pattern
+	followed by either a block or else a colon and a expression.
+	If any pattern matches, the evaluated value of its block or expression is the match's value</li>
+	<li>Using the <span class="pre">_</span> pattern will always match any value.
+	If specified, it should be the last pattern used.</li>
 	</ul>
-	<p>Use of the powerful <span class="pre">~~</span> operator is made possible by the 
-	richness of pattern-matching types it is capable of supporting:
-	set membership, regular expression, search selectors (e.g., for parts), parsers, input decoder, 
-	translater, information analysis, etc.</p>
+	<p>A versatile range of patterns are supported, 
+	able to match wholly to specified values, partially, or using a first-class pattern.
+	Pattern matching also supports de-structuring portions of the original value
+	into bound variables.</p>
 
-	<h2 id="match">Match statement</h2>
-	<p>Now that we have talked about the <span class="pre">~~</span> pattern match operator,
-	let's return to the <span class="pre">match</span> statement which makes use of that operator.
-	By default, the 'match' statement uses the '~~' method 
-	to match each successive pattern against the value of the 'match' statement's value.</p>
-
-	<h3>The 'using' clause</h3>
-	<p>Append a 'using' clause to the 'match' statement to specify a 
-	specific method to use for matching (as opposed to using the default '~~'):</p>
+	<h2>Whole Value Matches</h2>
+	<p>The simplest form of value matching just uses a value as the pattern.
+	This can be a constant value (as above) or any expression that evaluates to some value
+	(e.g.: <span class="pre">anotherval.len</span>).
+	The type of the pattern value must match the type of the matchee value.
+	An equivalence match is performed between these values as if using the '==' operator.</p>
+	<p>More complex value patterns are possible.</p>
+	
+	<h3>Comparisons</h3>
+	<p>These patterns work just like any <a href="refcondexp.html#compop">comparison operator</a>
+	(including <span class="pre">!=</span>).
+	The left hand value is not specified, as it is understood to be the match value:</p>
 <pre>
-match number using `==`
-with 0
-	.turn
-with 1
-	.jump
-</pre>
-	<p>The using clause can specify any method name or an executable function or closure.</p>
-
-	<h3>Multiple patterns on a 'when'</h3>
-	<p>A 'with' statement can list multiple match patterns, separated by commas.
-A match on any of those match patterns activates that code block.</p>
-<pre>
-match number using '=='
-with 0,1
-	.turn
-with 2,3,4
-	.jump
+match n
+  <0: -1
+  >0:  1
+  _:   0
 </pre>
 
-	<h3>Extracting match results</h3>
-	<p>Some patterns do more than matching.
-	They also extract or transform matched elements within a successfully matched source value, 
-	returning one or more new digested value
-	(so long as the first returned value is not false or null, which indicates a match failure).
-	Specify the variables names that hold these returned values with an 'into' clause
-	at the end of the 'match' statement:</p>
+	<h3>Range pattern</h3>
+	<p>The range pattern checks whether the matchee value lies within a specified
+	range. This is specified by placing either the
+	<span class="pre">..</span> or <span class="pre">...</span> range operator
+	between two expressions:</p>
 <pre>
-match command into thing
-with +Regex"fight [*]"
-	combat: true
-	opponent: thing
-with +Regex"use [*]"
-	.use(thing)
+match n
+  0 ..  3: 1   // matches 0, 1, or 2 (but not 3)
+  3 ... 6: 2   // matches 3, 4, 5 or 6 inclusively
 </pre>
-	<p>Regex returns the portion of the Text that lies within the square brackets.
-	So, if command was "fight Lux", the first match would succeed and thing would be set to "Lux".</p>
-	<p>Alternatively, the return variable name(s) may be specified on any specific 'with' statement:</p>
+	
+	<h2>Pattern Expressions</h2>
+	<p>Before continuing on to talk about type-based pattern matching,
+	let's introduce ways to enhance the match patterns already described
+	as part of a more comprehensive pattern expression.</p>
+
+	<h3>Multiple patterns</h3>
+	<p>It is possible to list more than one possible pattern to match,
+	using <span class="pre">or</span> between each pattern:</p>
 <pre>
-match command
-with +Regex"fight [*]" into npc
-	combat: true
-	opponent: npc
-with +Regex"use [*]" into item
-	.use(item)
+match n
+  2 or 3 or 5 or 7:  2
+  -6 or -1...1 or 6: 1
+  _:                 0
 </pre>
+	
+	<h3>Tuples</h3>
+	<p>Multiple values to be matched can be specified on the
+	<span class="pre">match</span> statement as a comma-separated tuple
+	or with a function that returns multiple values.
+	If a tuple is specified on the match, then all match patterns must be specified as tuples.
+	For a tuple to match, all values must match individually:</p>
+<pre>
+match key,value
+  0, _:  0
+  _, 0:  1
+  _, _:  2
+</pre>
+
+	<h3>if Guards</h3>
+	<p>An 'if' clause may be specified following all patterns as an additional guard.
+	The condition expression after the 'if' must evaluate to true in order for the
+	match to take place.</p>
+<pre>
+match nbr
+  4 if cnt &gt; 0: 0  // matches only if nbr==4 and cnt&gt;0
+  4:            1  // matches when nbr==4 and cnt&lt;=0
+  _:            2  // matches when nbr != 4
+</pre>
+
+	
+	<h2>Partial matches</h2>
+	<p>Partial matching is based on the idea that the matchee value is a composite data structure,
+	and we only want to match on certain aspects to parts of that data.</p>
+	<p>TBD. Match on certain substructural values.</p>
+	<h3>Binding and Destructuring</h3>
+	<p>TBD</p>
+	<h3>Supertype Matching</h3>
+	</p>TBD.</p>
+	
+	<h2>First-class patterns</h2>
+	<p>For many match requirements, the above facilities are sufficient.
+	However, there are times we need to use more sophisticated algorithms
+	for making a match determination.
+	These algorithms can be encapsulated in a callable function or method
+	which returns true for a successful match.
+	<p>Use of a first-class pattern is signaled using the <span class="pre">with</span> keyword.
+	The matchee value is implicitly included as part of the call
+	(as the first parameter for a function and the second for a method call):</p>
+<pre>
+match n
+  with isPrime(): 0  // invokes isPrime(n)
+  with isOdd():   1  // invokes isOdd(n)
+  _:              2
+</pre>
+	<p>This technique makes it easier to use a broad range of complex
+	pattern matching strategies, such as regular expressions, parsing, etc.
+	The first-class pattern can be an object with state that changes as a result of
+	a successful match. As part of the match, data can be extracted from the
+	matchee value and preserved for later use by the match block.</p>
+	
+	<p><b>Note:</b> A first class pattern can be easily applied to any arbitrary value as part of
+	an <span class="pre">if</span> statement:</p>
+<pre>
+++nbr if isOdd(n)
+</pre>
+
+	
+	
+	
 		
 		<p style="text-align: right; margin-top: 2em;">
 			<a href="refloop.html"><img alt="_" src="next.png" /></a>
