@@ -15,9 +15,9 @@
 
 	<p>As with <span class="pre">if</span>, pattern matching is about deciding
 	which code path to perform. 
-	Its approach is to match a single value against a multiple patterns.
-	When some pattern matches, the code block associated with that pattern is performed.</p>
-	<p>Let's illustrate this with a simple (but mathematically bizarre) example:</p>
+	Its approach is to match a single value against a multiple, ordered patterns.
+	The code block associated with the first matching pattern is performed.</p>
+	<p>Let's illustrate this with a simple (but mathematically unusual) example:</p>
 <pre>
 fn power(n i32, pow i32) i32
   match pow
@@ -26,8 +26,8 @@ fn power(n i32, pow i32) i32
     2: n * n
     _: -1
 </pre>
-	<p>In this example, we are returning a different value based on the value of pow.
-	So, if pow is zero, we return 1. If pow is 1, we return n.
+	<p>This example returns a value calculated differently based on the value of pow.
+	If pow is zero, we return 1. If pow is 1, we return n.
 	If pow is two, we return n squared. 
 	Finally, if pow is any other value, we return -1.</p>
 	<p>The structure of this form of pattern matching is straightforward:</p>
@@ -48,15 +48,22 @@ fn power(n i32, pow i32) i32
 	into bound variables.</p>
 
 	<h2>Whole Value Matches</h2>
-	<p>The simplest form of value matching just uses a value as the pattern.
-	This can be a constant value (as above) or any expression that evaluates to some value
-	(e.g.: <span class="pre">anotherval.len</span>).
-	The type of the pattern value must match the type of the matchee value.
+	<p>These patterns involve straightforward comparisons between the matchee value
+	and one or more pattern values.</p>
+	<h3>Equivalence</h3>
+	<p>The simplest form of matching uses a value as the pattern.
+	This can be a constant value (as above) or any expression that evaluates to some value,
+	for example:</p>
+<pre>
+match val
+  anotherval.len:  4
+  _:               0
+</pre>
+	<p>The type of the pattern value must match the type of the matchee value.
 	An equivalence match is performed between these values as if using the '==' operator.</p>
-	<p>More complex value patterns are possible.</p>
 	
 	<h3>Comparisons</h3>
-	<p>These patterns work just like any <a href="refcondexp.html#compop">comparison operator</a>
+	<p>Comparison patterns make use of the <a href="refcondexp.html#compop">comparison operators</a>
 	(including <span class="pre">!=</span>).
 	The left hand value is not specified, as it is understood to be the match value:</p>
 <pre>
@@ -78,7 +85,7 @@ match n
 </pre>
 	
 	<h2>Pattern Expressions</h2>
-	<p>Before continuing on to talk about type-based pattern matching,
+	<p>Before continuing on to talk about partial pattern matching,
 	let's introduce ways to enhance the match patterns already described
 	as part of a more comprehensive pattern expression.</p>
 
@@ -118,44 +125,52 @@ match nbr
 
 	
 	<h2>Partial matches</h2>
-	<p>Partial matching is based on the idea that the matchee value is a composite data structure,
-	and we only want to match on certain aspects to parts of that data.</p>
-	<p>TBD. Match on certain substructural values.</p>
-	<h3>Binding and Destructuring</h3>
-	<p>TBD</p>
-	<h3>Supertype Matching</h3>
-	</p>TBD.</p>
+	<p>When dealing with a composite data structure, partial matching
+	supports value or type matching on selected parts of that data.
+	A partial match pattern mimics the type structure of the data we are matching
+	against, specifying match patterns for the value or type of 
+	particular substructural elements.
+	It also supports "destructuring", binding variables to these or other substructural elements.</p>
+	<p>Partial match patterns begin with the <span class="pre">~~</span> operator,
+	followed by the type. Additional specifics of the pattern vary by type.
+	The right time to discuss the specifics of these mechanisms is
+	as part of the pages that describe these complex types:</p>
+	<ul>
+	<li><a href="refarray.html#match">Array partial match</a></li>
+	<li><a href="refstruct.html#match">Struct partial match</a></li>
+	<li><a href="refunion.html#match">Union partial match</a></li>
+	<li><a href="refenum.html#match">Enum partial match</a></li>
+	<li><a href="refrefs.html#match">Reference partial match</a></li>
+	<li><a href="refinterface.html#match">Subtype partial match</a></li>
+	</ul>
 	
 	<h2>First-class patterns</h2>
-	<p>For many match requirements, the above facilities are sufficient.
-	However, there are times we need to use more sophisticated algorithms
-	for making a match determination.
-	These algorithms can be encapsulated in a callable function or method
-	which returns true for a successful match.
+	<p>Whole and partial matching patterns handle many situations, but not all.
+	First-class patterns make it possible to support more sophisticated matching
+	algorithms.
+	Such algorithms are implemented in a callable function or method
+	that returns true for a successful match.
 	<p>Use of a first-class pattern is signaled using the <span class="pre">with</span> keyword.
 	The matchee value is implicitly included as part of the call
-	(as the first parameter for a function and the second for a method call):</p>
+	(essentially, the first parameter for a function and the second for a method call):</p>
 <pre>
 match n
   with isPrime(): 0  // invokes isPrime(n)
   with isOdd():   1  // invokes isOdd(n)
   _:              2
 </pre>
-	<p>This technique makes it easier to use a broad range of complex
+	<p>This technique can be quite powerful, 
+	as it makes it possible to support a broad range of complex
 	pattern matching strategies, such as regular expressions, parsing, etc.
-	The first-class pattern can be an object with state that changes as a result of
+	A first-class pattern can be an object with state that changes as a result of
 	a successful match. As part of the match, data can be extracted from the
 	matchee value and preserved for later use by the match block.</p>
 	
-	<p><b>Note:</b> A first class pattern can be easily applied to any arbitrary value as part of
+	<p><b>Note:</b> A first class pattern can also be applied to any arbitrary value as part of
 	an <span class="pre">if</span> statement:</p>
 <pre>
 ++nbr if isOdd(n)
 </pre>
-
-	
-	
-	
 		
 		<p style="text-align: right; margin-top: 2em;">
 			<a href="refloop.html"><img alt="_" src="next.png" /></a>
