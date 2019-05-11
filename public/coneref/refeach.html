@@ -1,0 +1,134 @@
+<html>
+  <head>
+	  <title>Each - Cone Reference</title>
+		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	  <link rel="stylesheet" type="text/css" href="standard.css" />
+	</head>
+  <body>
+		<div id="header">
+			<a href="/"><div id="title">Cone</div></a>
+			<div id="sub">Each and Iteration</div>
+		</div>
+
+    <div class="text">
+
+	<p style="margin-left: 40px;"><i>Note: Only numeric range iterators have been implemented.</i></p>
+
+	<p>Although <span class="pre">while</span> can be used to implement any structured loop,
+		<span class="pre">each</span> makes it more convenient to implement a common loop pattern:
+		iterating over a sequence of values.
+		Let's re-implement the factorial function using <span class="pre">each</span>:</p>
+<pre>
+fn fact(n i32) i32
+  mut result = 1
+  each x in 2 ... n
+    result *= x
+  result
+</pre>
+	<p>Effectively this <span class="pre">each</span> statement binds the variable x to each iterated value
+		from 2 up to n inclusively, each time performing the loop's inner block.
+		This uses the same inclusive range operator <span class="pre">...</span> described earlier for
+		<span class="pre">match</span>.</p>
+		<p>As this example shows, the <span class="pre">each</span> statement has a simple structure:</p>
+		<ul>
+			<li>One or more variables to be bound to values produced by the iterator.
+				These variables are local to the <span class="pre">each</span> block and cannot be accessed outside that scope.</li>
+			<li>An iterator that produces different value(s) on each iteration of the loop.
+				The iterator follows <span class="pre">in</span>.</li>
+			<li>A block containing the logic to be performed on each iteration.</li>
+		</ul>
+	
+	<h2>Each clause, break and continue</h2>
+	<p><span class="pre">each</span> is like <span class="pre">while</span> in two more ways.
+		It may be used as a statement suffix:</p>
+<pre>
+fn fact(n i32) i32
+  mut result = 1
+  result *= x each x in 2 ... n
+  result
+</pre>
+			
+	<p>Also, <span class="pre">break</span> and <span class="pre">continue</span> statements may be used within an 
+		<span class="pre">each</span> block to stop or re-start the loop.</p>
+
+	<h2>Iterators</h2>
+	<p>Several forms of iterators may be used.</p>
+
+	<h3>Numeric Range Iterator</h3>
+	<p>As the above example shows, the <span class="pre">..</span> and <span class="pre">...</span>
+		range operators can be used to iterate successively over integers or floating point numbers.
+		Iteration begins with the first number and then increments by 1 until it
+		reaches (..) or passes (...) the second number.
+		Expressions may be used in place of literal numbers, if desired.</p>
+	<p>To iterate <b>backwards</b> (decrementing the iterated number), use the
+			<span class="pre">&gt;</span> or <span class="pre">&gt;=</span> operators instead.</p>
+<pre>
+each x in 6 &gt; 1  // iterates:  6 5 4 3 2
+</pre>
+	</p>
+	<p>A <b>step value</b> may be specified after <span class="pre">by</span>.
+		Instead of incrementing or decrementing by 1, the step value specifies how much to increase the iterated number each time:</p>
+<pre>
+mut sum = 0
+each x in 0 ... 10 by 2 // iterates: 0, 2, 4, 6, 8, 10
+	sum += x	
+</pre>
+
+	<h3>Array Iterator</h3>
+	<p><span class="pre">each</span> can be used to iterate successively through every element in an array data structure,
+		one at a time.
+		For details on how this works, see the iteration section for the array types:</p>
+		<ul>
+			<li><a href="refarray.html#each">Array iteration</a></li>
+			<li><a href="refarrayref.html#each">Array reference (slice) iteration</a></li>
+		</ul>
+
+	<h3>Closure Iterator</h3>
+	<p>Look to closures for iterator versatility.
+			Using closure iterators, one can scan through elements in a complex collection,
+			retrieve values from a streaming resource, algorithmically calculate a sequence of values, etc.
+			We will cover <a href="refclosure.html">closures</a> in much more detail later.
+		For now, think of a closure as a function that preserves and uses its state from one call to the next.
+		When a closure is used as an iterator, it produces a new value on every call.</p>
+	<p>In order for a closure to be suitable as an iterator, it must be able to signal when it is done producing values.
+		 It does this by returning a special value when it is done, typically
+		 <span class="pre">none</span> or <span class="pre">null</span>.</p>
+	<p>In the following example, imagine that <span class="pre">half</span> is a closure that starts off
+	holding the value 12, and halves (and returns) its value on each call. When the value gets to 0,
+	it returns <span class="pre">none</span> instead:</p>
+<pre>
+mut sum = 0
+each x in half
+  sum += x
+</pre>
+		<p>The value of sum at the end will be 10, as each successive call to <span class="pre">half</span> returns 6, 3, and 1.
+			After 1, it returns <span class="pre">none</span>, which stops iteration.</p>
+		<p>Because it is stateful, a closure is typically single use. It is created before it is needed, used to produce values lazily, 
+			and then discarded afterward. 
+			This is because, unless its state can be independently reset, it will only ever afterward say it is out of values.</p>
+		
+		<h4>Automatic Closure Creation</h4>
+		<p>The typical approach is to create the closure iterator as part of the each statement. For example:</p>
+<pre>
+each x in collection.iter
+</pre>
+		<p>If what is specified is not already an iterator, 
+			an implicit call to the <span class="pre">iter</span> method is made.
+			Thus, the above can be rewritten as:</p>
+<pre>
+each x in collection
+</pre>
+		<p>Similarly, if an iterator is expected to return two values,
+			the <span class="pre">kviter</span> method is expected instead:</p>
+<pre>
+each key, value in dictionary
+</pre>
+	
+	<p style="text-align: right; margin-top: 2em;">
+		<a href="refcollect.html"><img alt="_" src="next.png" /></a>
+	</p>
+
+	</div>
+	</body>
+</html>

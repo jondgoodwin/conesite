@@ -1,0 +1,83 @@
+<html>
+  <head>
+	  <title>While - Cone Reference</title>
+		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	  <link rel="stylesheet" type="text/css" href="standard.css" />
+	</head>
+  <body>
+		<div id="header">
+			<a href="/"><div id="title">Cone</div></a>
+			<div id="sub">While, Break and Continue</div>
+		</div>
+
+    <div class="text">
+
+	<p>Use <span class="pre">while</span> to repetitively perform the same logic over and over again
+		so long as a specified condition is true. For example:</p>
+<pre>
+fn fact(mut n i32) i32
+  mut result = 1
+  while n &gt; 1
+    result *= n
+    --n
+  result
+</pre>
+  <p>This function calculates the factorial of some number n.
+		So long as n stays greater than one, the inner block repeatedly multiplies result by n and then decrements n.
+		So, if n is 5, result will be calculated as 5 * 4 * 3 * 2, returning 120.
+	</p>
+	<p>The while statement's condition can be any conditional expression, as described for <span class="pre">if</span>.
+	  The condition is checked when encountering the while statement, and then again every time after
+		the block's statements have been performed.
+		Whenever the condition evaluates as false, execution continues at the first statement after the while block.</p>
+
+	<h3>while suffix</h3>
+	<p>Alternatively, <span class="pre">while</span> (like <span class="pre">if</span>)
+		may be used as a control suffix after any statement.
+		The following logic is identical to the above.</p>
+<pre>
+fn fact(mut n i32) i32
+	mut return = 1
+	result *= n-- while n &gt; 1
+	return
+</pre>
+
+	<h3 id="break">break</h3>
+	<p><span class="pre">break</span> statements may be placed anywhere within a while block
+		to terminate the repetitive loop early.
+		We can code the factorial function yet another way using 'break':</p>
+<pre>
+fn fact(mut n i32) i32
+  mut result = 1
+  while true
+    break if n &lt; 2
+    result *= n--
+  result
+</pre>
+	<p>As this example shows,
+	<span class="pre">break</span> is typically found within an <span class="pre">if</span> block.
+	A <span class="pre">break</span> statement terminates the control flow for the innermost
+	loop block it is found within.</p>
+
+	<h3 id="continue">continue</h3>
+	<p>The <span class="pre">continue</span> statement also changes the loop's control flow.
+		Instead of terminating the loop, it resumes execution at the top of the loop,
+		re-evaluating the conditional expression.
+		Effectively, <span class="pre">continue</span> ignores all subsequent statements in the loop's block.</p>
+<pre>
+fn countOdd(n i32) i32
+  mut result = 0
+  while n &gt; 0
+    continue if n-- % 2 == 0
+    ++result
+  result
+</pre>
+	
+	<p style="text-align: right; margin-top: 2em;">
+		<a href="refeach.html"><img alt="_" src="next.png" /></a>
+	</p>
+
+	</div>
+	</body>
+</html>
