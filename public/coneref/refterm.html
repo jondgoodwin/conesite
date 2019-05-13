@@ -41,17 +41,30 @@
 	</ul>
 
 	<h3 id="vtype">Types</h3>
-	<p>Every value has a type it belongs to.
-	Although we will cover types more thoroughly later, let's simply say for now
-	that each type corresponds to a specific set of allowed values.
-	Thus, the <span class="pre">Bool</span> type only supports <span class="pre">true</span> and <span class="pre">false</span> as values.
-	Integer types only support integer number values.
-	Floating point types support floating point number values,
-	and so on.</p>
-	<p>Each type also establishes what operations can be performed on values of that type.
-		Thus, an integer type permits two integers to be added together,
-		the result of which is another integer value.</p>
-	<p>For the next few pages, examples will only use the built-in number types,
+	<p>Every value has a type it belongs to. A type is a pattern that:</p>
+	<ul>
+	<li>Establishes all permissible values.
+		Thus, the <span class="pre">Bool</span> type only supports <span class="pre">true</span> and <span class="pre">false</span> as values.
+		Integer types only support integer number values.
+		Floating point types support floating point number values, and so on.</li>
+	<li>Determines how values are digitally encoded, including how many binary bits are needed to encode them.</li>
+	<li>Specifies what operations can be performed on values of that type.
+			For example, an integer type permits two integers to be added together,
+			the result of which is another integer value.
+			These type operations are called <b>methods</b>.</li>
+	<li>Enforces <a href="reftypesafe.html">constraints</a> that ensure the type's values are handled consistently and safely.</li>
+	</ul>
+	<p>Every value in a program has a type, 
+	  known at compile-time due to an explicit declaration or because the type can be easily inferred based on the context.
+	  By knowing the types of all values, the compiler can optimize a program's performance and memory use.
+	  Clear typing facilitates precise, flexible data manipulation and improves the safe and correct use of data.</p>
+	<p>The names of specific types are capitalized by convention.
+			This helps cleanly distinguish variable names from type names,
+			reducing unexpected naming conflicts and improving code clarity.
+			One notable exception to this naming convention is the type names for the primitive numeric types.</p>
+
+	<h4>Number types</h4>
+			<p>For the next few pages, examples will only use the built-in number types,
 		which specify their bit-size as part of the type's name. Here they are:</p>
 	<ul>
 	<li><b>Signed integer</b> types: <span class="pre">i8</span>, <span class="pre">i16</span>,
@@ -60,6 +73,7 @@
 	<span class="pre">u32</span> and <span class="pre">u64</span></li>
 	<li><b>Floating point</b> types: <span class="pre">f32</span> and <span class="pre">f64</span></li>
 	</ul>
+	<p>Later, a number of other types will be introduced.</p>
 	  
 	<h3>Typed Number Literals</h3>
 	<p>To explicitly specify the type for a numeric literal,
