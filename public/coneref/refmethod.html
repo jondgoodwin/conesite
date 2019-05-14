@@ -117,7 +117,20 @@ x.counter // 11
 		<li><b>`&lt;&lt;` and `&gt;&gt;`</b> for append and prepend</li>
 	</ul>
 
-	<h3>Implicit methods</h3>
+	<h2>Structs as indexed collections</h2>
+	<p>More complex collections may be created using the built-in array types as a foundation.
+			This is typically accomplish by defining a struct with a dynamic array as one of the fields.
+			This custom collection can handle all of the operations described earlier
+			because these capabilities are invoked as methods on the struct object.
+			The struct's methods can then forward these requests down to the dynamic array as appropriate.</p>
+	<p>These are the implicit names for these methods:</p>
+	<ul>
+			<li><b>[]</b> - single-element indexing (get and set) if there is one argument,
+					and multi-element indexing if there are two.</li>
+			<li><b>&[]</b> - get borrowed reference to a single element</li>
+	</ul>
+	
+<h3>Implicit methods</h3>
 	<p>Various language constructs call certain methods under the covers:</p>
 	<ul>
 			<li><b>.init</b> is the default <a href="refallocref.html#initializer">initializer</a>

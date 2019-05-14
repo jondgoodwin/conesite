@@ -75,15 +75,26 @@ each x in 0 ... 10 by 2 // iterates: 0, 2, 4, 6, 8, 10
 	sum += x	
 </pre>
 
-	<h3>Array Iterator</h3>
-	<p><span class="pre">each</span> can be used to iterate successively through every element in an array data structure,
-		one at a time.
-		For details on how this works, see the iteration section for the array types:</p>
-		<ul>
-			<li><a href="refarray.html#each">Array iteration</a></li>
-			<li><a href="refarrayref.html#each">Array reference (slice) iteration</a></li>
-		</ul>
-
+	<h3 id="array">Array Iterator</h3>
+	<p><span class="pre">each</span> can be used to iterate successively through 
+		every element in an array or array reference (slice) data structure,
+		one at a time. For example:</p>
+<pre>
+mut sum = 0
+each x in intslice
+		sum += x
+</pre>
+			<p>Iteration can return a mutable borrowed reference instead of the value:</p>
+<pre>
+each &mut x in intslice
+		++x
+</pre>
+			<p>Iteration can also show the index number for each value:</p>
+<pre>
+each i, x in intslice
+		newslice[i] = x
+</pre>
+	
 	<h3>Closure Iterator</h3>
 	<p>Look to closures for iterator versatility.
 			Using closure iterators, one can scan through elements in a complex collection,

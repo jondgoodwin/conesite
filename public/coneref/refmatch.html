@@ -134,11 +134,28 @@ match nbr
 	particular substructural elements.
 	It also supports "destructuring", binding variables to these or other substructural elements.</p>
 	<p>Partial match patterns begin with the <span class="pre">~~</span> operator,
-	followed by the type. Additional specifics of the pattern vary by type.
-	The right time to discuss the specifics of these mechanisms is
-	as part of the pages that describe these complex types:</p>
+	followed by the type. Additional specifics of the pattern vary by type.</p>
+
+	<h2 id="array">Array partial matches</h2>
+	<p>The simplest partial match checks whether an array (or array reference) begins with
+		certain elements:</p>
+<pre>
+match name
+	~~ "Judy": judy     // Matches if name string begins with "Judy"
+	~~ "Frank": frank
+	_: noone
+</pre>
+	<p>Alternatively, one can specify matching patterns for the first few elements:</p>
+<pre>
+match numbers
+	~~ [1, _]: 1
+	~~ [_, 1]: 2
+	~~ [&lt;=0, &lt;=0]: 3
+	_: 4
+</pre>
+
+	<h2>Other types</h2>
 	<ul>
-	<li><a href="refarray.html#match">Array partial match</a></li>
 	<li><a href="refstruct.html#match">Struct partial match</a></li>
 	<li><a href="refunion.html#match">Union partial match</a></li>
 	<li><a href="refenum.html#match">Enum partial match</a></li>

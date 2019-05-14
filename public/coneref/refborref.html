@@ -117,7 +117,7 @@ imm allocref = &amp;rc 1
 imm borref = &*allocref
 </pre>
 
-	<h3>Borrowing within a struct or array</h3>
+	<h3 id="internal">Borrowing within a struct or array</h3>
 	<p>Only a borrowed reference may point to some value that lies within an allocated value,
 		such as a property in a <a href="refstruct.html">struct</a> 
 		or an element in an <a href="refarray.html">array</a>-based collection.

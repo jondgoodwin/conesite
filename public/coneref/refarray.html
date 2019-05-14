@@ -13,137 +13,181 @@
 
     <div class="text">
 
-    <p>What if we want the ability to manipulate several values of the same type,
-        all stored together sequentially in memory?
-        Cone offers these safe, built-in types to support this capability:
+    <p style="margin-left: 40px;"><i>Note: All of this capability is implemented
+        except multi-element segments, 'each' iteration, comparison, and pattern matching.</i></p>
+
+    <p>An array holds a fixed number of values, all of the same type.
+        The array's elements are co-located in memory and can be individually accessed using an integer index.</p>
+        <p>Let's illustrate with an example:
     </p>
-    <ul>
-        <li><b>Static Array</b> - a fixed-size collection of elements whose size is known at compile-time.</li>
-    </ul>
-
-    <h2>Declaration and Creation</h2>
-    <p>As a quick glance, these examples show the type signatures for the built-in array types listed above:</p>
 <pre>
-imm staticarray [10] f32      // Static array
+imm numbers [3] f32 = [3.1, 4.1, 5.92]
+</pre>
+    <p>Here, <span class="pre">numbers</span> is an array containing three floating-point numbers as its elements.
+      As the redundant type specification <span class="pre">[3] f32</span> indicates, the length of the array is 3 
+      and the type of its elements is <span class="pre">f32</span>.</p>
+    <p>An array can only exist as either a global or a local, stack-allocated value. 
+        Its length must be specified using an integer literal, making it fixed and unchangeable.
+        If variable-sized or heap-allocated arrays are needed, use
+        <a href="refarrayref.html">array references</a> instead.</p>
+
+    <h2>Construction</h2>
+    <p>To create or initialize an array, specify the values of all its elements
+        separated by commas and enclosed within square brackets (as the above example demonstrates).
+        When this array constructor is used to initialize a global variable,
+        the element values must be constants.
+        When used as part of a function's logic, element values may be specified using expressions:
+    </p>
+<pre>
+imm pair = [nbr * nbr, nbr + nbr]
+</pre>
+    <p>An alternative way to create an array is to specify it as a string:</p>
+<pre>
+imm hello = "Hello world!"  // type:  [12] u8
+</pre>
+     <p>A string is encoded as an sequence of utf-8 code points.
+        The length is the number of bytes it occupies. The type of each element is u8.
+        For C-compatibility, the zero terminator ('\0') is placed at the end of the string, but not counted in its length.
+    </p>
+
+    <h2>Copying</h2>
+    <p>Like numeric values, array values may be passed around between variables and functions:</p>
+<pre>
+imm hello = "Hello"
+fn main()
+  mut dessert = jello(hello)
+
+fn jello(mut saying [5] u8)
+  saying = "jello"
+  saying
+</pre>
+    <p>In this example, a copy of the <span class="pre">hello</span> variable's array 
+        is passed to the function <span class="pre">jello</span>. 
+        It replaces that copy's contents with the string "jello" and returns it to <span class="pre">main</span>.
+        The mutable local variable <span class="pre">dessert</span> now holds a copy of the array string "jello".</p>
+    <p>When arrays are passed around, we always make copies of the array (just like we do with numbers).
+        Any changes made to a copy won't change the original array.</p>
+    <p>This may not always be the behavior that you want, though.
+        If instead you want to pass around a reference to an array,
+        such that any changes <i>do</i> change the original array,
+        obtain and pass an <a href="refarrayref.html">array reference</a>.</p>
+
+    <h2>Getting the length</h2>
+    <p>To get a count of how many elements are in an array, 
+        use the <span class="pre">len</span> method:</p>
+<pre>
+imm hello = "Hello"
+imm length = hello.len   // =5
 </pre>
 
-    <h3>Static Arrays</h3>
-    <p>A static array is a fixed-size collection of elements whose size is known at compile-time.
-        It can exist as a global variable or allocated on the stack like any other local variable.
-        The type signature for a static array specifies the number of elements as an unsigned integer literal
-        inside square brackets, followed by the type of every element:</p>
-<pre>
-mut text [4] u32
-</pre>
-    <p>A static array is initialized using an array constructor,
-        a comma-separated enumeration of same-typed values enclosed within square brackets:</p>
-<pre>
-mut list = [1f, 4f, 5f]   // [3] f32
-</pre>
-    <p>As one would expect, a global variable declaration requires the array constructor
-        to contain only literal values. All other uses of the array constructor
-        allow the array values to be expressions.</p>
-    <p>A static array may also be initialized using a string literal:</p>
-<pre>
-imm hellotext = "Hello!"  // [6] u8
-</pre>
-
-
-    <h2>Array Operations</h2>
-    <p>Arrays may be indexed, copied, compared, iterated over, resized, and queried for their properties.
-        These operations work the same way on static arrays, dynamic array, and slices,
-        except where otherwise noted.</p>
-
-    <h3>Indexing</h3>
+    <h2>Indexing</h2>
     <p>A <b>single element</b> within an array may be accessed using 
-        an unsigned integer value enclosed in square brackets.
-        This supports both getting and setting the values at a specific index:</p>
+        an unsigned integer index value enclosed in square brackets.
+        The specified index may be an expression.
+        An index of <span class="pre">0</span> refers to the first element.</p> 
+    <p>Indexing can be used to get or set the specified element:</p>
 <pre>
-c_array[3] = c_array[2]    // the 4th element is now the same as the third
+mut c_array = "coal"
+c_array[2] = c_array[1]    // the 3rd element is now the same as the second
+// c_array now holds the array value "cool"
 </pre>
     <p>Array indexing is automatically bounds-checked by its known size.
-        This technique works with pointers as well, but never performs any bounds-check.
-        Using a pointer this way can improve performance where we know the index is safe.
+        Any attempt to supply an invalid index results in a compile-time or run-time error.</p>
+    <p><b>Note:</b> It is also possible to use the ampersand operator to <a href="refborref.html#internal">borrow a reference</a> 
+        to a specific indexed element in an array.</p>
+
+    <h3>Indexing from the end</h3>
+    <p>Sometimes it is more convenient to index an element based on 
+        its position relative to the end of the array.
+        This can be accomplished in a verbose way:
     </p>
-    <p>A <b>borrowed reference to a single element</b> can be obtained using the
-        ampersand (&amp;) operator:</p>
 <pre>
-imm borref = &amp;sliceref[4]   // borrow reference to 5th element
+imm nbrs = [2, 4, 6]
+imm four = nbrs[nbrs.len - 2] // =4 - the 2nd from the end
 </pre>
-    <p><b>Multiple elements</b> of an array may be extracted 
-        and copied into another array using a range in square brackets.
-        Both content segments must have the same type and size.</p>
+    <p>The less verbose equivalent uses the <span class="pre">|-</span> operator:</p>
 <pre>
-arrref[1 by 2] = sliceref[0 by 2]
-greetings[n by 5] = "Kevin"
-</pre>
-    <p>Similarly, a single value can be repeatedly filled into a slice's elements:</p>
-<pre>
-arrref[1 .. 3] = 2
+imm four = nbrs[|-2]
 </pre>
 
-    <h3>Iteration</h3>
-    <p>The <span class="pre">each</span> block provides an easy way to iterate over
-    a static array, dynamic array, or slice:</p>
+    <h3>Iterating over an array</h3>
+    <p>Using indexing and the <span class="pre">len</span> method,
+    one can now easily iterate over every element in an array:</p>
 <pre>
-mut sum = 0
-each x in intslice
-    sum += x
+imm numbers = [3.5, 4.0, 5.5, 3.0]
+average = 0.0
+mut i = 0
+while i &lt; numbers.len
+  average += numbers[i++]
+average /= numbers.len      // == 4.0
 </pre>
-    <p>Iteration can return a borrowed reference instead of the value:</p>
+    <p>A cleaner, more concise approach uses an <a href="refeach.html#array">each</a> block instead:</p>
 <pre>
-each &mut x in intslice
-    ++x
+imm numbers = [3.5, 4.0, 5.5, 3.0]
+average = 0.0
+each nbr in numbers
+    average += nbr
+average /= numbers.len      // == 4.0
 </pre>
-    <p>Iteration can also show the index number for each value:</p>
+            
+    <h3>Multi-element copying</h3>
+    <p>Multiple elements of an array may be copied into another array using a range index.</p>
 <pre>
-each i, x in intslice
-    newslice[i] = x
+mut greetings = "Hello Jeter"
+greetings[7,4] = greetings[1,4] // "Hello Jello"
+greetings[6...10] = "Peter"     // "Hello Peter"
+greetings[6..11] = "Helen"      // "Hello Helen"
+greetings[6..] = "Jayne"        // "Hello Jayne" (end is assumed if unspecified)
 </pre>
-
-    <h3>Comparison</h3>
-    <p>Two array references may be compared for equality, so long as they have the same element type,
-        even if one is a borrowed reference and the other an allocated reference.
-        This comparison checks for equality of both the starting pointer and the element count.</p>
-<pre>
-if ownref == borref
-   ....
-</pre>
-    <p>Comparing for order (e.g., &lt;) is not possible directly.
-        One can of course compare the component parts of an array reference separately (see below).</p>
-    <p>Use iteration to compare the contents in two arrays.</p>
-
-    <h3>Property Queries</h3>
-    <p>The component parts of an array or array reference can be retrieved separately:</p>
-<pre>
-imm ptr = array.ptr     // The pointer to the first element
-imm len = array.len     // The number of elements
-imm count = array.count // The number of elements
-imm size = array.size   // The memory size used
-</pre>
-    <p>Although .count and .len returns the same value for these types,
-        this is not necessarily true for other types,
-        where .len represents the capacity and .count represents how many elements contain a stored value.
-    </p>
-
-    <h2>Structs as indexed collections</h2>
-    <p>More complex collections may be created using the built-in array types as a foundation.
-        This is typically accomplish by defining a struct with a dynamic array as one of the fields.
-        This custom collection can handle all of the operations described earlier
-        because these capabilities are invoked as methods on the struct object.
-        The struct's methods can then forward these requests down to the dynamic array as appropriate.</p>
-    <p>These are the implicit names for these methods:</p>
+    <p>As the examples show, several range operators are supported.
+        The first number is always the index of the first element in the segment.
+        The meaning of the number after the range operator varies:</p>
     <ul>
-        <li><b>[]</b> - single-element indexing (get and set) if there is one argument,
-            and multi-element indexing if there are two.</li>
-        <li><b>&[]</b> - get borrowed reference to a single element</li>
+        <li><span class="pre">,</span> - The second number specifies how many elements
+            are in the array segment.</li>
+        <li><span class="pre">..</span> - The second number specifies the index of the element
+            after the last element in the array segment.
+            If unspecified, it is assumed to be the length of the array.</li>
+        <li><span class="pre">...</span> - The second number specifies the index of the last
+            element in the array segment.</li>
     </ul>
-    
-    <h2 id="each">each iteration</h2>
-    <p>TBD.</p>
+    <p>Both array segments must have the same element type and length.
+        Array segments can only be used for copying elements from one array to another
+        using assignment or variable initialization.
+        An array segment cannot be passed as an argument in a function call or used in a comparison.
+    </p>
+    <p><b>Note:</b> One can also use the ampersand operator to 
+        <a href="refarrayref.html#internal">borrow an array reference (slice)</a> 
+        to a specific set of elements in an array.</p>
 
-	<h2 id="match">Partial match</h2>
-	<p>TBD</p>
+    <h3>Multi-element fills</h3>
+    <p>Using the same range operators, a single value can be repeatedly filled into a segment's elements:</p>
+<pre>
+mut numbers = [0, -1, -2, -3]
+numbers[1 .. 3] = 2
+// numbers == [0, 2, 2, -3]
+</pre>
+    <p>The type of the fill value must be the same as the type of the array's elements.</p>
+
+    <h2>Comparing</h2>
+    <p>Two arrays may be compared, so long as they have the same element type.</p>
+    <p>To be equivalent the arrays must have the same length and every element must be the same.
+        To make element comparison possible,
+        the element's type must support the <span class="pre">==</span> method.</p>
+<pre>
+imm somebody = "John"
+if somebody == "Jane"
+  ....
+</pre>
+    <p>Comparing for order (e.g., &lt;) is also handled by comparing the two arrays element-by-element,
+    stopping the first time two elements are not the same.
+    The number of elements compared is the minimum of the lengths of the two arrays.
+    If the element check shows them as equivalent, the lesser-sized array comes first in order.</p>
+
+    <h3>Partial pattern match</h3>
+    <p>The <a href="refmatch.html"><span class="pre">match</span></a> statement 
+        or <span class="pre">~~</span> operator</span> supports additional string comparison capability,
+        particularly for <a href="refmatch.html#array">partial pattern matching</a>.
 
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refstruct.html"><img alt="_" src="next.png" /></a>
