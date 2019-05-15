@@ -29,7 +29,7 @@
 	<h2>The type's namespace</h2>
 	<p>Functions typically belong to a global (module) namespace.
 		By contrast, methods belong to a type's <a href="refnamespace.html">namespace</a>.
-		(Note: a type's named properties belong to the same namespace as its methods).</p>
+		(Note: a type's named fields belong to the same namespace as its methods).</p>
 	<p>Since methods belong to a type's namespace, two different types can
 		define a method with the same name, each doing something different and appropriate to its type.
 		There is no confusion over which one to use, because use of a method
@@ -66,6 +66,19 @@ fn test()
     Similarly, when the type of self is the same as the method's type, which is typically the case,
     self need not even be declared in the method's parameter list. It will be inserted automatically.</p>
 
+		<h3>Implicit field and method access</h3>
+		<p>Within a struct's methods, only the field name needs to be specified,
+				just as if it were a variable.</p>
+		<pre>
+		fn dist() f32
+				(x*x + y*y).sqrt  // x is equivalent to self.x
+		</pre>
+			<p>A field can be changed by putting the field name to the left of an assignment operator:</p>
+		<pre>
+		fn setOrigin(self &amp;mut)
+				x,y = 0f,0f
+		</pre>
+
 	<h3>set methods (Computed Properties)</h3>
 	<p>By default, methods typically operate in "get" mode,
 		invoked as part of an expression and often returning one or more values.
@@ -93,13 +106,25 @@ x.counter // 11
 	<p>It is worth noting that with both the setter and getter method use,
 		it is permissable to omit the parentheses when no additional arguments are passed.
 		This makes the use of get and set methods look exactly like property access.
-		This visual symmetry means that a type can migrate from making its properties public,
+		This visual symmetry means that a type can migrate from making its fields public,
 		to making them private, but still offering a compatible public interface of the same name
 		using methods.
 	</p>
-
+	<p><b>Note:</b> From the outside, a field and a computed property (a get/set method)
+		look identical. The user of a struct does not care if it is working with a stored value
+		or a value mediated by methods.</p>
+	
 	<h2>Methods with pre-defined roles</h2>
 	<p>A number of method names have an important built-in role in various Cone features.</p>
+
+	<h3 id="init">Initialization methods</h3>
+	<p>TBD: default named "init", 'raw' permission, use of constructor, etc.</p>
+
+	<h3>Drop method</h3>
+	<p>TBD: finalizers (when fires, whether can invoke ahead of time).</p>
+
+	<h3 id="compare">Comparison methods</h3>
+	<p>TBD: </p>
 
 	<h3>Operator methods</h3>
 	<p>Many operators are implemented as method calls. For instance, <span class="pre">x+3</span>

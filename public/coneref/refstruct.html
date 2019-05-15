@@ -13,122 +13,137 @@
 
     <div class="text">
 
-	<p>Use the struct type when creating values that contain multiple other values within.
-	A struct's member values are called properties.
-	Each property has a unique name, a specified type, and possibly a default value.</p>
-	<p>As with other types, a struct may implement
-		<a href="refmethod.html">methods</a> in addition to properties.
-		Additionally, structs may implement <a href="reftrait.html">traits</a>
-		and/or variant-type tags, useful features described elsewhere.
-	</p>
-	<p><b>Note:</b> structs are not the only type to support properties.
-		Traits, Interfaces, Allocs, Perms and other types also support properties
-		for similar, but more specialized needs.
-	</p>
+	<p>A struct holds one or more named values (fields), each with its own type.
+			The struct's fields are located together in memory
+			and can be individually accessed using the field's name.</p>
+	<p>Let's illustrate by declaring a new struct type:</p>
+<pre>
+struct Liner
+  line [80] u8
+  pos u32
+</pre>
+	<p>This defines a new struct type called <span class="pre">Liner</span> that holds two fields of data.
+		The field named <span class="pre">line</span> is an array of 80 bytes.
+		The field named <span class="pre">pos</span> is an unsigned integer.</p>
+	<p>Variables can be declared using this new type, each with its own values in these two fields:</p>
+<pre>
+imm liner1 = Liner[line: [80; ' '], pos: 0u]
+mut liner2 = Liner[line: [80; '\0'], pos: 10u]
+</pre>
+	<p>This page focuses on using structs to hold field-oriented data.
+		Subsequent pages will enrich what can be done with a struct by adding
+		<a href="refmethod.html">method</a> and <a href="refinterface.html">interface</a> definitions.</p>
 	
 	<h2>Declaration</h2>
-	<p>First, you must declare a specific struct layout by name. For example:</p>
+	<p>Before we can make use of a specific data structure,
+		we need to declare it, giving it a name and specifying its fields:</p>
+	</p>
 <pre>
 struct Point
-    x f32
-    y f32
+    x f32 = 0.
+    y f32 = 0.
 </pre>
-	<p>This defines a struct type named Point that contains two properties named x and y.
-		Both properties are floating point numbers.
+	<p>The struct's declared name is effectively new, custom-defined type.
+		This type name can be used to declare any number of variables containing values of this type
+	  (e.g., <span class="pre">imm pt1 Point</span>).</p>
+	<p>Field declarations look like variable declarations, specifying the field's:</p>
+	<ul>
+		<li><b>Permission.</b>
+			The actual permission that governs field access is derived from
+			both the field's and struct's permissions
+			using a mechanism called <a href="refperm.html#view">viewpoint adaptation</a>.
+			If unspecified, <span class="pre">mut</span> is assumed,
+			which effectively means the struct value's permission governs access.</li>
+		<li><b>Name.</b>
+			Field names that begin with an underscore are considered private.
+			Private fields can only be accessed by the struct's methods.
+			Fields should be private if we don't want logic outside the struct's methods
+			to depend on this implementation detail or be able to change its value directly.
+			This is particularly important when the field's value should be subject to
+			additional invariant constraints that are properly enforced by the struct's methods.
+			<p>The anonymous name <span class="pre">_</span> may be used for
+			any data segment of the struct that we don't want or need access to.</p></li>
+		<li><b>Type.</b>
+			This can be any type:  numeric, Bool, an array, some other struct, etc.
+			There is one important restriction: A field's type may not be the same
+			as the struct type we are declaring (or any recursive variation on this).
+			A field's type, however, may be a <a href="refrefs.html">reference</a> to the struct type.</li>
+		<li><b>Default value.</b>
+			The default value must be a constant.
+			Specifying default values makes initialization of a newly created struct more convenient.</li>
+	</ul>
+	<p><b>Note:</b>
+		A struct declared with no fields is called an <b>opaque type</b>.
+		It is typically used when we want to be able to point to data whose structure is a mystery
+		(built built and managed by some external system).
+		It is not possible to create a new value using an opaque type,
+		but one can pass around references to an already created value of such an opaque type.
 	</p>
-	<p>Property declarations look like variable declarations:</p>
-	<ul>
-		<li>A permission may be specified before the property name.
-			If unspecified, <span class="pre">mut</span> is assumed.</li>
-		<li>The property's name and type must be specified.
-			Property names that begin with an underscore are considered private.
-			Private properties cannot be accessed outside of the struct's methods.
-		</li>
-		<li>A default value may be specified after the type and an equal sign.
-			The default value must be a literal and may be used to help initialize a newly created struct.</li>
-	</ul>
-	<p>Once declared, the struct type may be used the same way as any other type.
-	For example, this declares a Point variable:</p>
+
+	<h2>Initialization</h2>
+	<p>The initial value for any struct value is always built 
+		(explicitly or implicitly) using a struct constructor:
+	the struct name followed by comma-separated field values in square brackets.
+	Values may be marked with field names or just listed in declared order:</p>
 <pre>
-imm pt Point;
+imm pt = Point [x: 3., y: 4.]    // Using field names
+imm pt2 = Point [3., 4.]         // When field names are omitted, order matters.
+imm pt3 = Point[]                // Uses x,y's declared default values of 0.
 </pre>
-
-	<h2>Struct Values</h2>
-	<p>A new struct value is created and initialized using a literal or an 
-		<a href="refallocref.html#initializer">initializer</a>.</p>
-
-	<h3>Literals</h3>
-	<p>A struct literal begins with the struct name followed by the initial values for all properties in square brackets.</p>
-	<pre>
-	imm pt = Point [x: 3., y: 4.]    // Using property names
-	imm pt2 = Point [3., 4.]         // When property names are omitted, order matters.
-	</pre>
-	<p>Several rules apply to literals:</p>
+	<p>Several constraints apply to struct constructors:</p>
 	<ul>
-		<li>A value must be specified for all properties that were not declared with a default value.</li>
-		<li>Private properties without a default value prevent the use of literals external to the type's methods.</li>
+		<li>The constructor must specify a value for every field lacking a default value.</li>
+		<li>Only the type's methods may use the struct constructor,
+			if the struct has any private field lacking a default value.</li>
 	</ul>
-
-	<h3>Copy vs. Move</h3>
-	<p>By default, most declared structs are 'copy' types.
-	  However, if a struct defines any field whose type is 'move'
-	  (e.g., a 'lex' or 'uni' reference),
-	  the entire struct is treated as a 'move' type.
-	  For further information about 'copy' vs. 'move', please consult the
-	  <a href="refmove.html">move semantics</a> page.</p>
-
-	<h3>Struct References</h3>		
-	<p>struct copying has potential downsides: a) the larger the struct, the slower the copy,
-	b) changing a copy does not change the original. These limitations can be addressed
-	by borrowing a reference to a struct and then passing around and using the reference
-	in place of the struct.
+	<p>It is also possible to initialize a new struct value by using one of the struct's defined
+		<a href="refmethod.html#init">initializer methods</a> instead.
+		Under the covers,
+		initializer methods also use the struct constructor to initialize the struct's value.</p>
+	
+	<h2>Copying</h2>
+	<p>Like numbers, struct values may be passed around between variables and functions:</p>
 <pre>
 fn main()
-  imm pt = Point [x: 3f, y: 4f]
-  imm dist = dist(&amp;mut pt)  // dist may modify the contents of pt
-</pre>
-	<p>Similarly, an allocator may be used to allocate a new struct.
-	The allocator returns a reference to the struct:</p>
-<pre>
-imm pt = &amp;gc mut Point[x: 3f, y: 4f]
-</pre>
+	imm pt1 = Point[]
+	pt1 = change(pt1)
 
-	<h2>Property Access</h2>
-	<p>Any public property within a struct may be accessed using the <span class="pre">.</span> operator,
-	specifying the object on the left and the property name on the right:</p>
+fn change(mut pt Point)
+	pt = Point[1., 2.]
+	pt
+</pre>
+	<p>Copies of the data structures are made as they are passed around
+		(e.g. into and returned by <span class="pre">change</span>).
+		Any changes made to a copy won't change the original struct value.
+		This may not always be the behavior that you want, though.
+		If a struct is too big to pass around efficiently,
+		or you want changes to apply to the source structure,
+		make use of <a href="refrefs.html">references</a> to a struct instead.</p>
+
+	<h2>Field Access</h2>
+	<p>Use the <span class="pre">.</span> operator to access a struct field's value,
+	specifying the struct value on the left and the field name on the right:</p>
 <pre>
 imm dist = (pt.x*pt.x + pt.y*pt.y).sqrt
 </pre>
-	<p>Within a struct's methods, only the property name needs to be specified,
-		just as if it were a variable.</p>
+	<p>A field's value may also be altered in this way:</p>
 <pre>
-fn dist() f32
-    (x*x + y*y).sqrt  // x is equivalent to self.x
+pt.y = pt.x
 </pre>
-	<p>A property can be changed by putting the property name to the left of an assignment operator:</p>
-<pre>
-fn setOrigin(self &amp;mut)
-    x,y = 0f,0f
-</pre>
-	<p><b>Note:</b> From the outside, a property and a computed property (a get/set method)
-	look identical. The user of a struct does not care if it is working with a stored value
-	or a value mediated by methods.</p>
-	
-	<h3>Property permissions</h3>
-	<p>Mutation of a property is allowed only if the permissions on 
-	both the object <i>and</i> the property permit it.</p>
+	<p>The compiler applies field privacy and permission constraints to prevent invalid field accesses.
+		A private field can only be accessed by the type's methods.
+		Changing of a field's value is only allowed if the struct/field permissions allow mutability.</p>
 
-	<h3>Property references</h3>
-	<p>It is possible to use the <span class="pre">&amp;</span> operator to 
-	obtain a borrowed reference to a specific property within a structure:</p>
-<pre>
-imm pt = Point[x: 3f, y: 4f]
-imm refx = &amp;pt.x
-*refx                     // 3f
-</pre>
+	<p>It is also possible to use the <span class="pre">&amp;</span> operator to 
+	<a href="refborref.html#internal">borrow a reference</a> to a specific field within a struct value.</p>
 
-	<h2 id="match">Partial match</h2>
-	<p>TBD.</p>
+	<h2>Comparing</h2>
+	<p>It is not possible to check whether two structs have the same value if the struct defines only fields.
+		However, two struct values may be compared if the struct implements
+		the <a href="refmethod.html#compare">comparison methods</a>.
+		Also, it is possible to perform <a href="refmatch.html#struct">partial matching</a>
+		of a struct against some pattern.
+	</p>
 
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refunion.html"><img alt="_" src="next.png" /></a>

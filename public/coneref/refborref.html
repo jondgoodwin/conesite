@@ -119,12 +119,12 @@ imm borref = &*allocref
 
 	<h3 id="internal">Borrowing within a struct or array</h3>
 	<p>Only a borrowed reference may point to some value that lies within an allocated value,
-		such as a property in a <a href="refstruct.html">struct</a> 
+		such as a field in a <a href="refstruct.html">struct</a> 
 		or an element in an <a href="refarray.html">array</a>-based collection.
 		This is how to do it:
 	</p>
 <pre>
-imm ref1 = &amp;apoint.x   // a property within a struct
+imm ref1 = &amp;apoint.x   // a field within a struct
 imm ref2 = &amp;vec[a]     // an element within an array
 </pre>
 	<p>This interior reference capability is versatile in several ways:</p>
@@ -195,7 +195,7 @@ imm val = *ref  // val is now 3
 	<p>It is not always necessary to explicitly dereference a borrowed reference to use it,
 	since a reference is understood to be a stand-in for the value it references.
 	Dereferencing happens implicitly when using the <span class="pre">.</span> operator
-	to access a property or call a method on some value pointed to by a reference:</p>
+	to access a field or call a method on some value pointed to by a reference:</p>
 <pre>
 mut a = -4
 imm ptr = &amp;mut a

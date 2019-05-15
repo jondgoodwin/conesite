@@ -13,10 +13,10 @@
 
     <div class="text">
 
-    <p style="margin-left: 40px;"><i>Note: All of this capability is implemented
-        except multi-element segments, 'each' iteration, comparison, and pattern matching.</i></p>
+    <p style="margin-left: 40px;"><i>Note: All of this capability is implemented except
+        fill initialization, multi-element segments, 'each' iteration, comparison, and pattern matching.</i></p>
 
-    <p>An array holds a fixed number of values, all of the same type.
+    <p>An array holds a specified number of values, all of the same type.
         The array's elements are co-located in memory and can be individually accessed using an integer index.</p>
         <p>Let's illustrate with an example:
     </p>
@@ -31,7 +31,7 @@ imm numbers [3] f32 = [3.1, 4.1, 5.92]
         If variable-sized or heap-allocated arrays are needed, use
         <a href="refarrayref.html">array references</a> instead.</p>
 
-    <h2>Construction</h2>
+    <h2>Initialization</h2>
     <p>To create or initialize an array, specify the values of all its elements
         separated by commas and enclosed within square brackets (as the above example demonstrates).
         When this array constructor is used to initialize a global variable,
@@ -49,6 +49,16 @@ imm hello = "Hello world!"  // type:  [12] u8
         The length is the number of bytes it occupies. The type of each element is u8.
         For C-compatibility, the zero terminator ('\0') is placed at the end of the string, but not counted in its length.
     </p>
+
+    <h3>Fill Initialization</h3>
+    <p>An array can be initialized with a single fill value by using a semi-colon to separate the
+        array's length from its fill value.
+        This example creates a 100-byte string, where all bytes are spaces:</p>
+<pre>
+imm spaces = [100; ' ']
+</pre>
+    <p>Alternatively, a <a href="refclosure.html">closure</a> may be specified in lieu of a fill value.
+        The closure is repeatedly invoked to produce each of the array elements' values.</p>
 
     <h2>Copying</h2>
     <p>Like numeric values, array values may be passed around between variables and functions:</p>
@@ -186,7 +196,7 @@ if somebody == "Jane"
 
     <h3>Partial pattern match</h3>
     <p>The <a href="refmatch.html"><span class="pre">match</span></a> statement 
-        or <span class="pre">~~</span> operator</span> supports additional string comparison capability,
+        or <span class="pre">~~</span> operator</span> supports additional array comparison capability,
         particularly for <a href="refmatch.html#array">partial pattern matching</a>.
 
 	<p style="text-align: right; margin-top: 2em;">
