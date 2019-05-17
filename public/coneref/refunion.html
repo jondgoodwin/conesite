@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>enums and unions - Cone Reference</title>
+	  <title>unions - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -8,86 +8,77 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">enums and unions</div>
+			<div id="sub">unions</div>
 		</div>
 
     <div class="text">
-		<p>From a type perspective, a struct or array value's data structure is quite fixed.
-			This is restrictive when we need values whose structure can vary based on runtime logic.
-			This is what enum and union-based types address.
-			They allow a value's type structure to vary as signalled by its captured "tag".</p>
-
-		<h2>Enums</h2>
-		<p>Let's start with enum. 
-			Enums hold a single value whose type could be one of several variations.
-			For example:</p>
+		<p>Like enums, unions allow a value's type structure to vary.
+			Unions permit greater data structure flexibility than enums,
+			because they make the nature of the tag more explicit.</p>
+			<p>The safe way to use a union is within a struct,
+			where the union points to the explicit tag field in the struct:</p>
 <pre>
-enum Number
-	Integer i32
-	Float   f32
+struct Event
+  evtype u32
+  time Time
+  union : evtype
+    MouseButton
+      button u8
+      x i32
+      y i32
+    Keyboard
+      keysym KeySym
+		Quit
 </pre>
-		<p>This defines a new enum type called <span class="pre">Number</span>
-			which holds a single numeric value.
-			That value <i>could</i> be an integer or a floating-point number, but not both.
-			Unlike with structs, <span class="pre">Integer</span> and <span class="pre">Float</span> 
-			are not separate fields stored in different locations.
-				They are instead two possible overlays on a single memory location.</p>
-			<p>Under the covers, enum values also hold a hidden field called the "tag".
-			In this example, the tag indicates whether the value currently holds an integer 
-			or a floating-point number.</p>
+		<p>The <span class="pre">Event</span> type encodes user-initiated events,
+			such as clicking a mouse button, pressing a key on the keyboard, or quitting the program.
+			These are variant types of events, that all share some fields in common, such as
+			<span class="pre">time</span>'s timestamp info.
+			Each event type also defines its own specific fields.
+			Notice that union points to the common <span class="pre">evtype</span> field,
+			making it the type's tag field used to determine which variant type a value holds.</p>
 	
-	<h3>Enum Declaration</h3>
-	<p>As the example shows, an enum type declaration resembles a struct declaration.
-		The enum's declared name represents this new, custom-defined type.
-		The type for an unsigned integer may be specified after the name,
-		if a tag type larger than the default (usually u8) is desired.</p>
-	<p>The enum declaration enumerates several variant types, each specifying the option's:</p>
-	<ul>
-		<li><b>Name.</b>
-			As the option name represents a type, it is typically capitalized.
-			Names should not begin with (or be) an underscore.</li>
-		<li><b>Value.</b>
-			Normally, a number is automatically assigned to each variant for the tag,
-			starting with 0 and incrementing upwards on each option.
-			Optionally, a specific number may be specified after the name and an
-			equal sign.</li>
-		<li><b>Type.</b>
-			This is the type of any value of this option.
-			A type need not be specified when this option is not attached to a value.
-			Alternative, the specified may be a set of fields enclosed in curly braces.
-			This is understood to mean the type is a struct that includes the defined fields.</li>
-	</ul>
-	<p>This silly declarations shows three options with different kinds of types:</p>
+	<h3>Declaration</h3>
+	<p>The union's declaration looks largely identical to that of an enum.
+		An important difference is that a union needs to specify which of the enclosing struct's fields
+		is to be used as the discriminating tag.</p>
+
+		<h3>Initialization</h3>
+		<p>A union-based struct value is built using a variation of the struct constructor:</p>
 <pre>
-enum OddEnum
-	None
-	SomeInt i32
-	PointStruct
-		x f32
-		y f32
+mut event = Event::MouseButton[now, button: 0, x: 140, y: 170]
+event = Event::Keyboard[now, 'a']
+event = Event::Quit[now]
 </pre>
-	<p>If an enum lacks types for all its options (like None does above),
-		the enum essentially just associates names to constant numbers.
-		For example:</p>
+		<p>How this differs from a normal struct constructor should be pretty obvious:
+			instead of giving the tag's value inside the constructor, we qualify the type's
+			name with the type of the variant.</p>
+
+		<h3>Copying</h3>
+		<p>A struct value with an embedded union may be passed around, by copy, just like any other value.
+			As with enums, all variant values of a union-based struct type are the same size.
+		</p>
+
+		<h3>Value Access</h3>
+		<p>Any field in common across all variants may be accessed in the same way as any normal field:</p>
 <pre>
-enum Colors
-	Red   = 0xFF0000
-	Green = 0x00FF00
-	Blue  = 0x0000FF
+imm when = event.time
+</pre>
+		<p>However, much like enum, to safely gain access to any of the union-declared variant fields,
+			we must use <a href="refmatch.html">pattern matching</a>:</p>
+<pre>
+match event
+  ~~ mbutton = MouseButton:   mbutton.x
+  ~~ key = Keyboard:          i32[key.keysym]
+  ~~ Quit:                    0
 </pre>
 
-		<h3>Enum Initialization</h3>
-		<p>An enum initial value is built using the enum constructor, which looks similar to the struct one:</p>
-<pre>
-mut oddval = OddEnum::None
-oddval = OddEnum::SomeInt[34]
-oddval = OddEnum::PointStruct[x: 4., y: 8.]
-</pre>
-
-
-			<h2 id="match">Partial match</h2>
-	<p>TBD.</p>
-
+		<h3>Comparing</h3>
+		<p>Just like with vanilla structs,
+				two union-based struct values may be only compared if the struct implements
+				the <a href="refmethod.html#compare">comparison methods</a>.
+			</p>
+		
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refalloc.html"><img alt="_" src="next.png" /></a>
 	</p>

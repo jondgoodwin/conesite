@@ -12,11 +12,112 @@
 		</div>
 
     <div class="text">
-	<p>TBD.</p>
+		<p>From a type perspective, the structure of a struct or array value is quite fixed.
+			This is restrictive when we need values whose structure can vary based on runtime logic.
+			This is what enum (and union-based) types address.
+			They allow a value's type structure to vary as signalled by its captured "tag".</p>
 
+		<p>Enums hold a single value whose type could be one of several variations.
+			For example:</p>
+<pre>
+enum Number
+	Integer i32
+	Float   f32
+</pre>
+		<p>This defines a new enum type called <span class="pre">Number</span>
+			which holds a single numeric value.
+			That value <i>could</i> be an integer or a floating-point number, but not both.
+			Unlike with structs, <span class="pre">Integer</span> and <span class="pre">Float</span> 
+			are not separate fields stored in different locations.
+				They are instead two possible overlays on a single memory location.</p>
+			<p>Under the covers, enum values also hold a hidden field called the "tag".
+			In this example, the tag indicates whether the value currently holds an integer
+			(tag field = 0) or a floating-point number (tag field = 1).
+		</p>
+	
+	<h3>Declaration</h3>
+	<p>As the example shows, an enum type declaration resembles a struct declaration.
+		It begins by giving a name to this new, custom-defined type.
+	  The variant types options are listed within, each specifying the option's:</p>
+	<ul>
+		<li><b>Name.</b>
+			As the option name represents a type, it is typically capitalized.
+			Names should not begin with (or be) an underscore.
+		  A name may be the same as the name of the type specified for this variant.</li>
+		<li><b>Type.</b>
+			This is the type of any value of this option.
+			A type need not be specified when this option is not attached to a value.
+			Alternative, the specified may be a set of fields enclosed in curly braces.
+			This is understood to mean the type is a struct that includes the defined fields.</li>
+		<li><b>Tag Value.</b>
+			Normally, a number is automatically assigned to each variant for the tag,
+			starting with 0 and incrementing upwards on each option.
+			This tag number may be explicitly indicated, if desired.</li>
+		</ul>
+	<p>This declaration specifies three variant types:</p>
+<pre>
+enum OddEnum
+	None          // No value for this variant
+	SomeInt i32   // Value is an integer
+	PointStruct   // Value is a struct holding two floats
+		x f32
+		y f32
+</pre>
+	<p><b>Note:</b>
+		enums can be used to associate names to constant numbers.
+		Just leave out type information:
+	</p>
+<pre>
+enum Colors
+	Red   = 0xFF0000
+	Green = 0x00FF00
+	Blue  = 0x0000FF
+</pre>
 
-	<h2 id="match">Partial match</h2>
-	<p>TBD.</p>
+		<h3>Initialization</h3>
+		<p>An enum initial value is built using the enum constructor:</p>
+<pre>
+mut oddval = OddEnum::None
+oddval = OddEnum::SomeInt[34]
+oddval = OddEnum::PointStruct[x: 4., y: 8.]
+</pre>
+
+		<h3>Copying</h3>
+		<p>An enum value may be passed around, by copy, just like any other value.
+			This is possible because all variant values of a specific enum type are the same size.
+			The enum type's size is effectively the size of its largest variant type
+			plus the size of its hidden tag field.
+		</p>
+
+		<h3>Value Access</h3>
+		<p>To safely gain access to the differently-typed value enclosed with an enum value,
+			we must use <a href="refmatch.html">pattern matching</a>.
+			As a brief peek into the versatile power of partial pattern matching,
+			consider this example:</p>
+<pre>
+match oddval
+	~~ intval = SomeInt:     intval
+	~~ point = PointStruct:  i32[point.x * point.y]
+	None:                    0
+</pre>
+		<p>The <span class="pre">match</span> statement allows us to determine which type of data
+			this <span class="pre">OddEnum</span> value holds.
+			If it is an integer, it will match on the first option and (as part of the match) copy that integer into
+			a new variable called <span class="pre">intval</span>.
+			For this variant, the logic indicates that the match expression should evaluate to this integer's value.
+			And so it goes for matching against any of the other variants.</p>
+		<p>One may also match an enum value against a single variant using an
+			<span class="pre">if</span> statement:</p>
+<pre>
+sum += intval if oddval ~~ intval=SomeInt
+</pre>
+
+		<h3>Comparing</h3>
+		<p>An enum value may only be compared for equivalence (and not order).
+			The equivalence check compares the tag fields first.
+			If they are equal, the appropriately-typed interior values are compared
+			using the <span class="pre">==</span> method.</p>
+
 
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refalloc.html"><img alt="_" src="next.png" /></a>

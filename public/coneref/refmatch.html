@@ -136,7 +136,7 @@ match nbr
 	<p>Partial match patterns begin with the <span class="pre">~~</span> operator. 
 		Additional specifics of the pattern vary by type.</p>
 
-	<h2 id="array">Array partial matches</h2>
+	<h3 id="array">Array partial matches</h3>
 	<p>The simplest partial match checks whether an array (or array reference) begins with
 		certain elements:</p>
 <pre>
@@ -154,7 +154,7 @@ match numbers
 	_: 4
 </pre>
 
-	<h2 id="struct">Struct partial matches</h2>
+	<h3 id="struct">Struct partial matches</h3>
 	<p>A matching pattern may be created for specific named fields:</p>
 <pre>
 match points
@@ -165,10 +165,36 @@ match points
 </pre>
 	<p>Any unspecified fields in a struct pattern are assumed to match.</p>
 
+	<h3 id="enum">Enum partial matches</h3>
+	<p>An enum pattern typically just matches against each option's variant type,
+		binding to a variable:</p>
+<pre>
+match oddval
+	~~ intval = SomeInt:     intval
+	~~ point = PointStruct:  i32[point.x * point.y]
+	None:                    0
+</pre>
+	<p>If desired, pattern matching and binding can also be applied to the internal value(s):</p>
+<pre>
+match oddval
+  ~~ intval = SomeInt[&lt;0]:   -intval
+  ~~ intval = SomeInt:       intval
+  ~~ PointStruct[x=_, y=_]:  i32[x * y]
+  None:                      0
+</pre>
+
+	<h3 id="union">Union-based struct partial matches</h3>
+	<p>The patterns are a mix of the enum and struct pattern:</p>
+<pre>
+match event
+  ~~ mbutton = MouseButton:   mbutton.x
+  ~~ key = Keyboard:          i32[key.keysym]
+  ~~ Quit:                    0
+</pre>
+						
 <h2>Other types</h2>
 	<ul>
 	<li><a href="refunion.html#match">Union partial match</a></li>
-	<li><a href="refenum.html#match">Enum partial match</a></li>
 	<li><a href="refrefs.html#match">Reference partial match</a></li>
 	<li><a href="refinterface.html#match">Subtype partial match</a></li>
 	</ul>
