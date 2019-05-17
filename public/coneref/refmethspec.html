@@ -1,0 +1,75 @@
+<html>
+  <head>
+	  <title>Special-Purpose Methods - Cone Reference</title>
+		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	  <link rel="stylesheet" type="text/css" href="standard.css" />
+	</head>
+  <body>
+		<div id="header">
+			<a href="/"><div id="title">Cone</div></a>
+			<div id="sub">Special-Purpose Methods</div>
+		</div>
+
+    <div class="text">
+
+	<p>A number of method names have an important built-in role in various Cone features.</p>
+
+	<h2 id="init">Initialization methods</h2>
+	<p>TBD: default named "init", 'raw' permission, use of constructor, etc.</p>
+
+	<h3>Drop method</h3>
+	<p>TBD: finalizers (when fires, whether can invoke ahead of time).</p>
+
+	<h2 id="compare">Comparison methods</h2>
+	<p>TBD: </p>
+
+	<h2>Operator methods</h2>
+	<p>Many operators are implemented as method calls. For instance, <span class="pre">x+3</span>
+	is treated as if it were:  <span class="pre">x.`+`(3)</span>
+	A type need only implement the <span class="pre">`+`</span> method to
+	make the <span class="pre">+</span> operator meaningful to values of that type.
+	If a program tries to apply the <span class="pre">+</span> operator to a value 
+	whose type has not implemented the <span class="pre">`+`</span> method,
+	a compiler error results.</p>
+	<p>This principle applies to all the arithmetic, arithmetic assignment, and comparison operators.
+		It also applies to:</p>
+	<ul>
+		<li><b>`[]`</b> for indexing or slice creation</li>
+		<li><b>`()`</b> for function calls (this allows a struct to become a closure)</li>
+		<li><b>`&lt;&lt;` and `&gt;&gt;`</b> for append and prepend</li>
+	</ul>
+
+	<h2>Structs as indexed collections</h2>
+	<p>More complex collections may be created using the built-in array types as a foundation.
+			This is typically accomplish by defining a struct with a dynamic array as one of the fields.
+			This custom collection can handle all of the operations described earlier
+			because these capabilities are invoked as methods on the struct object.
+			The struct's methods can then forward these requests down to the dynamic array as appropriate.</p>
+	<p>These are the implicit names for these methods:</p>
+	<ul>
+			<li><b>[]</b> - single-element indexing (get and set) if there is one argument,
+					and multi-element indexing if there are two.</li>
+			<li><b>&[]</b> - get borrowed reference to a single element</li>
+	</ul>
+	
+<h3>Implicit methods</h3>
+	<p>Various language constructs call certain methods under the covers:</p>
+	<ul>
+			<li><b>.init</b> is the default <a href="refallocref.html#initializer">initializer</a>
+				for newly allocated values</li>
+			<li><b>.drop</b> is the <a href="refallocref.html#finalizer">finalizer</a>
+				called when before an allocated value is freed</li>
+			<li><b>.clone</b> is called when making a copy of a "non-copyable" value</li>
+			<li><b>.each</b> is called by the <span class="pre">each</span> block to create an iterator</li>
+		<li><b>.`~~`</b> is the default match operator for <span class="pre">match</span> blocks</li>
+		<li><b>.`&lt;&lt;`</b> is the default append operator used for <span class="pre">build</span> blocks</li>
+	</ul>
+
+	<p style="text-align: right; margin-top: 2em;">
+		<a href="refthis.html"><img alt="_" src="next.png" /></a>
+	</p>
+
+	</div>
+	</body>
+</html>

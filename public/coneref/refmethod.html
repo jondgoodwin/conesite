@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>Methods - Cone Reference</title>
+	  <title>Method Definition - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -8,60 +8,59 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Methods</div>
+			<div id="sub">Method Definition</div>
 		</div>
 
     <div class="text">
 
 	<p>Methods add functional behavior to a defined type, offering capabilities consistent with
 		and helpful for values of that type.
-		For example, as mentioned <a href="refexpr.html#method">earlier</a>, 
+		For example (as mentioned <a href="refexpr.html#method">earlier</a>), 
 		<span class="pre">`+`</span> is one of several methods defined for the <span class="pre">i32</span> type.
 		It adds two integers together and returns the result.</p>
-	<p>Nearly every type supports the use of custom-defined methods: numbers, structs, indexed collections,
-		variant types, interfaces, traits, slices, etc. Even allocators and permissions support methods.
-		The only types that do not support their own customizeable methods are references, pointers, functions and static arrays
-		(although any of these can do so when wrapped within a struct).</p>
-	<p>A method definition looks and behaves like a function definition: It has a name, named parameter(s),
-		return value type(s), and a statement body. On this page we explore the ways that methods
-		differ from functions.</p>
-
-	<h2>The type's namespace</h2>
-	<p>Functions typically belong to a global (module) namespace.
-		By contrast, methods belong to a type's <a href="refnamespace.html">namespace</a>.
-		(Note: a type's named fields belong to the same namespace as its methods).</p>
-	<p>Since methods belong to a type's namespace, two different types can
-		define a method with the same name, each doing something different and appropriate to its type.
-		There is no confusion over which one to use, because use of a method
-		is qualified implicitly (using the dot operator) by the type of the value it is applied to.</p>
-	<p>No such qualification is needed when a method calls another method in the same type;
-		such a call looks exactly like a function call.</p>
-
-	<h2>Multiple methods with the same name</h2>
-	<p>Another difference between methods and functions is that a type may define more than one method of the same name.
-	  Once again, there is no confusion about which method to use, because
-	  same-named methods differ in their parameter definitions, either the number or type of its parameters.
-	  When a certain named method is used, Cone chooses the first method whose parameter definition
-	  matches the types and number of arguments passed to that method.
-	  Supporting multiple methods of the same name makes it convenient for a type to
-	  support a similar capability for a broad range of differently-typed values.</p>
-
-	<h2>Self</h2>
-	<p>A method's first parameter is always named <span class="pre">self</span>.
-	The type specified for <span class="pre">self</span> must match the type the method is defined within,
-	or else be a reference to a value of that type.</p>
+	<p>Methods are pre-defined for the number types.
+		However, for some custom-declared types, such as structs or enums, no default methods are provided.
+		Instead, methods may be defined along with the data structure.</p>
+	<p>This example defines some methods as part of the <span class="pre">Point</span> declaration:</p>
 <pre>
 struct Point
   x f32
   y f32
-  // a method that works on Point values...
-  fn len(self) f32
-    ((.x*.x)+(.y*.y)).sqrt()
+		
+  // Calculate distance between two points
+  fn distance(pt2) f32
+    (self-pt2).len
 
-fn test()
-  imm pt = Point{3., 4.}
-  imm c = pt.len() // use Point's 'len' method
+  // Subtract two points
+  fn `-`(pt2) Point
+    Point[pt2.x - x, pt2.y - y]
+
+  // Calculate length of point
+  fn len() f32
+    _lensq().sqrt // _lensq() is equivalent to self._lensq()
+	
+  // A private method
+  fn _lensq() f32
+		x*x + y*y
 </pre>
+	<p>There's a lot to unpack here, which we will get to in a moment,
+		but with these method definitions in place, it is now possible to write some logic that uses them:
+	</p>
+<pre>
+imm from = Point[x: 1., y: 1.]
+imm to   = Point[x: 4., y: 5.]
+imm dist = from.distance(to)     // == 5.0. Pythagoras would be proud
+</pre>
+
+	<h2>Method definition</h2>
+	<p>A method definition looks and behaves like a function definition: It has a name, named parameter(s),
+		return value type(s), and a statement body. On this page we explore the ways that methods
+		differ from functions.</p>
+
+	<h3>self and Self</h3>
+	<p>A method's first parameter is always named <span class="pre">self</span>.
+	The type specified for <span class="pre">self</span> must match the type the method is defined within,
+	or else be a reference to a value of that type.</p>
     <p>A method's parameter need not specify the type if it is the same as the type the method is defined in.
     Similarly, when the type of self is the same as the method's type, which is typically the case,
     self need not even be declared in the method's parameter list. It will be inserted automatically.</p>
@@ -79,7 +78,31 @@ fn test()
 				x,y = 0f,0f
 		</pre>
 
-	<h3>set methods (Computed Properties)</h3>
+	<h2>The type's namespace</h2>
+	<p>Nearly every type supports the use of custom-defined methods: numbers, structs, indexed collections,
+			variant types, interfaces, traits, slices, etc. Even allocators and permissions support methods.
+			The only types that do not support their own customizeable methods are references, pointers, functions and static arrays
+			(although any of these can do so when wrapped within a struct).</p>
+	<p>Functions typically belong to a global (module) namespace.
+		By contrast, methods belong to a type's <a href="refnamespace.html">namespace</a>.
+		(Note: a type's named fields belong to the same namespace as its methods).</p>
+	<p>Since methods belong to a type's namespace, two different types can
+		define a method with the same name, each doing something different and appropriate to its type.
+		There is no confusion over which one to use, because use of a method
+		is qualified implicitly (using the dot operator) by the type of the value it is applied to.</p>
+	<p>No such qualification is needed when a method calls another method in the same type;
+		such a call looks exactly like a function call.</p>
+
+	<h2>Method Overloading</h2>
+	<p>Another difference between methods and functions is that a type may define more than one method of the same name.
+		Once again, there is no confusion about which method to use, because
+		same-named methods differ in their parameter definitions, either the number or type of its parameters.
+		When a certain named method is used, Cone chooses the first method whose parameter definition
+		matches the types and number of arguments passed to that method.
+		Supporting multiple methods of the same name makes it convenient for a type to
+		support a similar capability for a broad range of differently-typed values.</p>
+	
+	<h2>set methods (Computed Properties)</h2>
 	<p>By default, methods typically operate in "get" mode,
 		invoked as part of an expression and often returning one or more values.
 		However, it is possible for a method to be used on the left-hand side of an assignment.
@@ -114,60 +137,6 @@ x.counter // 11
 		look identical. The user of a struct does not care if it is working with a stored value
 		or a value mediated by methods.</p>
 	
-	<h2>Methods with pre-defined roles</h2>
-	<p>A number of method names have an important built-in role in various Cone features.</p>
-
-	<h3 id="init">Initialization methods</h3>
-	<p>TBD: default named "init", 'raw' permission, use of constructor, etc.</p>
-
-	<h3>Drop method</h3>
-	<p>TBD: finalizers (when fires, whether can invoke ahead of time).</p>
-
-	<h3 id="compare">Comparison methods</h3>
-	<p>TBD: </p>
-
-	<h3>Operator methods</h3>
-	<p>Many operators are implemented as method calls. For instance, <span class="pre">x+3</span>
-	is treated as if it were:  <span class="pre">x.`+`(3)</span>
-	A type need only implement the <span class="pre">`+`</span> method to
-	make the <span class="pre">+</span> operator meaningful to values of that type.
-	If a program tries to apply the <span class="pre">+</span> operator to a value 
-	whose type has not implemented the <span class="pre">`+`</span> method,
-	a compiler error results.</p>
-	<p>This principle applies to all the arithmetic, arithmetic assignment, and comparison operators.
-		It also applies to:</p>
-	<ul>
-		<li><b>`[]`</b> for indexing or slice creation</li>
-		<li><b>`()`</b> for function calls (this allows a struct to become a closure)</li>
-		<li><b>`&lt;&lt;` and `&gt;&gt;`</b> for append and prepend</li>
-	</ul>
-
-	<h2>Structs as indexed collections</h2>
-	<p>More complex collections may be created using the built-in array types as a foundation.
-			This is typically accomplish by defining a struct with a dynamic array as one of the fields.
-			This custom collection can handle all of the operations described earlier
-			because these capabilities are invoked as methods on the struct object.
-			The struct's methods can then forward these requests down to the dynamic array as appropriate.</p>
-	<p>These are the implicit names for these methods:</p>
-	<ul>
-			<li><b>[]</b> - single-element indexing (get and set) if there is one argument,
-					and multi-element indexing if there are two.</li>
-			<li><b>&[]</b> - get borrowed reference to a single element</li>
-	</ul>
-	
-<h3>Implicit methods</h3>
-	<p>Various language constructs call certain methods under the covers:</p>
-	<ul>
-			<li><b>.init</b> is the default <a href="refallocref.html#initializer">initializer</a>
-				for newly allocated values</li>
-			<li><b>.drop</b> is the <a href="refallocref.html#finalizer">finalizer</a>
-				called when before an allocated value is freed</li>
-			<li><b>.clone</b> is called when making a copy of a "non-copyable" value</li>
-			<li><b>.each</b> is called by the <span class="pre">each</span> block to create an iterator</li>
-		<li><b>.`~~`</b> is the default match operator for <span class="pre">match</span> blocks</li>
-		<li><b>.`&lt;&lt;`</b> is the default append operator used for <span class="pre">build</span> blocks</li>
-	</ul>
-
 	<h2>Static functions</h2>
 	<p>Sometimes it makes sense to define a function as part of a type,
 		because it plays a useful role in relationship to the type, even though
