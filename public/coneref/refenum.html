@@ -12,28 +12,30 @@
 		</div>
 
     <div class="text">
-		<p>From a type perspective, the structure of a struct or array value is quite fixed.
-			This is restrictive when we need values whose structure can vary based on runtime logic.
-			This is what enum (and union-based) types address.
-			They allow a value's type structure to vary as signalled by its captured "tag".</p>
+	<p style="margin-left: 40px;"><i>Note: None of this capability is currently implemented.</i></p>
 
-		<p>Enums hold a single value whose type could be one of several variations.
-			For example:</p>
+	<p>From a type perspective, the structure of a struct or array value is quite fixed.
+	This is restrictive when we need values whose structure can vary based on runtime logic.
+	This is what enum (and union-based) types address.
+	They allow a value's type structure to vary as signalled by its captured "tag".</p>
+
+	<p>Enums hold a single value whose type could be one of several variations.
+		For example:</p>
 <pre>
 enum Number
 	Integer i32
 	Float   f32
 </pre>
-		<p>This defines a new enum type called <span class="pre">Number</span>
-			which holds a single numeric value.
-			That value <i>could</i> be an integer or a floating-point number, but not both.
-			Unlike with structs, <span class="pre">Integer</span> and <span class="pre">Float</span> 
-			are not separate fields stored in different locations.
-				They are instead two possible overlays on a single memory location.</p>
-			<p>Under the covers, enum values also hold a hidden field called the "tag".
-			In this example, the tag indicates whether the value currently holds an integer
-			(tag field = 0) or a floating-point number (tag field = 1).
-		</p>
+	<p>This defines a new enum type called <span class="pre">Number</span>
+		which holds a single numeric value.
+		That value <i>could</i> be an integer or a floating-point number, but not both.
+		Unlike with structs, <span class="pre">Integer</span> and <span class="pre">Float</span> 
+		are not separate fields stored in different locations.
+			They are instead two possible overlays on a single memory location.</p>
+		<p>Under the covers, enum values also hold a hidden field called the "tag".
+		In this example, the tag indicates whether the value currently holds an integer
+		(tag field = 0) or a floating-point number (tag field = 1).
+	</p>
 	
 	<h3>Declaration</h3>
 	<p>As the example shows, an enum type declaration resembles a struct declaration.
@@ -111,13 +113,65 @@ match oddval
 <pre>
 sum += intval if oddval ~~ intval=SomeInt
 </pre>
+	<p><b>Note:</b>If an enum value is being matched against a variant that has no value
+		(e.g., <span value="pre">none</span> above), the equivalence operator 
+		<span class="pre">== </span> may be used
+		instead of the partial match operator <span class="pre">~~</span>, if desired.</p>
+	</p>
 
-		<h3>Comparing</h3>
-		<p>An enum value may only be compared for equivalence (and not order).
-			The equivalence check compares the tag fields first.
-			If they are equal, the appropriately-typed interior values are compared
-			using the <span class="pre">==</span> method.</p>
+	<h3>Comparing</h3>
+	<p>An enum value may only be compared for equivalence (and not order).
+		The equivalence check compares the tag fields first.
+		If they are equal, the appropriately-typed interior values are compared
+		using the <span class="pre">==</span> method.</p>
 
+	<h2>Nullable Types</h2>
+	<p>A common enum type is the nullable type.
+		This is needed whenever we either have a value of some type
+		or else we have the absence of a value (called <span class="pre">null</span>).
+		Nullable types are needed so often that special syntax exist to make it easier to use.</p>
+	<p>To declare a nullable type, simply put a question mark before the type.
+		For example:</p>
+<pre>
+mut maybeInt ?i32 = null   // Initial value indicates the absence of a value
+if maybeInt == null
+  maybeInt = 4             // Give it the value 4
+</pre>
+	<p>If the type of a declared variable is omitted but an initial value is specified,
+		the initial value needs to be wrapped in the <span class="pre">some</span> constructor:</p>
+<pre>
+mut maybeInt = some[4]
+</pre>
+	<p><b>Nullable References</b>
+		Although we have not covered references yet, it is worth nothing here that
+		nullable references take no more space than regular references.
+		The null reference value is just a non-addressable address (typically, 0).
+	</p>
+
+	<h3>Use of nullable values</h3>
+	<p>All the usual capabilities available to enum values are also available
+		to nullable values, including copying, comparing and pattern matching.
+		Additionally, a number of pre-defined methods are available for use
+		on nullable values.
+	</p>
+	<p>Two special operators exist to make it more convenient to do certain common
+		operations on a nullable value.
+		The double exclamation operator is used when we know a nullable value is not null
+		and we want to keep using it as part of an expression:</p>
+<pre>
+imm x = maybeInt!! + 12
+</pre>
+	<P>A special method call operator is used to allow us to safely call a method on
+		a nullable value:</P>
+<pre>
+imm x = maybePoint?.dist
+</pre>
+	<p>This is identical to:</p>
+<pre>
+imm x = match maybePoint
+  null: null
+  ~~ p = Point: some(p.dist)
+</pre>
 
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refunion.html"><img alt="_" src="next.png" /></a>
