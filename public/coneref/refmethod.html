@@ -20,8 +20,8 @@
 		It adds two integers together and returns the result.</p>
 	<p>Methods are pre-defined for the number types.
 		However, for some custom-declared types, such as structs or enums, no default methods are provided.
-		Instead, methods may be defined along with the data structure.</p>
-	<p>This example defines some methods as part of the <span class="pre">Point</span> declaration:</p>
+		Instead, methods are defined in the same block as the data structure declarations.</p>
+	<p>This example defines several methods as part of the <span class="pre">Point</span> declaration:</p>
 <pre>
 struct Point
   x f32
@@ -43,121 +43,97 @@ struct Point
   fn _lensq() f32
 		x*x + y*y
 </pre>
-	<p>There's a lot to unpack here, which we will get to in a moment,
-		but with these method definitions in place, it is now possible to write some logic that uses them:
+	<p>There's a lot to unpack here, which we will get to soon.
+		The end result is that the above type definition for Point now makes
+		it possible to write logic that uses these methods:
 	</p>
 <pre>
 imm from = Point[x: 1., y: 1.]
 imm to   = Point[x: 4., y: 5.]
 imm dist = from.distance(to)     // == 5.0. Pythagoras would be proud
 </pre>
+	<p>Methods may be defined for named types, such as structs, enums, unions, integers, and floating point.
+		However, methods may not be defined for the array types, as they are unnamed.
+		This restriction is easily remedied by wrapping an array in a named struct.</p>
+	<p>In addition, the <span class="pre">extend</span> command may be used to add methods to an existing
+		 type. For example:
+		</p>
+<pre>
+extend i32
+	fn double() Self
+	  self+self
+</pre>
 
 	<h2>Method definition</h2>
-	<p>A method definition looks and behaves like a function definition: It has a name, named parameter(s),
-		return value type(s), and a statement body. On this page we explore the ways that methods
-		differ from functions.</p>
+	<p>A method definition looks (and behaves) like a function definition: It has a name, named parameter(s),
+		return value type(s), and a statement body. 
+		Let's examine how method definitions differ from functions.</p>
 
-	<h3>self and Self</h3>
-	<p>A method's first parameter is always named <span class="pre">self</span>.
-	The type specified for <span class="pre">self</span> must match the type the method is defined within,
-	or else be a reference to a value of that type.</p>
-    <p>A method's parameter need not specify the type if it is the same as the type the method is defined in.
-    Similarly, when the type of self is the same as the method's type, which is typically the case,
-    self need not even be declared in the method's parameter list. It will be inserted automatically.</p>
-
-		<h3>Implicit field and method access</h3>
-		<p>Within a struct's methods, only the field name needs to be specified,
-				just as if it were a variable.</p>
-		<pre>
-		fn dist() f32
-				(x*x + y*y).sqrt  // x is equivalent to self.x
-		</pre>
-			<p>A field can be changed by putting the field name to the left of an assignment operator:</p>
-		<pre>
-		fn setOrigin(self &amp;mut)
-				x,y = 0f,0f
-		</pre>
-
-	<h2>The type's namespace</h2>
-	<p>Nearly every type supports the use of custom-defined methods: numbers, structs, indexed collections,
-			variant types, interfaces, traits, slices, etc. Even allocators and permissions support methods.
-			The only types that do not support their own customizeable methods are references, pointers, functions and static arrays
-			(although any of these can do so when wrapped within a struct).</p>
-	<p>Functions typically belong to a global (module) namespace.
-		By contrast, methods belong to a type's <a href="refnamespace.html">namespace</a>.
-		(Note: a type's named fields belong to the same namespace as its methods).</p>
-	<p>Since methods belong to a type's namespace, two different types can
-		define a method with the same name, each doing something different and appropriate to its type.
-		There is no confusion over which one to use, because use of a method
-		is qualified implicitly (using the dot operator) by the type of the value it is applied to.</p>
-	<p>No such qualification is needed when a method calls another method in the same type;
-		such a call looks exactly like a function call.</p>
-
-	<h2>Method Overloading</h2>
-	<p>Another difference between methods and functions is that a type may define more than one method of the same name.
-		Once again, there is no confusion about which method to use, because
-		same-named methods differ in their parameter definitions, either the number or type of its parameters.
-		When a certain named method is used, Cone chooses the first method whose parameter definition
-		matches the types and number of arguments passed to that method.
+	<h3>Method name</h3>
+	<p>As with fields, the names given to methods will not conflict with another type's method or field names,
+		nor with the names of variables or functions outside the type.
+		However, a type cannot have a method and field with the same name.</p>
+	<p>Two or more methods <i>may</i> be given the same name.
+		This is called <b>method overloading</b>.
+		Each same-named method should be given a different parameter "signature":
+		they should vary in number of parameters or in the types of the parameters.
+		A call to a method of this name will be resolved by matching the method call's argument types
+		to the defined methods' signatures.
+		The method that matches best is used.
 		Supporting multiple methods of the same name makes it convenient for a type to
 		support a similar capability for a broad range of differently-typed values.</p>
 	
-	<h2>set methods (Computed Properties)</h2>
-	<p>By default, methods typically operate in "get" mode,
-		invoked as part of an expression and often returning one or more values.
-		However, it is possible for a method to be used on the left-hand side of an assignment.
-		These are called "set" methods,
-		and are declared by specifying <span class="pre">set</span> before <span class="pre">fn</span>.
-	</p>
+	<h3>self Parameter</h3>
+	<p>A method's first parameter is always named <span class="pre">self</span>.
+		If a <span class="pre">self</span> parameter is not specified,
+		one is inserted at the beginning of the parameter list.
+		If the type of <span class="pre">self</span> is not specified,
+		it is assumed to be the same as the type we are specifying (<span class="pre">Self</span>).
+		If a type is specified for <span class="pre">self</span>, it must either be the same as <span class="pre">Self</span>,
+		or some kind of reference to <span class="pre">Self</span>.
+
+	<h3>Implicit parameter types</h3>
+	<p>As with the <span class="pre">self</span> parameter,
+	a method's other parameters need not specify their type.
+	If omitted, <span class="pre">Self</span> is assumed.</p>
+
+	<h3>Implicit field and method access</h3>
+	<p>Nearly always, a method's logic needs access to the data object referred to by
+			<span class="pre">self</span>. Often, it may also want to invoke other
+			methods in the same type. As one would expect,
+			such capabilities are easily achieved through the use of <span class="pre">self</span>:</p>
 <pre>
-struct Counter
-	count u32
-	fn counter() u32 {count += 1}          // a "getter" method
-	set fn counter(cnt u32) {count = cnt}  // a "setter" method
+imm len = (self.x * self.x + self.y * self.y).sqrt
+self.clear()
 </pre>
-  <p>The following example shows the use of this pair of get and set methods:
+	<p>Fortunately, a more concise approach is possible, 
+		by omitting "<span class="pre">self.</span>" altogether:</p>
 <pre>
-mut x = Counter{0}
-x.counter // 1
-x.counter // 2
-x.counter = 10 // uses the "setter" to set the value
-x.counter // 11
+imm len = (x * x + y * y).sqrt
+clear()
 </pre>
-	<p>A "set" method can only be invoked to the left of an assignment operator.
-		The value to be assigned is passed to the setter method as its last argument.
-	</p>
-	<p>It is worth noting that with both the setter and getter method use,
-		it is permissable to omit the parentheses when no additional arguments are passed.
-		This makes the use of get and set methods look exactly like property access.
-		This visual symmetry means that a type can migrate from making its fields public,
-		to making them private, but still offering a compatible public interface of the same name
-		using methods.
-	</p>
-	<p><b>Note:</b> From the outside, a field and a computed property (a get/set method)
-		look identical. The user of a struct does not care if it is working with a stored value
-		or a value mediated by methods.</p>
-	
-	<h2>Static functions</h2>
-	<p>Sometimes it makes sense to define a function as part of a type,
-		because it plays a useful role in relationship to the type, even though
-		it does not apply to a specific instance of the type.
-		In such cases, precede the function definition with
-		<span class="pre">static</span> to distinguish it from a method declaration.</p>
-	
+	<p>Using the more concise syntax depends on not defining any local variables
+		in the method that would conflict with the type's field or method names.</p>
+
+	<h2>Static</h2>
+	<p>As we have seen, what looks like a function definition in a program
+		is understood to be a method definition within a type definition.
+		Similarly, what looks like a global variable in a program
+		becomes a field within a type definition.
+		If we actually want to define a function or global variable in a type,
+		begin by using the <span class="pre">static</span> attribute:</p>
 <pre>
 struct Counter
 	static fn factory() Counter
 			Counter{0}
 </pre>
-		<p>As with functions in a module namespace, a qualified name must be used to call the function:</p>
+			
+		<p>To access the function, qualify the name with the name of the type:</p>
 <pre>
 mut cnt = Counter::factory()
 </pre>
 
-	<h2>extend</h2>
-	<p>TBD. (extending i32)</p>
-
-	<p style="text-align: right; margin-top: 2em;">
+<p style="text-align: right; margin-top: 2em;">
 		<a href="refthis.html"><img alt="_" src="next.png" /></a>
 	</p>
 

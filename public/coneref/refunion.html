@@ -44,6 +44,10 @@ struct Event
 	<p>The union's declaration looks largely identical to that of an enum.
 		An important difference is that a union needs to specify which of the enclosing struct's fields
 		is to be used as the discriminating tag.</p>
+	<p>Unions may be used inside a union. These unions rely on the same tag,
+		further differentiating variations.
+		This approach supports a classification hierarchy, allowing shared fields for any grouping of variants.
+	  Only the final variants may be instantiated with values.</p>
 
 		<h3>Initialization</h3>
 		<p>A union-based struct value is built using a variation of the struct constructor:</p>

@@ -55,19 +55,25 @@ struct Point
 			If unspecified, <span class="pre">mut</span> is assumed,
 			which effectively means the struct value's permission governs access.</li>
 		<li><b>Name.</b>
-			Field names that begin with an underscore are considered private.
+			Each field must be given a unique name.
+			However, names used in one struct will not be confused with same-named
+			fields in other types, nor with variable or function names.
+			<p>Field names that begin with an underscore are considered pr\ivate.
 			Private fields can only be accessed by the struct's methods.
 			Fields should be private if we don't want logic outside the struct's methods
 			to depend on this implementation detail or be able to change its value directly.
 			This is particularly important when the field's value should be subject to
-			additional invariant constraints that are properly enforced by the struct's methods.
+			additional invariant constraints that are properly enforced by the struct's methods.</p>
 			<p>The anonymous name <span class="pre">_</span> may be used for
 			any data segment of the struct that we don't want or need access to.</p></li>
 		<li><b>Type.</b>
 			This can be any type:  numeric, Bool, an array, some other struct, etc.
+			The name <span class="pre">Self</span> may be used to refer to the struct
+			type currently being defined.
 			There is one important restriction: A field's type may not be the same
 			as the struct type we are declaring (or any recursive variation on this).
-			A field's type, however, may be a <a href="refrefs.html">reference</a> to the struct type.</li>
+			A field's type, however, may be a <a href="refrefs.html">reference</a> to the struct type.
+		</li>
 		<li><b>Default value.</b>
 			The default value must be a constant.
 			Specifying default values makes initialization of a newly created struct more convenient.</li>
