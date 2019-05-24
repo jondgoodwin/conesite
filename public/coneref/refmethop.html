@@ -8,54 +8,13 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Special-Purpose Methods</div>
+			<div id="sub">Operator Methods</div>
 		</div>
 
     <div class="text">
 
 	<p>A number of method names have an important built-in role in various Cone features.</p>
 
-	<h2 id="init">Initialization methods</h2>
-	<p>TBD: default named "init", 'raw' permission, use of constructor, etc.</p>
-
-	<h3>Drop method</h3>
-	<p>TBD: finalizers (when fires, whether can invoke ahead of time).</p>
-
-	<h2>set methods (Computed Properties)</h2>
-	<p>By default, methods typically operate in "get" mode,
-		invoked as part of an expression and often returning one or more values.
-		However, it is possible for a method to be used on the left-hand side of an assignment.
-		These are called "set" methods,
-		and are declared by specifying <span class="pre">set</span> before <span class="pre">fn</span>.
-	</p>
-<pre>
-struct Counter
-	count u32
-	fn counter() u32 {count += 1}          // a "getter" method
-	set fn counter(cnt u32) {count = cnt}  // a "setter" method
-</pre>
-  <p>The following example shows the use of this pair of get and set methods:
-<pre>
-mut x = Counter{0}
-x.counter // 1
-x.counter // 2
-x.counter = 10 // uses the "setter" to set the value
-x.counter // 11
-</pre>
-	<p>A "set" method can only be invoked to the left of an assignment operator.
-		The value to be assigned is passed to the setter method as its last argument.
-	</p>
-	<p>It is worth noting that with both the setter and getter method use,
-		it is permissable to omit the parentheses when no additional arguments are passed.
-		This makes the use of get and set methods look exactly like property access.
-		This visual symmetry means that a type can migrate from making its fields public,
-		to making them private, but still offering a compatible public interface of the same name
-		using methods.
-	</p>
-	<p><b>Note:</b> From the outside, a field and a computed property (a get/set method)
-		look identical. The user of a struct does not care if it is working with a stored value
-		or a value mediated by methods.</p>
-	
 	<h2 id="compare">Comparison methods</h2>
 	<p>TBD: </p>
 
@@ -101,8 +60,43 @@ x.counter // 11
 		<li><b>.`&lt;&lt;`</b> is the default append operator used for <span class="pre">build</span> blocks</li>
 	</ul>
 
+	<h2>set methods (Computed Properties)</h2>
+	<p>By default, methods typically operate in "get" mode,
+		invoked as part of an expression and often returning one or more values.
+		However, it is possible for a method to be used on the left-hand side of an assignment.
+		These are called "set" methods,
+		and are declared by specifying <span class="pre">set</span> before <span class="pre">fn</span>.
+	</p>
+<pre>
+struct Counter
+	count u32
+	fn counter() u32 {count += 1}          // a "getter" method
+	set fn counter(cnt u32) {count = cnt}  // a "setter" method
+</pre>
+  <p>The following example shows the use of this pair of get and set methods:
+<pre>
+mut x = Counter{0}
+x.counter // 1
+x.counter // 2
+x.counter = 10 // uses the "setter" to set the value
+x.counter // 11
+</pre>
+	<p>A "set" method can only be invoked to the left of an assignment operator.
+		The value to be assigned is passed to the setter method as its last argument.
+	</p>
+	<p>It is worth noting that with both the setter and getter method use,
+		it is permissable to omit the parentheses when no additional arguments are passed.
+		This makes the use of get and set methods look exactly like property access.
+		This visual symmetry means that a type can migrate from making its fields public,
+		to making them private, but still offering a compatible public interface of the same name
+		using methods.
+	</p>
+	<p><b>Note:</b> From the outside, a field and a computed property (a get/set method)
+		look identical. The user of a struct does not care if it is working with a stored value
+		or a value mediated by methods.</p>
+	
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refthis.html"><img alt="_" src="next.png" /></a>
+		<a href="refclosure.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>
