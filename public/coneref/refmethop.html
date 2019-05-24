@@ -13,87 +13,176 @@
 
     <div class="text">
 
-	<p>A number of method names have an important built-in role in various Cone features.</p>
-
-	<h2 id="compare">Comparison methods</h2>
-	<p>TBD: </p>
-
-	<h2>Operator methods</h2>
 	<p>Many operators are implemented as method calls. For instance, <span class="pre">x+3</span>
-	is treated as if it were:  <span class="pre">x.`+`(3)</span>
-	A type need only implement the <span class="pre">`+`</span> method to
-	make the <span class="pre">+</span> operator meaningful to values of that type.
-	If a program tries to apply the <span class="pre">+</span> operator to a value 
-	whose type has not implemented the <span class="pre">`+`</span> method,
-	a compiler error results.</p>
-	<p>This principle applies to all the arithmetic, arithmetic assignment, and comparison operators.
-		It also applies to:</p>
-	<ul>
-		<li><b>`[]`</b> for indexing or slice creation</li>
-		<li><b>`()`</b> for function calls (this allows a struct to become a closure)</li>
-		<li><b>`&lt;&lt;` and `&gt;&gt;`</b> for append and prepend</li>
-	</ul>
+		is treated as if it were:  <span class="pre">x.`+`(3)</span>
+		A type need only implement the <span class="pre">`+`</span> method to
+		make the <span class="pre">+</span> operator meaningful to values of that type.
+		If a program tries to apply the <span class="pre">+</span> operator to a value 
+		whose type has not implemented the <span class="pre">`+`</span> method,
+		a compiler error results.</p>
+	<p>Let's explore the implications across a number of operators.</p>
 
-	<h2>Structs as indexed collections</h2>
-	<p>More complex collections may be created using the built-in array types as a foundation.
-			This is typically accomplish by defining a struct with a dynamic array as one of the fields.
-			This custom collection can handle all of the operations described earlier
-			because these capabilities are invoked as methods on the struct object.
-			The struct's methods can then forward these requests down to the dynamic array as appropriate.</p>
-	<p>These are the implicit names for these methods:</p>
-	<ul>
-			<li><b>[]</b> - single-element indexing (get and set) if there is one argument,
-					and multi-element indexing if there are two.</li>
-			<li><b>&[]</b> - get borrowed reference to a single element</li>
-	</ul>
+	<h2>Arithmetic Operator Methods</h2>
+	<p>A type may support any of the <a href="refexpr.html#arith">arithmetic operators</a>
+		(<span class="pre">+</span>, <span class="pre">-</span>, <span class="pre">*</span>,
+		<span class="pre">/</span> and <span class="pre">%</span>) 
+		by implementing them as methods.
+		The integer and floating point types do this, of course,
+		but really any type that effectively encodes numbers or number structures can do this.
+		This might include: complex numbers, "big" integers, rationals, unit-based numbers, vectors or matrices.</p>
+		<p>On the previous page, the <span class="pre">Point</span> type example
+		took advamtage of this by implementing the subtraction method:</p>
+<pre>
+fn `-`(pt2) Point
+	Point[pt2.x - x, pt2.y - y]
+</pre>
+	<p><b>Note:</b> Whenever a name includes non-alphanumeric (or underscore) characters,
+		it must be enclosed in backticks. This is why the method name is shown as
+		<span class="pre">`-`</span>.</p>
+	<p>With this method implemented, one may simply subtract two Points in an expression:
+		<span class="pre">pt1 - pt2</span>.</p>
+	<p>Unary negation may also be implemented using the <span class="pre">`-`</span>.
+		The difference between the negation method and the subtraction method is that
+		the former needs only the self parameter:</p>
+<pre>
+fn `-`() Point
+  Point[-x, -y]
+</pre>
 	
-<h3>Implicit methods</h3>
-	<p>Various language constructs call certain methods under the covers:</p>
-	<ul>
-			<li><b>.init</b> is the default <a href="refallocref.html#initializer">initializer</a>
-				for newly allocated values</li>
-			<li><b>.drop</b> is the <a href="refallocref.html#finalizer">finalizer</a>
-				called when before an allocated value is freed</li>
-			<li><b>.clone</b> is called when making a copy of a "non-copyable" value</li>
-			<li><b>.each</b> is called by the <span class="pre">each</span> block to create an iterator</li>
-		<li><b>.`~~`</b> is the default match operator for <span class="pre">match</span> blocks</li>
-		<li><b>.`&lt;&lt;`</b> is the default append operator used for <span class="pre">build</span> blocks</li>
-	</ul>
+	<h3>Arithmetic Assignment Operators</h3>
+	<p>A custom type may also support any of the <a href="refexpr.html#arithassign">arithmetic assignment operators</a>
+		(<span class="pre">+=</span>, <span class="pre">-=</span>, <span class="pre">*=</span>,
+		<span class="pre">/=</span> and <span class="pre">%=</span>) 
+		by implementing them as methods.</p>
+	<p>If a type does not implement the arithmetic assignment operators,
+		the compiler will attempt to implement them using the arithmetic methods.
+		Thus, <span class="pre">pt1 += pt2</span> would be treated as if it were:
+		<span class="pre">pt1 = pt1 + 2</span>.</p>
 
-	<h2>set methods (Computed Properties)</h2>
-	<p>By default, methods typically operate in "get" mode,
-		invoked as part of an expression and often returning one or more values.
-		However, it is possible for a method to be used on the left-hand side of an assignment.
-		These are called "set" methods,
-		and are declared by specifying <span class="pre">set</span> before <span class="pre">fn</span>.
+	<h3>Increment and Decrement Operators</h3>
+	<p>A type may implement the <a href="refexpr.html#incrdecr">increment or decrement operators</a>
+			(<span class="pre">++</span> and <span class="pre">--</span>) as methods.
+			When used as prefix operators, their names are <span class="pre">`++`</span> and <span class="pre">`--`</span>.
+			When used as postfix operators, their names are
+			<span class="pre">`_++`</span> and <span class="pre">`_--`</span>.
 	</p>
+
+	<h2>Logic and Shift Operator Methods</h2>
+	<p>A type may support any of the <a href="refexpr.html#bitwise">logic and shift operators</a>
+		(<span class="pre">!</span>, <span class="pre">&</span>, <span class="pre">^</span>,
+		<span class="pre">~</span>, <span class="pre">&lt;&lt;</span> and <span class="pre">&gt;&gt;</span>) 
+		by implementing them as methods.</p>
+	<p>Similarly, the logic an shift assignment operators may also be implemented as methods.
+		If not, they will be handled in the same way as the arithmetic assignment operators.</p>
+	
+	<h2 id="compare">Comparison Operator Methods</h2>
+	<p>To support operator-based comparison of two values, implement the appropriate
+		<a href="refif.html#compare">comparison operator(s)</a>
+		(<span class="pre">==</span>, <span class="pre">&lt;</span>, <span class="pre">&lt;=</span>,
+		<span class="pre">&gt;</span>, or <span class="pre">&gt;=</span>) 
+		as methods.
+		It is not necessary to implement the inequivalence operator (<span class="pre">!=</span>),
+		as this is supported automatically if <span class="pre">`==`</span> is implemented.
+	</p>
+
+	<h2>'set' Methods for Assignment</h2>
+	<p>To implement methods that work to the left of the assignment operator,
+		use a <span class="pre">set</span> method.
+		Such methods are designated by preceding <span class="pre">fn</span> with <span class="pre">set</span>.
+		For example:</p>
 <pre>
 struct Counter
-	count u32
-	fn counter() u32 {count += 1}          // a "getter" method
-	set fn counter(cnt u32) {count = cnt}  // a "setter" method
+  _count u32 = 0
+  set fn count(cnt u32)
+    _count = cnt / 2
 </pre>
-  <p>The following example shows the use of this pair of get and set methods:
+	<p>As this example demonstrates, a <span class="pre">set</span> method typically alters
+		some private field's value using a formula or algorithm.
+		We can make use of this method as follows:</p>
 <pre>
-mut x = Counter{0}
-x.counter // 1
-x.counter // 2
-x.counter = 10 // uses the "setter" to set the value
-x.counter // 11
+mut cnt = Counter[]
+cnt.count() = 10    // Sets _count to 5
+cnt.count = 6       // Note: the parentheses can be omitted
 </pre>
-	<p>A "set" method can only be invoked to the left of an assignment operator.
-		The value to be assigned is passed to the setter method as its last argument.
-	</p>
-	<p>It is worth noting that with both the setter and getter method use,
-		it is permissable to omit the parentheses when no additional arguments are passed.
-		This makes the use of get and set methods look exactly like property access.
-		This visual symmetry means that a type can migrate from making its fields public,
-		to making them private, but still offering a compatible public interface of the same name
-		using methods.
-	</p>
-	<p><b>Note:</b> From the outside, a field and a computed property (a get/set method)
-		look identical. The user of a struct does not care if it is working with a stored value
-		or a value mediated by methods.</p>
+	<p>The value to the right of the assignment is passed to the
+		<span class="pre">set</span> method as the last argument.</p>
+
+	<h3>Getters and Setters</h3>
+	<p>For public fields, there is often no reason to implement getters and setters to offer
+		direct access to their values.
+		However, if it would be unsafe to offer direct access to certain fields,
+		in order to preserve specific data invariants, one should make them private
+		and then potentially offer appropriate getters and setters that preserve the invariants.</p>
+ 	<p>Implementing a getter and setter is as easy as defining a
+		a regular and <span class="pre">set</span> method of the same name:</p>
+<pre>
+struct Counter
+	_count u32 = 0
+
+  // a getter
+  fn counter() u32
+    _count++
+
+  // a setter
+  set fn count(cnt u32)
+    _count = cnt
+</pre>
+	<p>And here we use them:</p>
+<pre>
+mut x = Counter[]
+x.counter // 0
+x.counter // 1
+x.counter = 10 // uses the "setter" to set the value
+x.counter // 10
+</pre>
+  <p>Because we can omit the parentheses when using a getter or setter,
+		their use looks no different than access to a public field.
+		This makes it possible to start off with a type making a field public,
+		and then later changing it to private because of an invariant.
+		By implementing getters and setters instead, the API can be preserved
+		even as the implementation evolves.</p>
+
+	<h2>Collection Operators</h2>
+	<p>By wrapping an array (or array reference) within a struct, one can
+		create all sorts of collections: indexed collections like vectors and dictionaries,
+		as well as stacks, queues, sets and more.
+		The difference between them is largely determined by which methods are implemented for
+		working with various elements of the collection.
+		Most collections will typically implement the
+		<span class="pre">len</span> method to find how many elements are currently in the collection,
+		and <span class="pre">iter</span> to enable iteration through the collection's elements.</p>
+	<p>A couple of operators make it easier to work with collections:
+		<span class="pre">[]</span> for indexed access and
+		<span class="pre">&lt;-</span> to add or remove an element.
+		Each collection type implements methods that determine how these operators work.</p>
+
+	<h3>[] Indexed Access Operator</h3>
+	<p>As we saw with arrays, the <span class="pre">[]</span> operator is used to
+		access a specific collection element according to its index.
+		Implementing the <span class="pre">[]</span> method as both a getter and setter
+		makes indexed access possible for other kinds of indexed collections.
+		The index need not even be an unsigned integer, as it is for an array.
+		Dictionaries, for example, often use strings as the index.</p>
+
+	<h3>&lt;- Add or Remove Element Operator</h3>
+	<p>A collection may implement the <span class="pre">&lt;-</span> operator
+		for adding or removing an element from the collection.</p>
+	<p>When used as a prefix, the <span class="pre">&lt;-</span> operator extracts
+	the next available element from the collection. The corresponding method
+	has only <span class="pre">self</span> as a parameter.</p>
+	<p>When used as an infix operator, <span class="pre">&lt;-</span>
+	appends a new element to the end of the collection.
+	The corresponding method has <span class="pre">self</span> and the element as parameters.
+	If an array literal is used on the right-hand side of the
+	<span class="pre">&lt;-</span> operator, all of its elements are added to the
+	collection on the left, one-by-one.</p>
+		
+	<h2>() "Function call" Operator</h2>
+	<p>It is actually possible to "call" an object as if it were a function.
+		Doing so will actually invoke the <span class="pre">()</span> method
+		for the object.
+		This is what makes it possibe to support 
+		<a href="refclosure.html">closures</a>.</p>
 	
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refclosure.html"><img alt="_" src="next.png" /></a>

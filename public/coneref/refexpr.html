@@ -93,7 +93,7 @@ imm sixf = f64[six]   // Converts 32-bit signed integer to 64-bit floating point
 </pre>
 	<p>If the receiving number type is a smaller size, numeric information may be lost.</p>
 
-	<h2>Logical expressions</h2>
+	<h2 id="bitwise">Logical expressions</h2>
 	<p>The logical operators operate on true/false values:</p>
 	<dl>
 	<dt>'|'</dt>
@@ -140,7 +140,7 @@ a,b = b,a
 min, max = minmax(5, 4)
 </pre>
 
-	<h3>Increment/decrement Operators</h3>
+	<h3 id="incrdecr">Increment/decrement Operators</h3>
 	<p>When used to the left of an lval, <span class="pre">++</span> will increment the number and
 	<span class="pre">--</span> will decrement it.</p>
 <pre>
@@ -155,7 +155,7 @@ mut cnt = 10
 imm x = cnt++  // x is 10, cnt is 11
 </pre>
 
-	<h3>Arithmetic Assignment</h3>
+	<h3 id="arithassign">Arithmetic Assignment</h3>
 	<p>The arithmetic assignment operators (e.g., '+=', '-=', '*=', '/=') offer a convenient way to update
 		an existing stored value:</p>
 <pre>
