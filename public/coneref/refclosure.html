@@ -8,139 +8,82 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Function and Closure References</div>
+			<div id="sub">Closures</div>
 		</div>
 
     <div class="text">
 
-	<p></p>
-
-	<h2>Function References</h2>
-	<p>We can get a reference to any function the same way as for a variable by using the ampersand operator:
-	</p>
-<pre>
-fn incr(nbr u32) u32
-  nbr + 1
-
-fn doit()
-  imm fnref = &incr  // fn ref points to the function "incr"
-</pre>
-	<p>A function reference may be copied/passed around like other values.
-		Although it is a borrowed reference, it has no lifetime constraints, since it points to a global entity.
-		Its permission is <span class="pre">id</span>, since you may not read or change the function it points to.
-	</p>
-	<p>The one thing you can do with a function reference (besides copy it or compare it to another reference)
-		is use it to call the function it refers to.</p>
-<pre>
-fn doit()
-	dostuff(&incr)   // Pass along a reference to the incr function
-
-// Note the parameter needs to declare the reference's function signature
-fn dostuff(fnref &fn(u32) u32)
-  fnref(4)         // Call the function
-</pre>
-	<p>Function references are useful when you want the flexibility of embedding some 
-		logic that conforms to a certain API within another piece of logic.
-		Thus, it is possible for some other function to call dostuff passing along a reference
-		to a different function (e.g., "double").
-	</p>
-
-	<h2>Anonymous Functions</h2>
-	<p>When the function you want to get a reference to is small,
-		it may be more convenient to incorporate the logic for the function right where the function reference is to be captured.
-		This can be accomplished using an anonymous function:
-	</p>
-<pre>
-fn doit()
-	dostuff(&fn(nbr u32) u32 {nbr+1})
-	dostuff(&fn(nbr u32) u32 {nbr+nbr})
-</pre>
-
-	<h2>Closures</h2>
-	<p>A closure can be thought of as a function that has a state that is preserved from
-		one execution to the next.
-		The closure's logic may retrieve or alter its state using bound closure variables.
-	</p>
-	<p>Because closures preserve state information, they are useful for:</p>
+	<p>A closure is a function that preserves its state from one invocation to the next.
+		The closure's logic accesses its state using bound closure variables.</p>
+	<p>Because closures preserve their state, they are useful for:</p>
 	<ul>
 		<li>Iterators, which retrieve a sequence of values one-at-a-time from a defined collection.</li>
 		<li>Generators that return a different value on each use</li>
-		<li>Event-triggered callbacks, whose state preserves information about the impact an event should have on specific values.</li>
+		<li>Event-triggered callbacks, whose state guides what happens after an event is triggered.</li>
 	</ul>
-	<p>A closure can be created almost as easily as an anonymous function.
-		The crucial difference is the need to specify the bound closure variables
-		in curly braces just before the parameter list.
-		For example, here we create a simple generator closure:
-	</p>
-<pre>
-imm counter = &fn {mut cnt=0}() {cnt += 1}
-counter()   // 1
-counter()   // 2
-</pre>
-  <p>Cone's closures are somewhat different than closures in other languages.
-		Cone expects the bound closure variables to be declared, which often improves code readability.
-		Also, closure variables are bound by value, which is more flexible and reduces the likelihood of errors.
-		Closure variables may hold references, if desired.
-	</p>
-	<p>Closure variable declarations look like those for any variable and are separated by semicolons.
-		Each variable should always specify an initial value.
-		If the name of the closure variable matches the name of a variable in the outer
-		scope holding the desired value, one can specify "name" as a shortcut for "name=name".
-	</p>
-	<p>Closures are created as references.
-		As such they can be created as lifetime-constrained borrowed references
-		or using allocators.
-		Likewise, reference permissions may be specified
-		(though the default 'uni' permission is very useful for moving around ownership of event handlers).
-	</p>
 
-	<h3>Closure Interface</h3>
-	<p>Let's examine a more complex example: 
-		using a closure as an event handler.</p>
+	<h2>Simple Closure</h2>
+	<p>A closure definition looks similar to a function definition, but uses vertical bars to enclose parameters.
+		For example:</p>
 <pre>
-window.whenClicked(&fn {window}() { ... })
+imm cnt = 5
+mut counter = || cnt++   // closure definition
+counter()                // 5
+counter()                // 6
 </pre>
-
-<p>Since our anonymous closure has no named type, what declared type does the whenClicked method expect?
-	It needs to be a type that can accept a number of different anonymous closures.
-	In this case, the correct answer is to use the standard library's predefined Closure interface.
-  Closure is declared like this:</p>
-</p>
+  <p>In this case, the closure takes no parameters. It infers that the return value is an integer.
+		Importantly, the closure's state is established by the variable it binds from the outer scope,
+		in this case the local variable <span class="pre">cnt</span>.
+		Each time the closure is called, it increments the value held by <span class="pre">cnt</span>.
+		which is why it returns a different value each time it is called.</p>
+	<p>A closure's state is bound by value, which means it is created using a <i>copy</i> of the bound variable(s).
+		Any change to <span class="pre">cnt</span> within the closure has
+		no impact on the outer scope's <span class="pre">cnt</span> variable.
+		(Binding state by reference is also possible. We will talk about this after
+		introducing reference types.)</p>
+	
+	<h2>Explicit State Definition</h2>
+  <p>Often it is clearer and more convenient to define a closure's state explicitly.
+		For example:</p>
 <pre>
-interface Closure
-  fn `()`()
+mut counter = |n i32 {cnt = 0}| cnt += n
+counter(1)        // 1
+counter(2)        // 3
 </pre>
-<p>With this definition, Closure is a match for any struct that implements the `()` method
-	with no parameters.
-	Since closures are implemented using structs (more on that below), the Closure interface
-	will then match on any closure whose method has no parameters and returns no values.</p>
-	<p>We can now declare window.whenClicked as follows:
-</p>
-<pre>
-fn whenClicked(handler &Closure) { .. }
-</pre>
-<p>When the event fires on a click, the event handler can now call the closure to perform the desired action,
-	which has access to needed state information:</p>
-<pre>
-handler()
-</pre>
-
-<h3>Closures as structs</h3>
-  <p>Cone's anonymous closure syntax is actually syntactic sugar 
-		which (under the covers) builds an anonymous struct and then creates an instance of it.
-		The closure's bound variables become the fields of the struct.
-		The defined method becomes the struct's named <span class="pre">`()`</span> method,
-		allowing the struct to be "called" as if it were a function.
+  <p>This closure's state is defined explicity within curly braces at the end of the parameter list.
+			Each closure variable should specify an initial value.
+			Multiple closure variables are delimited by semi-colons.
+			Think of the state definition as defining an anonymous struct. Here it defines one field called
+		<span class="pre">cnt</span> whose initial value is 0.
 	</p>
-	<p>Here is the equivalent code generated for the earlier example:</p>
+	<p>It is often better to define an explicit state.
+		It signals to the code reader which variables represent the closure's state.
+		It simplifies the code (like here) when the closure variable is not a mirror of an existing
+		variable in an outer scope, but can be initialized with some expression or literal.
+		It is also useful when we want to bind by reference.</p>
+	
+	<h2>Closures are anonymous structs</h2>
+	<p>A closure is really just syntactic sugar for an anonymous struct.
+		The following code is equivalent to the above example:
+	</p>
 <pre>
-struct Handler
-	window Window
-	fn `()`() { .. }
+struct _cntstr
+  _cnt = 0
+  fn `()`(n i32)
+    _cnt += n
 
-imm handler = Handler{window}
-window.whenClicked(&handler)
+mut counter = _cntstr[]
+counter(1)        // 1
+counter(2)        // 3
 </pre>
+	<p>As this example demonstrates, the closure itself is defined by the
+		<span class="pre">_cntstr</span> struct.
+		The closure's state is define by its field(s).
+		The functional logic is captured within a single method named
+		<span class="pre">()</span>.</p>
+	<p>As we learned on the previous page, an object may be "called" just like a function.
+		Doing so invokes the <span class="pre">()</span> method.
+		In this way any explicitly callable struct is effectively also a closure.</p>
 
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refspecblock.html"><img alt="_" src="next.png" /></a>
