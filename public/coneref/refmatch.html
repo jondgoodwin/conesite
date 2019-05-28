@@ -17,7 +17,7 @@
 
 	<p>As with <span class="pre">if</span>, pattern matching is about deciding
 	which code path to perform. 
-	Its approach is to match a single value against a multiple, ordered patterns.
+	Its approach is to match a single value in order against multiple patterns.
 	The code block associated with the first matching pattern is performed.</p>
 	<p>Let's illustrate this with a simple (but mathematically unusual) example:</p>
 <pre>
@@ -192,13 +192,6 @@ match event
   ~~ Quit:                    0
 </pre>
 						
-<h2>Other types</h2>
-	<ul>
-	<li><a href="refunion.html#match">Union partial match</a></li>
-	<li><a href="refrefs.html#match">Reference partial match</a></li>
-	<li><a href="refinterface.html#match">Subtype partial match</a></li>
-	</ul>
-	
 	<h2>First-class patterns</h2>
 	<p>Whole and partial matching patterns handle many situations, but not all.
 	First-class patterns make it possible to support more sophisticated matching
