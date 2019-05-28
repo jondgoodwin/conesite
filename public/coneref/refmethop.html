@@ -164,14 +164,9 @@ x.counter // 10
 		The index need not even be an unsigned integer, as it is for an array.
 		Dictionaries, for example, often use strings as the index.</p>
 
-	<h3>&lt;- Add or Remove Element Operator</h3>
+	<h3>&lt;- Add Element Operator</h3>
 	<p>A collection may implement the <span class="pre">&lt;-</span> operator
-		for adding or removing an element from the collection.</p>
-	<p>When used as a prefix, the <span class="pre">&lt;-</span> operator extracts
-	the next available element from the collection. The corresponding method
-	has only <span class="pre">self</span> as a parameter.</p>
-	<p>When used as an infix operator, <span class="pre">&lt;-</span>
-	appends a new element to the end of the collection.
+		for adding an element to a collection, typically the end of it.</p>
 	The corresponding method has <span class="pre">self</span> and the element as parameters.
 	If an array literal is used on the right-hand side of the
 	<span class="pre">&lt;-</span> operator, all of its elements are added to the

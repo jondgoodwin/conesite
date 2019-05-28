@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>This and Builder Blocks - Cone Reference</title>
+	  <title>This Blocks - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -8,103 +8,113 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">This and Builder Blocks</div>
+			<div id="sub">This Blocks</div>
 		</div>
 
     <div class="text">
 
-	<h3 id="thisblk">'this' and its block</h3>
-	<p>In conversations, we often use pronouns like "she" and "this" as a convenient way
-		to refer to some specific person or thing we are talking about.
-		Cone uses the pseudo-variable <span class="pre">this</span> for the same purpose.
-		It allows a block of code to focus its attention on some specified value
-		referred to by <span class="pre">this</span>.</p>
-	<p>A 'this' block is simply an expression followed by a code block.
-		Throughout the block, <span class="pre">this</span> is understood to hold
-		the value of the specified expression.
-		Multiple actions may be performed using that value.</p>
+	<p>A <span class="pre">this</span> block focuses logic on a single value.
+		Although it may sometimes resemble method chaining or cascades in other languages, 
+		it is much more versatile.
+		(<b>Note:</b> This feature has nothing to do with
+		<a href="refmethod.html#self"><span class="pre">self</span></a>,
+		which some languages call <span class="pre">this</span>.)</p>
+	<p>A <span class="pre">this</span> block's simple mechanism consists of two aspects:</p>
+	<ul>
+		<li>implicit definition of a <span class="pre">this</span> variable within a block</li>
+		<li>using operators that implicitly rely on the <span class="pre">this</span> variable</li>
+	</ul>
+	
+	<h2>Implicit <span class="pre">this</span> Variable</h2>
+	<p>A <span class="pre">this</span> block is simply an expression followed by a code block.
+		Throughout the block, the variable <span class="pre">this</span> is understood to hold
+		the evaluated value of that expression.</p>
 <pre>
 // Calculate the value of 'this' (0.174533)
 Float.Pi/180
-	// 'this' block that makes use of calculated 'this' value
-	// to convert from degrees to radians
-	quarter = 90 * this
+	quarter = 90 * this  // Use 'this' to convert to radians
 	acute = 10 * this
 </pre>
-	<p>'this' blocks can be nested within each other.
-	For any statement, the value of <span class="pre">this</span> is established by
-	the inner-most 'this' block it lies within.</p>
-	<P>Although a 'this' block can focus on any value,
-	it is typically a copyable or borrowed mutable reference to some compound or collection value
-	whose parts we want to read or modify or whose methods we want to invoke over a sequence of statements.
-	'this' blocks offer an easy-to-read and more versatile alternative to method chaining or method cascades.</p>
-	
-	<h3>Operator support for implicit 'this'</h3>
-	<p>To make use of <span class="pre">this</span> more convenient and concise,
-		several operators implicitly work with <span class="pre">this</span>.
-	  When these operator are used as a prefix (rather than as infix operators),
-	  <span class="pre">this</span> is implied to the left.</p>
-	<dl>
-	<dt>.</dt>
-	<dd><b>Method call or field access</b>. 
-	(<span class="pre">.size</span> is equivalent to <span class="pre">this.size</span>)</dd>
-	<dt>&lt;&lt;</dt>
-	<dd><b>Append</b>, placing the value at the end of an ordered collection.
-	(<span class="pre">&lt;&lt;4.7</span> is equivalent to <span class="pre">this&lt;&lt;4.7</span>)</dd>
-	<dt>&gt;&gt;</dt>
-	<dd><b>Prepend</b>, inserting the value at the start of an ordered collection.
-	(<span class="pre">&gt;&gt;event</span> is equivalent to <span class="pre">this&gt;&gt;event</span>)</dd>
-	</dl>
-	<p>Additionally, the ':' infix operator implicitly works with 'this':
+		<p>The above example is short-hand for:</p>
 <pre>
-color: 'brown'    # equivalent to: this.color = 'brown'
+do
+  imm this = Float.Pi/180
+  quarter = 90 * this  // Use 'this' to convert to radians
+  acute = 10 * this	
 </pre>
-	<p>So far, 'this' blocks and operators sound rather dull and boring...
-		What value does this syntactic sugar offer?  Let's finish with
-		examples that illustrate how use of 'this' sugar makes code more concise and readable.
+	<p>Since <span class="pre">this</span> blocks can be nested within each other,
+		the value of <span class="pre">this</span> for any statement refers
+	  to the inner-most <span class="pre">this</span> block's expression's value.</p>
+
+	<h2>'.' Prefix Operator</h2>
+	<p>The convenience of a <span class="pre">this</span> block comes from using
+	operators which implicitly work with the value of <span class="pre">this</span>.
+	The most common of these is the dot ('.') operator, used to call methods or access fields.</p>
+	<p>Normally, the '.' operator specifies some data object to the left,
+		on which a method might be invoked or whose field is accessed.
+		However, if no object is specified to the left of '.',
+		<span class="pre">this</span> is assumed.
+		It is common to find <span class="pre">this</span> block logic
+		taking advantage of this shortcut:</p>
+<pre>
+// Normalize point to unit length
+point
+  imm len = (.x * .x + .y * .y).sqrt
+  if len > 0
+    .x /= len
+    .y /= len
+</pre>
+	<p>This example uses <span class="pre">.x</span> and <span class="pre">.y</span> to access
+		fields in <span class="pre">point</span>. This works because this block assigns
+		<span class="pre">this</span> to the value of <span class="pre">point</span>,
+		and <span class="pre">.x</span> is equivalent to <span class="pre">this.x</span>.
+		The block's logic is cleaner and easier to read without having to place
+		<span class="pre">point</span> ahead of every dot operator.</p>
+	<p>Why is this approach is more versatile than method chaining or cascades?</p>
+	<ul>
+	<li>Called methods need not return <span class="pre">self</span>, as method chaining requires.</li>
+	<li>Method calls may appear at any point in the block logic, instead of having to be sequenced together.</li>
+	<li>It supports field access as well as method calls.</li>
+	</ul>
+
+	<h2>'&lt;-' Prefix Operator</h2>
+	<p>The &lt;- operator adds the element on the right to the collection on the left.
+		If no collection is specified on the left, <span class="pre">this</span> is assumed.</p>
+<pre>
+// numbers is a vector of floating-point numbers
+myScene.numbers
+  &lt;- 3.4
+  &lt;- 2.6
+  &lt;- 1.4
+  .sort
+</pre>
+	<p>This appends three floating point numbers to the list of numbers held in
+		<span class="pre">myscene.numbers</span> and then re-sorts the numbers list 
+		by calling the <span class="pre">sort</span> method.
 	</p>
+	<p><b>Note:</b> If we just want to add three numbers without sorting:</p>
+<pre>
+myScene.numbers &lt;- [
+  3.4
+  2.6
+  1.4
+]
+</pre>
+			
+	<h2>The ':' operator</h2>
+	<p>Within a <span class="pre">this</span>, the ':' operator may be used to
+	replace a collection's member at some specific index with another value:</p>
+<pre>
+myScene.numbers
+  4: 1.6      // Equivalent to: myScene.numbers[4] = 1.6
+  6: 1.9
+  &lt;- 3.4      // Append a new number to the list of numbers
+  .sort       // Sort the list of numbers
+</pre>
+	<p>As this example shows, <span class="pre">this</span> blocks are particularly useful
+		for collections. However they are suitable any time one wants to invoke
+		multiple methods on the same value.</p>
 	
-	<p><b>Method chaining/cascade:</b></p>
-<pre>
-// Perform several methods on on root
-root.findById("canvas")
-	.add(anode)                    // Unlike chaining, the method need not return self
-	.hide(.statuspane)
-	angle = 20 * .degrees          // Unlike cascades, any logic can be placed between method calls
-	.add(anode2)
-	.add(node) each node in nodes  // ... even within conditional branches and loops
-</pre>
-	<p><b>Formatted stream output or string creation:</b></p>
-<pre>
-console
-	&lt;&lt; "Score: "       // Append to console stream
-	color: blue        // Alter a field
-	&lt;&lt; score           // Append with auto-conversion
-	color: white
-	&lt;&lt; "!\n"
-	.flush             // Invoke methods
-
-console &lt;&lt; {"And another thing ";name;"!\n"}
-</pre>
-	<p><b>List construction (or expansion):</b></p>
-<pre>
-// Use of &lt;&lt; at the start means append all the block's expression values
-names = &own List() &lt;&lt;
-	me
-	"Judy"
-	"Davos"
-	you.middlename
-</pre>
-
-  <p><b>Dictionary construction:</b></p>
-<pre>
-toDutch = &gc Dict{Text, Text}()
-	"girl": "meisje:
-	"horse": :paard"
-	"dog": "hond"
-</pre>
-	
-	<h3>Builder blocks</h3>
 
 
 		<p style="text-align: right; margin-top: 2em;">
