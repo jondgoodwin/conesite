@@ -8,197 +8,152 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">References and Safety</div>
+			<div id="sub">Introduction to References</div>
 		</div>
 
     <div class="text">
 
-	<p>The basic idea behind references is pretty simple.
-	Instead of having a variable hold a value, we want the variable to hold a reference to some value.
-	A reference is effectively an address to the memory location where the value has been stored.
+	<p>It is now time to introduce a different kind of type: references.
+	The basic idea is simple: references carry an address that points to some value in memory.
 	Using this reference, we can access or change the value the reference points to.</p>
-	<p>Let's illustrate this with a simple example.
-	The <span class="pre">&</span> operator obtains a reference to a variable,
-	and therefore to the value it holds.
-	The <span class="pre">*</span> (de-referencing) operator can then be applied to the reference
-	to get or change the value pointed to by the reference:</p>
+	<p>For example:</p>
 <pre>
 mut a = 3
-imm ref = &amp;a    // ref holds a reference to a's contents
-imm val = *ref  // val is now 3
-*ref = 4        // a is now set to 4
+imm ref = &amp;mut a   // ref holds a reference to a's contents
+imm val = *ref     // val is now 3
+*ref = 4           // a is now set to 4
 </pre>
+	<p>The <span class="pre">&</span> operator obtains a reference to the variable <span class="pre">a</span>,
+	effectively pointing to the value it holds.
+	The <span class="pre">*</span> (de-referencing) operator is used
+	to obtain and then change the value pointed to by the reference.</p>
 
-	<h2>Benefits and Safety Risks</h2>
-	<p>References offer important benefits:</p>
+	<p>References are very useful, as they support:</p>
 	<ul>
-		<li><b>Shared access</b>.
-			Multiple references can point to the same value,
-			such that all of them see and can change the latest value at that address.
-			If one reference is used to change a value, another reference to that value sees the updated value.
-			By contrast, values passed around between functions do not work this way, as passed values are copies.
-			Any change to a copy leaves the original value unchanged.</li>
-		<li><b>Space efficiency</b>.
-			Some data values can be large, such that making copies of them as they are passed around
-			takes up a lot of space and wastes time in the copying.
-			In these situations, it can be more efficient to pass around a reference to the large value.</li>
-		<li><b>Speed of Vectorization</b>.
-			If multiple values are co-located right next to each other in memory,
-			it can be faster to use a pointer to process those values sequentially,
-			rather than work with each value separately, one at a time.</li>
-	</ul>
+		<li><b>Shared access to the same value</b>.
+			Multiple references may point to the same value.
+			Any of them can see (and possibly change) the latest value at that address.
+			If one reference changes a value, another sees the updated value.
+			By contrast, values copied around between functions do not work this way:
+			changing a copy leaves the original value unchanged.</li>
+		<li><b>Dynamic heap allocation.</b>
+			We can dynamically allocate new data values on the heap whose lifetime is independent
+			of the local execution stack. References are the handles we use to access these data values.
+			When all references to a dynamically-allocated value expire, so does the value.</li>
+			<li><b>Performance efficiency</b>.
+			For non-trivial data structures, it is faster to pass around a reference to the data
+			rather than making a full copy for each function that needs it.
+		</ul>
 	
-	<p>However, without appropriate constraints, the unfettered ability to
-		access and change any arbitrary value based on its address
-		opens up a program to significant safety risks:</p>
-	<ul>
-	<li><b>Memory unsafe</b>. A pointer might point to an object that has been deleted and no longer exists.
-	It could also point to an area of memory (e.g., NULL) that has no valid objects.</li>
-	<li><b>Concurrency unsafe</b>. One pointer might try to access an object while its
-		contents are in the process of being changed by another pointer. Since the contents are
-		in transition, they may not make sense to an outside pointer.
-		Worse would be when two pointers try to change the same object at the same time across multiple steps,
-		making a mess of it in the attempt.</li>
-		<li><b>Type unsafe</b>. A pointer might point to an object whose type is different than it expected
-	(e.g., the program thought it was pointing at an integer, but there is a float there instead).</li>
-	</ul>
-	<p>Such failures are not always easy to detect and eliminate when the responsibility for being
-		careful lies 100% with fallible humans.
-		Although the consequences are not always serious, they <i>could</i> be catastrophic,
-	especially when malicious actors take advantage of undetected pointer problems to
-	gain access or control over other peoples' privileges or information.</p>
-	<p>Because of these safety risks, Cone explicitly distinguishes between references
-	  and <a href="refptr.html">pointers</a>.
-	  Although both offer addressable access to values,
-	  references are constrained to prevent unsafe use.
-	  Pointers are not subject to such constraints, making them more versatile but also potentially more dangerous.
+	<h2>Memory Management and Safety</h2>
+	<p>Cone's distinctive references are more than just "pointers".
+		They make fine-grained control over memory convenient and safe.</p>
+		<p>Let's review briefly how the versatility of region-based memory management,
+		powered by references, can facilitate improvements to throughput, responsiveness, and memory efficiency.
+		Likewise, references play an important role in ensuring memory and race safety.
 	</p>
-	
-	<h2>Reference Type Signature</h2>
-	<p>The way that Cone handles references is unusual among programming languages.
-	  Although many capabilities are similar to those found in other languages, Cone's distinctive approach
-	  optimizes for versatility, safety and ease-of-use.</p>
-	<p>Getting comfortable with Cone's references begins with an introduction to
-		the four fundamental mechanisms	that underlie their capabilities and constraints.
-	  These mechanisms are formalized as part of the type signature for every reference.</p>
+
+	<h3>Region-based Memory Management</h3>
+	<p>In addition to global and local (stack-based) data, it is often desirable
+		to dynamically allocate memory from the "heap" for new data objects.
+		When memory is allocated and initialized, an <b>owned reference</b> is created 
+		that points to the new data object.
+		This reference, or copies of it, may easily be used to work with this data.
+		When the last usable reference to an allocated object expires,
+		the object's memory is automatically recovered.
+		This is called automatic memory management.</p>
+
+	<p>Many different memory management strategies exist, such as tracing garbage collection,
+		reference counting, single-owner, arenas, pool etc. 
+		No single strategy is perfect for all needs. Their trade-offs vary widely in terms of
+		throughput, latency, memory use and leakage, data structure flexibility, ease-of-use, etc.</p>
+		<p>Instead of restricting a program to the limitations of only one memory management strategy,
+			as most languages do, Cone dynamically partitions memory into <b>regions</b>,
+			each with its own approach to memory allocation and collection.
+			For every new data object, Cone allows the programmer to specify, at allocation time,
+			which region the object belongs to,
+			according to how well it matches the object's usage profile.</p>
+
+	<h3>Memory and Race Safety</h3>
+	<p>References are also different from <a href="refptr.html">raw pointers</a> in terms of safety.
+		Although versatile, raw pointers can be very risky to use.
+			Incorrect use can potentially cause hard-to-detect program bugs.
+			Although the consequences are not always serious, they <i>could</i> be catastrophic,
+			especially when malicious actors take advantage of undetected pointer problems to
+			gain access or control over other peoples' privileges or information.</p>
+	<p>By contrast, usage constraints inherent to references ensure they can only be used safely:</p>
 	<ul>
-	  <li><a href="refallocref.html"><b>Allocators</b></a>.
-		A reference's allocator is responsible for allocating new values.
-		The allocator also tracks all allocated values, automatically disposing
-		of any values no longer needed.
-		Allocators are what makes it possible for a Cone program to support multiple memory strategies,
-		such as tracing GC, ref counting, escape-based RAII, arenas, pools, etc.
-		In effect, allocators help ensure memory safety.
-		A reference that has no allocator is a <a href="refborref.html"><b>borrowed reference</b></a>.</li>
-	  <li><a href="refborref.html#lifetime"><b>Lifetimes</b></a>.
-		Cone automatically tracks the lifetime of every reference based on its lexical scope.
-		Lifetimes are invaluable for ensuring that allocated objects are freed only when no reference
-		points to it.
-		They also ensure that borrowed references can never point to a freed value.
-		In these ways, lifetimes also help improve memory safety.
-	  </li>
-	  <li><a href="refperm.html"><b>Permissions</b></a>.
-		Permissions govern what may be done with a reference.
-		Each distinct permission grants and denies certain rights, such as the ability to read
-		or change the value the reference points at, or the ability to alias (create a copy of) a reference.
-		Permissions also govern the use of atomics, locks and other synchronization mechanisms.
-		Permissions help ensure concurrency safety.</li>
+		<li>Region, lifetime, initialization, bounds, and subtyping constraints ensure that
+			every reference always points to valid, live data of the expected type.
+			This is called memory safety.</li>
+			<li>Permission constraints ensure that use of one reference cannot corrupt
+				the integrity of data also accessible by another reference,
+				even when those references are used by concurrent threads.
+				This is called race safety.</li>
+	</ul>
+	
+	<h2>Reference Mechanisms</h2>
+	<p>To accomplish these versatile memory management and safety responsibilities,
+		references are composed of four largely-independent mechanisms
+		(inspired by similar mechanisms in Cyclone, Rust and Pony).
+		These are specified (often implicitly) as part of a reference's type signature:
+	<ul>
+		<li><b>Region</b></a>.
+			Every reference points to data owned by a specific memory region.
+			A region knows how to allocate memory for all the data it owns.
+			It also knows how to automatically reclaim memory for any owned data
+			when no accessible reference points to it.
+			Regions allow a program to make use of multiple memory management strategies.
+			An "owned" reference specifies its owning region as part of its type signature.
+			A "borrowed" reference is unaware of which region owns the data it points to.</li>
+		<li><b>Lifetime</b>.
+			A lifetime is some span of time in the execution of a program,
+			often bounded by some lexical scope.
+			In a very real way, the lifetime of an allocated data is determined
+			by the aggregate lifetime of all the usable references that point to it.
+			Often, references need not specify lifetimes explicitly,
+			as they can be inferred by context.</li>
+		<li><b>Permission</b>.
+			Like <a href="refterm.html#vars">variables</a>, every reference specifies the permission
+			that governs what may be done with it.
+			Each distinct permission grants and denies certain rights, such as the ability to read
+			or change the value the reference points at, or the ability to make a copy of a reference.
+			Permissions also govern the use of atomics, locks and other synchronization mechanisms.
+			So far, only the <span class="pre">imm</span>	and <span class="pre">mut</span> permissions
+			have been described. Later, we will introduce several others.</li>
 	  <li><b>Value type</b>.
 		The value type specifies the type of the value that the reference points to.
 		References are often treated as simply a stand-in for a value of this type.
-		The value type helps protect type safety.</li>
+		<p>For most value types, references are handled in a simple, straightforward way.
+			However, references for certain value types are twice as large ("fat" references)
+			and require more complex handling:</p>
+		<ul>
+				<li><a href="refarrayref.html"><b>Array references</b></a>
+				point to a collection of identically-typed elements.
+				These elements are contiguous in memory with the reference pointing to the first element.
+				The number of elements is carried as part of the array reference.
+				Such references may be indexed and are subject to bounds checks.</li>
+				<li><a href="refinterface.html"><b>Interface references</b></a>
+				offer an abstract view of some value instantiated by one of several variant types.
+				In addition to pointing at the value's data, the reference also points to
+				runtime type information that facilitates field access or method dispatch.</li>
+			</ul>
+		</li>
 	</ul>
-	<p>The following pages provide details on each of these mechanisms.
-		For now, it is helpful to know that
-	the type signature for a reference always begins with <span class="pre">&</span>
-	followed by qualifiers for each of the above mechanisms in the listed order. 
-	Here are examples of reference type signatures:</p>
-<pre>
-imm ref1 &rc imm i32   // ref-counted, immutable reference to an integer value
-imm ref2 &i32          // borrowed, 'const' reference to an integer value. Lifetime assumed.
-imm ref2 &'a mut i32   // borrowed, 'mut' reference with specified lifetime annotation
-</pre>
-
-	<h2>Nullable References</h2>
-	<p>By default, references can only point to valid values.
-		However, it is possible to explicitly declare and use
-		<a href="refnullref.html">nullable references</a>.
-		A nullable reference can have the value <span class="pre">null</span>,
-		which means the reference does not point to any valid value.</p>
-		<p>The type signature for a nullable reference specifies a <span class="pre">?</span>
-		after the ampersand:</p>
-<pre>
-imm ref4 &?i32		    	// borrowed, 'const' nullable reference
-</pre>
-		
-		<p>To ensure safety, access to a nullable reference's value is only possible if
-			the code first ensures the reference does not have the value of <span class="pre">null</span>:
-		</p>
-<pre>
-// This condition is true only if maybePoint is not null ...
-if (!maybePoint)
-		imm point = *maybePoint // ... allowing us to obtain its value
-imm point2 = *maybePoint    // **ERROR** We don't know if maybePoint is null here
-</pre>
-	
-	<h2>Reference Operations</h2>
-	<p>References are values. As such, they can be stored and passed around a program.
-		Whether such transfers are simple copies or moves depends on the reference's type
-		(particularly its permission and allocator).
-		Reference transfers also check reference type information to ensure everyone is in agreement
-		about what you can do with any passed-around reference.</p>
-	<p>In general, references are treated as stand-ins for the values they refer to.
-		Operations on references will nearly always apply to the value the reference refers to,
-		rather than the references themselves.
-	  However, there are a few operations which do operate directly on references:
-		dereferencing, comparison, and reinterpretation.</p>
-
-	<h3>De-referencing</h3>
-	<p>As several examples have demonstrated, the <span class="pre">*</span> operator is used to access a reference's value.
-		This is called de-referencing. De-referencing a reference is sometimes prohibited based on
-		its permission or whether it might have null as a value.</p>
-	<p>For most operations on a reference, a reference is automatically de-referenced before performing the operation.
-		For example:</p>
-<pre>
-// Assume ref1 is a reference to an integer
-imm sum = ref1 + 4        // equivalent to *ref1 + 4
-</pre>
-
-	<h3>Comparison</h3>
-	<p>Two references may be compared for equality, but only if they have the same type signature</p>
-<pre>
-// Do ref1 and ref2 point to the same value?
-if ref1 == ref2
-    // do some stuff
-</pre>
-	<p>It is also possible to compare whether one pointer is greater than another.
-		This is typically only meaningful if both refer to somewhere within the same object.</p>
-
-	<h3>Reinterpretation</h3>
-	<p>The 'as' operator may be used to take an existing reference and create a new reference
-		with a different type signature.
-		Whenever this might create some safety risks, use of the 'as' operator will need to happen within a 'trust' blocks.
-	</p>
-<pre>
-imm newref = oldref as &Point  // Coerce a reference to a borrowed reference
-</pre>
-
-	<h2>Array and Interface References</h2>
-	<p>In addition to the basic references introduced on this page and explored over the next few pages,
-		Cone supports more complex reference types that carry more than a pointer.
-		These are covered elsewhere:</p>
+	<h2>What's Next?</h2>
+	<p>This page introduced many reference concepts rather quickly,
+		and perhaps overwhelmingly. Let's slow down and walk through each of them carefully
+		with examples and helpful detail.
+		Importantly, you do not have to know everything about references to start usefully employing them.</p>
+	<p>In progressive order, we will cover:</p>
 	<ul>
-		<li><a href="refarray.html#arrref"><b>Array references</b></a>,
-		which point to a collection of identically-typed elements.
-		These elements are contiguous in memory with the reference pointing to the first element.
-		The number of elements is carried as part of the array reference.</li>
-		<li><a href="refinterface.html"><b>Interface references</b></a>,
-		which provide a generic view of some value defined by one of several possible struct types.
-		In addition to the object pointer, the reference also points to runtime type information about the value's type,
-		such as a vtable for dynamically dispatching method calls on the object.</li>
+		<li>Borrowed references, including the <span class="pre">const</span> permission,
+			lifetime annotations, and anonymous functions</li>
+		<li>Owned references, both 'static and dynamically allocated.
+			This also covers the <span class="pre">uni</span> permission and move semantics.</li>
+		<li>Array references.</li>
+		<li>Interface references and closures.</li>
 	</ul>
-	<h2 id="match">Partial match</h2>
-	<p>Tbd.</p>
 
 		<p style="text-align: right; margin-top: 2em;">
 			<a href="refborref.html"><img alt="_" src="next.png" /></a>
