@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>Permissions - Cone Reference</title>
+	  <title>Reference Permissions - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -8,7 +8,7 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Permissions</div>
+			<div id="sub">Reference Permissions and uni</div>
 		</div>
 
     <div class="text">
@@ -32,6 +32,12 @@
 	<li><b>Runtime</b> permissions are enforced partly by the compiler and partly by runtime mechanisms.
 	It is possible to define additional runtime permissions beyond those provided by the language.</li>
 	</ul>
+	<p>Notice that the <i>variable</i> 'ref3' that holds the reference is itself immutable
+		(it can only ever refer to 'localvar'). However, it holds a <i>reference</i> able to change (mutate) 'localvar'.
+		In this statement, 'imm' prohibits the variable 'ref3' from being changed,
+		whereas the implicit 'mut' allows the value pointed at by ref3 to be changed.
+		These are separable concerns.</p>
+
 	
 	<h2>imm and mut</h2>
 	<p>Let's begin with two static permissions introduced <a href="refterm.html#varperm">earlier</a>.
@@ -124,28 +130,6 @@ do
 *uniref = 7                     // Allowed, since borrowed references have expired
 </pre>
 	
-	<h2>const</h2>
-	<p>The <span class="pre">const</span> (constant) static permission has
-	<a href="refborref.html#dcl">already been mentioned</a>,
-	as it is the default permission assumed when declaring a borrowed reference.
-	A <span class="pre">const</span> reference may read its value, but may not modify that value.
-	This description may sound like <span class="pre">imm</span>, but it is not same.
-	<span class="pre">imm</span> guarantees that <i>no</i> other mutable reference to the same object exists,
-	making it safe to share between threads. <span class="pre">const</span> makes no such guarantee.
-	Therefore, <span class="pre">const</span> references cannot be safely shared with another thread.</p>
-	<p>The primary value of <span class="pre">const</span> is the way that
-	functions, who promise to not change the value, can be made more polymorphic. 
-	By declaring a reference parameter as <span class="pre">const</span>,
-	the function or method can safely accept references which the caller sees as
-	<span class="pre">mut</span>, <span class="pre">imm</span>, <span class="pre">uni</span>,
-	<span class="pre">const</span>, or <span class="pre">mut1</span>.</p>
-	<p>Whereas <span class="pre">uni</span> is the universal donor,
-	<span class="pre">const</span> is the effectively the opposite:
-	it is the commonly-used, universal receiver for other static permissions.
-	This is why a new borrowed reference
-	defaults to the <span class="pre">const</span> permission
-	when no permission has been explicitly specified.</p>
-
 	<h2>mut1</h2>
 	<p>The <span class="pre">mut1</span> permission
 	is the mutable counterpart of <span class="pre">const</span>.
