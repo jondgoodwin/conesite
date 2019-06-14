@@ -1,0 +1,104 @@
+<html>
+  <head>
+	  <title>&rc, &gc, &ar Regions - Cone Reference</title>
+		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	  <link rel="stylesheet" type="text/css" href="standard.css" />
+	</head>
+  <body>
+		<div id="header">
+			<a href="/"><div id="title">Cone</div></a>
+			<div id="sub">&rc, &gc, &ar Regions</div>
+		</div>
+
+    <div class="text">
+
+	<p>Programming languages offer a way to dynamically allocate new values.
+	  And if a language enforces memory safety, as most languages do,
+	  it uses an automatic memory management mechanism (such as tracing garbage collection)
+	  to ensure that allocated values are automatically freed when no longer needed.
+	  Most languages bake in a single memory management strategy, take it or leave it.</p>
+	<p>In Cone, allocated references handle these memory management responsibilities.
+	  They do so in a versatile way: <i>each</i> allocated reference specifies
+	  which memory management strategy allocates its value and manages its lifetime.
+	  One reference might use reference counting, another reference garbage
+	  collection, and a third a Rust-like single-owner model (RAII with escape analysis).
+	  Each memory strategy has distinct advantages and disadvantages.
+	  Cone's versatility allows a program to select the optimal mix of strategies that best satisfies its requirements.
+	</p>
+
+	<h2 id="allocators">Standard Allocators</h2>
+	<p>Cone supports several standard allocators, each corresponding to a specific memory management strategy.
+	Allocators vary in how they allocate and free memory,
+	as well as the lifetime algorithm they use to determine when it is safe to automatically free an allocated memory segment,
+	knowing that no more usable references exist that point to it.</p>
+	<p>There is no one perfect approach to memory management.
+	  Each allocator has its specific advantages and disadvantages.
+	  The art lies in choosing the right mix of strategies that best meets the program's requirements
+	  for performance, memory utilization, and data structure complexity.</p>
+	</p>
+	<h3>own - Single owner (RAII with escape analysis)</h3>
+	<p>Only one allocated reference may point to any own-allocated value.
+	  That reference may be passed around from function to function or from thread to thread.
+	  The memory for that value is automatically dropped and freed when its single reference goes out of its last scope.
+	  'own' is similar to Rust's Box&lt;T&gt; single-owner mechanism.</p>
+	<p>The key benefits are performance, deterministic drops, and memory efficiency.
+	  The performance benefit comes from avoiding the need for runtime bookkeeping,
+	  since the allocated value's lifetime can be determined at compile time.
+	  The biggest downside is its data structure inflexibility.
+	  It cannot safely handle data structures that require multiple allocated references to the same value,
+	  such as all cyclic and many directed acyclic graphs.</p>
+	<p><b>Note:</b> An 'own' allocated reference only accepts the 'uni' or 'imm' permissions.
+	It is not possible to alias an own allocated reference.
+	Any attempt to do so simply <a href="refmove.html">moves</a> the reference to a new binding.</p>
+
+	<h3>rc - Reference Counting</h3>
+	<p>When a new rc reference is created, it is initialized with a counter that is set to 1.
+	Every time an alias (copy) is made of an rc allocated reference, the counter is incremented.
+	Whenever a reference goes out of scope, the counter is decremented.
+	When the counter reaches 0, the value is dropped and freed.</p>
+	<p>The key benefits are memory efficiency, deterministic drops, simple mechanism,
+	  and much better data structure flexibility than lex.
+	  The biggest downsides are performance (due to cache-unfriendly runtime bookkeeping)
+	  and memory leakage when dealing with cyclic data structures.
+	  The latter weakness can be ameliorated sometimes through the use of weak references.
+	</p>
+
+	<h3>gc - Tracing Garbage Collection</h3>
+	<p>A record is kept of every new allocation. Periodically, the garbage collector traces out
+	  all references reachable from a required root collection (including the execution stack).
+	  Any allocated value that cannot be traced from the root is considered unreachable,
+	  and therefore is safe to automatically drop and free.</p>
+	<p>The primary benefit is its flexibility: it supports any kind of data structure,
+	and usually does so with better performance than rc.
+	The chief drawbacks are its runtime bookkeeping costs (regular tracing and sweep cycles),
+	unpredictable stop-the-world lag spikes, non-deterministic (and possibly delayed) drop and free,
+	and the complexity of its implementation and tuning (particularly for multi-threaded garbage collection).</p>
+
+	<h3>arena - Regional</h3>
+	<p>This strategy makes efficient use of a pre-allocated (and growable) arena of memory.
+	  Every new allocation takes a bite out of this arena using a fast bump pointer.
+	  Allocations are never individually freed. The entire slab is freed as a single event 
+	  when the arena itself goes out of scope.</p>
+	<p>The primary benefit is speed: allocation and free are much faster
+		than malloc or equivalent, and there are no run-time bookkeeping costs.
+		The chief drawbacks are memory waste (because nothing is freed until the arena goes out of scope)
+		and the inability to support drop finalizers.</p>
+
+	<h3>pool - Fixed-size Pool</h3>
+	<p>Similar to arena, this strategy makes use of a pre-allocated (and growable) memory area
+	  that has been divided up into identically-sized slots.
+	  Each new allocation quickly grabs some unused slot.
+	  Reference counting is used to determine when an allocation is freed (marking its slot as reusable).</p>
+	<p>The primary benefit of pool is memory efficiency and 
+		a much faster allocation and free of size-limited values than is possible using malloc.
+		The chief drawbacks are the size limits on values
+	    and the runtime bookkeeping costs of its underlying lifetime algorithm.</p>
+	
+	<p style="text-align: right; margin-top: 2em;">
+		<a href="refperm.html"><img alt="_" src="next.png" /></a>
+	</p>
+
+	</div>
+	</body>
+</html>

@@ -15,14 +15,52 @@
 
 	<p>TBD</p>
 
-	<h2 id="init">Initialization methods</h2>
-	<p>TBD: default named "init", 'raw' permission, use of constructor, etc.</p>
+	<h2 id="initializer">Initializers</h2>
+	<p>An initializer is a certain kind of method defined by the value's type.
+		It is typically named <span class="pre">init</span>.
+		Its purpose is to fully initialize a value of that type.
+		A type may define multiple initializers.</p>
+	<p>Initializers are very useful when the use of a literal would be:</p>
+	<ul>
+		<li><b>Insufficient</b>, because initialization needs to perform some logic that
+		 is more than simply assigning value(s).</li>
+		<li><b>Impossible</b>, because parts of the type are private and can only be accessed by methods of the type.</li>
+		<li><b>Inconvenient</b>, because the literal would be unnecessarily verbose in comparison to using an initializer.</li>
+	</ul>
+	<p>The type's declaration of an initializer looks like any other method and can accept parameters.
+		It typically returns no value.
+		self is always a reference.
+		When used by an allocated reference, the reference passed to self is a newly allocated area of
+		memory that still needs to be initialized.</p>
+		<p>The initializer for the Point3 example above might look like this,
+		effectively filling in the x, y, and z fields of a Point3 struct:
+	</p>
+<pre>
+fn init(self &, xi f32, yi f32, zi f32)
+	x = xi; y = yi; z = zi
+</pre>
+	<p>We know that an allocator reference is using an initializer when it explicitly names
+		a type or a type's method in what looks like a function call.
+	</p>
+<pre>
+// Point3 is a type. Point3 is de-sugared to Point3::init
+imm gcref = &amp;gc mut Point3(1f, 2f, 3f)
+</pre>
+	
+<p>TBD: default named "init", 'raw' permission, use of constructor, etc.</p>
 
-	<h3>Drop method</h3>
+<h2 id="finalizer">drop Finalizers</h2>
+	<p>A type may also define a single <span class="pre">drop</span> method.
+	This method may never be explicitly called by a program.
+	However, it is implicitly always called before any allocated value is about to be freed.</p>
+	<p>The purpose of the drop method is to give back any acquired resources or dependencies
+		before the allocated value vanishes.
+		It is useful for closing file or network handles, or de-subscribing to services.</p>
+
 	<p>TBD: finalizers (when fires, whether can invoke ahead of time).</p>
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refclosure.html"><img alt="_" src="next.png" /></a>
+		<a href="refborref.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

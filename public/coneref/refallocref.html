@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>Allocated references - Cone Reference</title>
+	  <title>Regions and Owning References - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -8,188 +8,234 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Allocated references</div>
+			<div id="sub">Regions and Owning References</div>
 		</div>
 
     <div class="text">
 
-	<p>Programming languages offer a way to dynamically allocate new values.
-	  And if a language enforces memory safety, as most languages do,
-	  it uses an automatic memory management mechanism (such as tracing garbage collection)
-	  to ensure that allocated values are automatically freed when no longer needed.
-	  Most languages bake in a single memory management strategy, take it or leave it.</p>
-	<p>In Cone, allocated references handle these memory management responsibilities.
-	  They do so in a versatile way: <i>each</i> allocated reference specifies
-	  which memory management strategy allocates its value and manages its lifetime.
-	  One reference might use reference counting, another reference garbage
-	  collection, and a third a Rust-like single-owner model (RAII with escape analysis).
-	  Each memory strategy has distinct advantages and disadvantages.
-	  Cone's versatility allows a program to select the optimal mix of strategies that best satisfies its requirements.
-	</p>
-	<p>A reference in Cone is either an allocated reference or a borrowed reference.
-	  Using allocated references looks largely like use of borrowed references, but there are differences.
-		An allocated reference owns the reference that a borrowed reference borrows from.
-	  Thus, an allocated reference may be coerced to a borrowed reference, but not vice-versa.
-	  The handling of allocated references sometimes carries extra runtime costs
-	  that borrowed references never do.
-		Allocated references cannot point to substructures the way a borrowed reference can.
-    </p>
-	<p>This page describes how allocated references are declared, shows how they are created,
-		and explains the memory management mechanisms that allocators use to ensure memory safety.</p>
-
-	<h2>Allocated reference Declarations</h2>
-	<p>As with borrowed references, the type declaration for an allocated reference 
-		begins with <span class="pre">&amp;</span>.
-		The reference mechanics follow:</p>
+	<p>A program's memory is partitioned into regions,
+			each with its own strategy for allocating and reclaiming memory for values.
+			Every program value is wholly located within and governed by its owning region.</p>
+	<p>For example, space for all variable values are automatically allocated
+			in either:</p>
 	<ul>
-		<li><b>Lifetime</b>. Allocated references never specify a lifetime, as it is inferred.</li>
-		<li><b>Allocator</b>. This is the memory management strategy used to allocate
-			and manage the lifetime of an allocated value. We will get into the details of this
-			<a href="#allocators">soon</a>.
-			The presence of a specified allocator is how you know it is a allocated reference.</li>
-		<li><b>Permission</b>.
-			The <span class="pre">uni</span> permission is the default given when no permission is specified.
-			<span class="pre">uni</span> grants a reference the ability to view or change the reference's value.
-			This is the universal donor permission, allowing mutation and inter-thread movement,
-			but restricting aliasing to a single live reference.
-			Extensive information about <span class="pre">uni</span> and other permissions
-			is covered on the <a href="refperm.html">permissions</a> page.
-		<li><b>Value Type</b>.
-			This specifies the type of the value that the reference points to.</li>
+		<li><b>Global region</b>.
+			All global variable values are stored here at fixed locations.</li>
+		<li><b>Execution Stack regions</b>.
+			Local variable values are allocated and de-allocated here in LIFO order
+			as execution unfolds.
+			Each execution thread has its own stack region.</li>
 	</ul>
-	<p>To summarize, allocated reference type declarations always need to specify the allocator and value type.
-		A permission is specified when different from <span class="pre">uni</span>. For example:</p>
-<pre>
-imm aref1 &amp;own i32
-imm aref2 &amp;rc mut i32
-</pre>
+	<p>Cone offers additional region types that are explicitly used to dynamically allocate space for new values,
+		such as <span class="pre">&amp;rc</span> (reference counting), <span class="pre">&amp;gc</span> (tracing GC),
+		<span class="pre">&amp;ar</span> (arena) and <span class="pre">&amp;one</span> (single owner).
+		Later pages will describe these and other region types in detail,
+		along with offering guidelines for selecting which to use when.</p>
+	<p>First, however, we need to understand owning references,
+		the handles we use to work with values dynamically allocated by regions.
+		All owning references point to some valid, allocated value.
+		This page describes how owning references are created and used.</p>
 
-	<h2>Creating an Allocated reference</h2>
-	<p>There is only one way to create an allocated reference:
-		Specify the <span class="pre">&</span> operator, followed by the allocator, an optional permission, 
-		and then either specify its initial value or use a <a href="refmethod.html#initializer">type initializer</a>:
+	<h2>Creating Owning References</h2>
+	<p>Let's ask a region to allocate a new value and give us back an owning reference:</p>
+<pre>
+imm nbrref = &amp;rc imm 4
+</pre>
+	<p>This uses the ampersand operator to dynamically allocate and initialize a new value,
+		specifying:</p>
+	<ul>
+		<li><b>Region</b> which allocates the value and manages its lifetime.
+			In this case, the value is allocated in the <span class="pre">rc</span> region.</li>
+		<li><b>Permission</b>. As with variables, this governs access to the value.
+			<span class="pre">imm</span> allows views but not changes.
+			(<b>Note:</b> <span class="pre">uni</span> is assumed when no permission is specified.)
+		</li>
+		<li><b>Initial Value</b>.
+			A copy of this value is stored in the newly allocated memory location.
+			In this case, it is the integer 4.</li>
+	</ul>
+	<p>What we get back from this allocation is an owning reference, 
+		which this example stores	in the variable <span class="pre">nbrref</span>.
+		The inferred type of this reference looks similar to the allocation:
+		<span class="pre">&amp;rc imm i32</span>.
+		This type signature includes the type of the initial value as the reference's value type.</p>
+	<p>A type's constructor or <a href="refinitdrop.html">initializer</a> may be specified
+		as the initial value.</p>
+<pre>
+imm gcref = &amp;gc mut Point3[1f, 2f, 3f]  // Allocate a new Point3 value using a constructor
+</pre>
+				
+	<h4>Reference vs. Variable Permissions</h4>
+	<p>To avoid confusion, let's clarify the role that permissions play with references.
+		The permission on a reference governs that reference itself:
+		what you can or cannot do with the value that the reference points to.
+		This is distinct and separate from the role of the permission on
+		any variable that holds a reference, which governs what we can do with the variable.</p>
+	<p>To illustrate this, consider these variations:</p>
+<pre>
+imm ref1 = &amp;rc imm 3
+imm ref2 = &amp;rc mut 3
+mut ref3 = &amp;rc imm 3
+mut ref4 = &amp;rc mut 3
+</pre>
+	<p>Because of the <span class="pre">mut</span> variable permission,
+		<span class="pre">ref3</span> and <span class="pre">ref4</span>
+		may be changed to hold a different reference.
+		<span class="pre">ref1</span> and <span class="pre">ref2</span> cannot.
 	</p>
 <pre>
-imm rcref = &amp;own 45                     // Allocate a new boxed value, initialized with 45
-imm gcref = &amp;gc mut Point3(1f, 2f, 3f)  // Allocate a new Point3 value using an initializer
+ref1 = &amp;rc imm 5   // ** ILLEGAL! **
+ref2 = &amp;rc mut 5   // ** ILLEGAL! **
+ref3 = &amp;rc imm 5   // ok
+ref4 = &amp;rc mut 5   // ok
 </pre>
-	<p>Creating an allocated reference is quite different than creating a borrowed reference.
-	  With a borrowed reference, we are simply obtaining the already-known address of some value.
-	  With an allocated reference, we are actually allocating a new place in memory
-	  with enough space to hold a value of the desired type. That memory space
-	  is initialized using the provided value or initializer.
-	  The returned allocated reference points to this newly created value.</p>
-
-		<h3 id="initializer">Initializers</h3>
-		<p>An initializer is a certain kind of method defined by the value's type.
-			It is typically named <span class="pre">init</span>.
-			Its purpose is to fully initialize a value of that type.
-			A type may define multiple initializers.</p>
-		<p>Initializers are very useful when the use of a literal would be:</p>
-		<ul>
-			<li><b>Insufficient</b>, because initialization needs to perform some logic that
-			 is more than simply assigning value(s).</li>
-			<li><b>Impossible</b>, because parts of the type are private and can only be accessed by methods of the type.</li>
-			<li><b>Inconvenient</b>, because the literal would be unnecessarily verbose in comparison to using an initializer.</li>
-		</ul>
-		<p>The type's declaration of an initializer looks like any other method and can accept parameters.
-			It typically returns no value.
-			self is always a reference.
-			When used by an allocated reference, the reference passed to self is a newly allocated area of
-			memory that still needs to be initialized.</p>
-			<p>The initializer for the Point3 example above might look like this,
-			effectively filling in the x, y, and z fields of a Point3 struct:
-		</p>
-<pre>
-	fn init(self &, xi f32, yi f32, zi f32)
-	  x = xi; y = yi; z = zi
-</pre>
-		<p>We know that an allocator reference is using an initializer when it explicitly names
-			a type or a type's method in what looks like a function call.
-		</p>
-<pre>
-// Point3 is a type. Point3 is de-sugared to Point3::init
-imm gcref = &amp;gc mut Point3(1f, 2f, 3f)
-</pre>
-		
-		<h3 id="finalizer">drop</h3>
-		<p>A type may also define a single <span class="pre">drop</span> method.
-		This method may never be explicitly called by a program.
-	  However, it is implicitly always called before any allocated value is about to be freed.</p>
-		<p>The purpose of the drop method is to give back any acquired resources or dependencies
-			before the allocated value vanishes.
-			It is useful for closing file or network handles, or de-subscribing to services.</p>
-	
-		<h2 id="allocators">Standard Allocators</h2>
-	<p>Cone supports several standard allocators, each corresponding to a specific memory management strategy.
-	Allocators vary in how they allocate and free memory,
-	as well as the lifetime algorithm they use to determine when it is safe to automatically free an allocated memory segment,
-	knowing that no more usable references exist that point to it.</p>
-	<p>There is no one perfect approach to memory management.
-	  Each allocator has its specific advantages and disadvantages.
-	  The art lies in choosing the right mix of strategies that best meets the program's requirements
-	  for performance, memory utilization, and data structure complexity.</p>
+	<p>In contrast, because of the <span class="pre">mut</span> reference permission,
+		the references in <span class="pre">ref2</span> and <span class="pre">ref4</span>
+		may be changed to point to a different value.
+		The values pointed to by <span class="pre">ref1</span> and <span class="pre">ref3</span> cannot be altered.
 	</p>
-	<h3>own - Single owner (RAII with escape analysis)</h3>
-	<p>Only one allocated reference may point to any own-allocated value.
-	  That reference may be passed around from function to function or from thread to thread.
-	  The memory for that value is automatically dropped and freed when its single reference goes out of its last scope.
-	  'own' is similar to Rust's Box&lt;T&gt; single-owner mechanism.</p>
-	<p>The key benefits are performance, deterministic drops, and memory efficiency.
-	  The performance benefit comes from avoiding the need for runtime bookkeeping,
-	  since the allocated value's lifetime can be determined at compile time.
-	  The biggest downside is its data structure inflexibility.
-	  It cannot safely handle data structures that require multiple allocated references to the same value,
-	  such as all cyclic and many directed acyclic graphs.</p>
-	<p><b>Note:</b> An 'own' allocated reference only accepts the 'uni' or 'imm' permissions.
-	It is not possible to alias an own allocated reference.
-	Any attempt to do so simply <a href="refmove.html">moves</a> the reference to a new binding.</p>
+<pre>
+*ref1 = 5   // ** ILLEGAL! **
+*ref2 = 5   // ok
+*ref3 = 5   // ** ILLEGAL! **
+*ref4 = 5   // ok
+</pre>
 
-	<h3>rc - Reference Counting</h3>
-	<p>When a new rc reference is created, it is initialized with a counter that is set to 1.
-	Every time an alias (copy) is made of an rc allocated reference, the counter is incremented.
-	Whenever a reference goes out of scope, the counter is decremented.
-	When the counter reaches 0, the value is dropped and freed.</p>
-	<p>The key benefits are memory efficiency, deterministic drops, simple mechanism,
-	  and much better data structure flexibility than lex.
-	  The biggest downsides are performance (due to cache-unfriendly runtime bookkeeping)
-	  and memory leakage when dealing with cyclic data structures.
-	  The latter weakness can be ameliorated sometimes through the use of weak references.
+	<h3>Creating Multiple References to the Same Value</h3>
+	<p>The creation of the <i>first</i> owning reference to a new value always comes from an allocation, as shown above.
+		Additional owning references to that value may then be created
+		by copying an existing reference via assignment or function calls:</p>
+<pre>
+imm nbrref = &amp;rc imm 4
+imm nbrref2 = nbrref        // nbrref2 and nbrref point to same value
+</pre>
+
+	<h3>How References and Allocations Expire</h3>
+	<p>Owning references keep the value they point to alive.
+		So long as a value has at least one owning reference that points to it,
+		the value's region will not dispose of the value and reclaim its memory space.
+		Only when all references to a value expire does the region have the right to free the value
+		(although how quickly this happens varies by region).</p>
+	<p>So, when does the lifetime of an owning reference expire?
+		When the data structure it is bound to expires or changes its value.
+		If the reference is never stored anywhere, it is consumed by the expression it is part of
+		and expires nearly immediately.
+		If the reference is stored in a variable, it expires no later than the end of the
+		lexical scope that variable is declared within
+		(and sooner, obviously, if the variable takes on a new value).
+		If the reference is pointed at by another reference,
+		then the lifetime of the former depends on the lifetime of the latter.</p>
+	<p>When all references to an allocated value expire 
+		and the region has decided to reclaim the value's space, 
+		the region will automatically invoke the value's 
+		<a href="refinitdrop.html">finalizer</a>, if it has been defined.</p>
+
+	<h2 id="ops">Reference Operations</h2>
+	<p>The de-referencing and comparison operators may be directly applied to references.</p>
+
+	<h3>De-referencing</h3>
+	<p>The most common use of references is to access and work with the value it points to.
+		Accessing this value is called de-referencing.
+  	To explicitly de-reference, use the <span class="pre">*</span> operator.
+		Within expressions, dereferencing retrieves the value the reference points to.
+		Used to the left of an assignment operator, dereferencing changes that value.</p>
+<pre>
+imm ref = &amp;rc mut 3
+imm val = *ref  // val is now 3
+*ref = 4        // ref now points to the value of 4
+</pre>
+	<p>De-referencing is only permitted if the reference's permission allows it.
+		Certain permissions, such as <span class="pre">opaq</span> and the locked permissions,
+		disallow de-referencing.</p>
+
+	<h3>Comparison</h3>
+	<p>Two references may be compared for equality, even if they do not have the same type signature.
+		What this test determines is whether both references point to the same value:
 	</p>
+<pre>
+// Do ref1 and ref2 point to the same value?
+if ref1 == ref2
+		// do some stuff
+</pre>
+	<p>It is also possible to compare whether one reference is "greater" than another.
+		This compares their respective memory addresses.
+		This might only be meaningful if both refer to somewhere within the same object.</p>
 
-	<h3>gc - Tracing Garbage Collection</h3>
-	<p>A record is kept of every new allocation. Periodically, the garbage collector traces out
-	  all references reachable from a required root collection (including the execution stack).
-	  Any allocated value that cannot be traced from the root is considered unreachable,
-	  and therefore is safe to automatically drop and free.</p>
-	<p>The primary benefit is its flexibility: it supports any kind of data structure,
-	and usually does so with better performance than rc.
-	The chief drawbacks are its runtime bookkeeping costs (regular tracing and sweep cycles),
-	unpredictable stop-the-world lag spikes, non-deterministic (and possibly delayed) drop and free,
-	and the complexity of its implementation and tuning (particularly for multi-threaded garbage collection).</p>
+	<h2 id="handle">Reference Handling</h2>
+	<p>References are values. As such, they can be stored and passed around a program.
+		Whether such transfers are simple copies or moves depends on the reference's permission
+		(move semantics apply to all references having the <a href="refmove.html">uni</a> permission).
+		Reference transfers also check reference type information to ensure everyone is in agreement
+		about what you can do with any passed-around reference.</p>
+	<p>Even though references are typed values,
+		they do sometimes get some special treatment to make them more convenient to use,
+		particularly to enable them to act as stand-ins for the values they point to.</p>
 
-	<h3>arena - Regional</h3>
-	<p>This strategy makes efficient use of a pre-allocated (and growable) arena of memory.
-	  Every new allocation takes a bite out of this arena using a fast bump pointer.
-	  Allocations are never individually freed. The entire slab is freed as a single event 
-	  when the arena itself goes out of scope.</p>
-	<p>The primary benefit is speed: allocation and free are much faster
-		than malloc or equivalent, and there are no run-time bookkeeping costs.
-		The chief drawbacks are memory waste (because nothing is freed until the arena goes out of scope)
-		and the inability to support drop finalizers.</p>
+	<h3>Reference Method Definitions</h3>
+	<p>Methods may be defined that accept references as the type for <span class="pre">self</span>.
+		However, importantly, such methods must be defined as part of the
+		<b>value type's</b> collection of methods.
+		Thus, if we want to define a method that works on a reference to a
+		<span class="pre">Point</span>, that method must be defined within the collection
+		of methods for the <span class="pre">Point</span> type:</p>
+<pre>
+struct Point
+  // .. other Point methods here
 
-	<h3>pool - Fixed-size Pool</h3>
-	<p>Similar to arena, this strategy makes use of a pre-allocated (and growable) memory area
-	  that has been divided up into identically-sized slots.
-	  Each new allocation quickly grabs some unused slot.
-	  Reference counting is used to determine when an allocation is freed (marking its slot as reusable).</p>
-	<p>The primary benefit of pool is memory efficiency and 
-		a much faster allocation and free of size-limited values than is possible using malloc.
-		The chief drawbacks are the size limits on values
-	    and the runtime bookkeeping costs of its underlying lifetime algorithm.</p>
+  // method that accepts a reference to a Point
+  fn normalize(self &rc mut Point)
+    imm len = self.len
+    x /= len
+    y /= len
+    z /= len
+</pre>
+
+	<h3>Implicit De-referencing</h3>
+	<p>Since a reference is generally understood to be a stand-in for the value it references,
+		de-referencing often happens implicitly.
+	  For example, when the dot operator is applied to a reference to access a field, 
+		the reference is automatically de-referenced:</p>
+<pre>
+imm ref = &amp;rc mut Point[1f, 2f, 3f]
+imm y = ref.y // equivalent to: (*ref).y
+</pre>
+	<p>Automatic de-referencing might also happen when applying
+		a method to a reference. For example:</p>
+<pre>
+imm ref = &amp;rc mut -4.
+imm pos = ref.abs    // pos is 4. Equivalent to: (*ref).abs
+imm sum = ref + 4.   // sum is 0. Equivalent to *ref1 + 4.
+</pre>
+	<p>With methods, the decision on whether or not to implicitly de-reference
+		depends on what is supported by implemented methods.
+		If an existing method can accept the reference as a reference, it is used.
+		If not, the reference is de-referenced before applying the method.</p>
+				
+	<h3>Nullable References</h3>
+	<p>References only ever point to valid values.
+		However, it is possible to explicitly declare and use nullable references,
+		much like any other <a href="refenum.html#nullable">nullable value</a>.</p>
+<pre>
+imm ref4 ?&amp;rc imm i32		 // nullable reference to an integer
+</pre>
+	<p>In addition to pointing to a valid value, a nullable reference
+		may also have the value <span class="pre">null</span>,
+		which means the reference does not point to any valid value.
+	  To ensure safety, access to a nullable reference's value is only possible if
+		the code first ensures the reference does not have the value of <span class="pre">null</span>:
+	</p>
+<pre>
+// This condition is true only if maybePoint is not null ...
+if maybePoint
+		imm point = *maybePoint // ... allowing us to obtain its value
+imm point2 = *maybePoint    // **ERROR** We don't know if maybePoint is null here
+</pre>
+	<p><b>Note:</b> A special optimization ensures that nullable references are the same size
+		as regular references.</p>
+
 	
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refperm.html"><img alt="_" src="next.png" /></a>
+		<a href="refregionglo.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

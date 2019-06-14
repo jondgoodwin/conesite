@@ -26,7 +26,7 @@
 			This versatility makes it possible to create generic functions or methods able to
 			work with referred-to values no matter which region they were allocated in.</li>
 		<li>A borrowed reference is as fast as any reference can be,
-			as it never incurs any of the runtime bookkeeping cost borne by some owned references.</li>
+			as it never incurs any of the runtime bookkeeping cost borne by some owning references.</li>
 	</ul>
 
 	<h2>Creating a Borrowed Reference</h2>
@@ -44,6 +44,14 @@ fn func(parm i32)
 	imm ref2 = &amp;parm      // ref2's type: &i32
 	imm ref3 = &amp;localvar  // ref3's type: &i32
 </pre>
+
+	<p>Notice how the absence of a region specification alters the ampersand operator's behavior.
+		Specifying a region allocates a new value in that region and returns an owning reference.
+		Whereas, <i>not</i> specifying a region borrows a reference to some existing value,
+		returning a borrowed reference.
+		The absence of a specified region emphasizes how much
+		a borrowed reference neither knows nor cares
+		which region owns the value the references points to.</p>
 
 	<h3>Borrowing from another reference</h3>
 	<p>To explicitly create a borrowed reference out of some owning (or borrowed) reference,
@@ -219,10 +227,19 @@ fn freeze(n i32)
 </pre>
 
 	<h2>Using a Borrowed Reference</h2>
-	<p>Basically, you can use any borrowed reference much the same way as any owning reference:
-		dereference it, compare it, etc.
-	</p>
+	<p>Borrowed references may be
+			<a href="refallocref.html#ops">dereferenced, compared</a>, and
+			<a href="refallocref.html#handle">handled</a>
+			in the same way as owning references.
+			In addition, borrowed references can play a helpful role in iteration and matching.
+		</p>
 
+	<h2 id="match">Iteration and Borrowed References</h2>
+	<p>Tbd.</p>
+		
+	<h2 id="match">Matching and Borrowed References</h2>
+	<p>Tbd.</p>
+		
 
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refrefborrow.html"><img alt="_" src="next.png" /></a>

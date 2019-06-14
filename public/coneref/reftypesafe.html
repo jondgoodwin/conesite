@@ -71,7 +71,15 @@ fn mat4det(mat &Mat4) f32
 imm bigint = u8value into u32
 </pre>
 
-	<h2>Type Conversion</h2>
+<p>The 'as' operator may be used to take an existing reference and create a new reference
+	with a different type signature.
+	Whenever this might create some safety risks, use of the 'as' operator will need to happen within a 'trust' blocks.
+</p>
+<pre>
+imm newref = oldref as &Point  // Coerce a reference to a borrowed reference
+</pre>
+
+<h2>Type Conversion</h2>
 	<p>Type conversion involves transforming a value of one type to its "equivalent" value in another type.
 		For example, converting the integer 1 to the floating point number 1.0,
 		or serializing it to text:  "1".

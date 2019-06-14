@@ -56,7 +56,7 @@ imm val = *ref     // val is now 3
 	<h3>Region-based Memory Management</h3>
 	<p>In addition to global and local (stack-based) data, it is often desirable
 		to dynamically allocate memory from the "heap" for new data objects.
-		When memory is allocated and initialized, an <b>owned reference</b> is created 
+		When memory is allocated and initialized, an <b>owning reference</b> is created 
 		that points to the new data object.
 		This reference, or copies of it, may easily be used to work with this data.
 		When the last usable reference to an allocated object expires,
@@ -147,16 +147,18 @@ imm val = *ref     // val is now 3
 		Importantly, you do not have to know everything about references to start usefully employing them.</p>
 	<p>In progressive order, we will cover:</p>
 	<ul>
+		<li>'static region and owning references: arena, ref-counting and tracing GC</li>
+		<li>Single-owner references, <span class="pre">uni</span> permission and move semantics.</li>
+		<li>Initializers and Finalizers</li>
 		<li>Borrowed references, including the <span class="pre">const</span> permission,
 			lifetime annotations, and anonymous functions</li>
-		<li>Owned references, both 'static and dynamically allocated.
-			This also covers the <span class="pre">uni</span> permission and move semantics.</li>
+		<li>First-class arenas and pools</li>
 		<li>Array references.</li>
 		<li>Interface references and closures.</li>
 	</ul>
 
 		<p style="text-align: right; margin-top: 2em;">
-			<a href="refborref.html"><img alt="_" src="next.png" /></a>
+			<a href="refallocref.html"><img alt="_" src="next.png" /></a>
 		</p>
 	
 	</div>
