@@ -220,10 +220,11 @@ fn getval() i32
 		in order to preserve that guarantee:</p>
 <pre>
 fn freeze(n i32)
-  imm uniref = &one 3       // has permission uni
+  uni uniref = &one 3       // has permission uni
   if n &gt; 1
-	imm borref = &*uniref   // borrowing make uniref inaccessible in this block 
-    imm m = *uniref         // oops! uniref may not be accessed
+    imm borref = &*uniref   // borrowing makes uniref inaccessible in this block 
+		imm m = *uniref         // oops! uniref is frozen and may not be accessed
+	*uniref                   // Safe, because the borrow has expired.
 </pre>
 
 	<h2>Using a Borrowed Reference</h2>

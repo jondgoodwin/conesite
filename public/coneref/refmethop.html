@@ -178,6 +178,25 @@ x.counter // 10
 		for the object.
 		This is what makes it possibe to support 
 		<a href="refclosure.html">closures</a>.</p>
+
+	<h2>Initializers and Finalizers</h2>
+	<p>A type may define one or more <b>initializers</b>.
+		Initializers offer an alternative to the type constructor
+		to create a new value of that type.
+		In contrast to a type constructor, which uses square brackets, an initializer uses parentheses:</p>
+<pre>
+imm pt = Point(1.)
+</pre>
+	<p>The default name for initializers is <span class="pre">init</span>. 
+		An initializer may, however, use some other name.
+		In particuar, an initializer named <span class="pre">clone</span>
+		is automatically used (when defined) whenever
+		a copy of a value needs to be made due to assignment, function call parameters, etc.</p>
+	<p>A type may also define a single <b>finalizer</b> called <span class="pre">drop</span>.
+		This is automatically invoked immediately before any value of that type is destroyed,
+		and its memory space reclaimed.</p>
+	<p>On a later page, detailed advice is given 
+		on how to <a href="refinitdrop.html">define initializers and finalizers</a>.</p>
 	
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refclosure.html"><img alt="_" src="next.png" /></a>

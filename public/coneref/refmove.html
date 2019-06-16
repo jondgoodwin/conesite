@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>Move semantics - Cone Reference</title>
+	  <title>Move types and uni Permission - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -8,139 +8,182 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Move semantics</div>
+			<div id="sub">Move types and uni Permission</div>
 		</div>
 
     <div class="text">
 
-	<p>Values are usually copied as they flow from function-to-function
-		or variable-to-variable. 
-		Changes made to a copy won't alter the original value.</p>
+	<p>Values are usually copied as they flow from 
+		variable-to-variable or function-to-function.
+		Changes made to a copy won't affect the original value.</p>
 <pre>
 imm a = 3
 mut b = a  // b holds a copy of a's value
 b += 1     // b's value is changed to 4
 a          // is still 3
 </pre>
-	<p>Values of certain types, however, may <i>not</i> be copied.
-	  Such values may only be moved.</p>
-	<p>This "no-copy" restriction is typically oriented around non-aliasable references,
-		making possible some useful capabilities:</p>
-	<ul>
-	<li>Safe, single-owner memory management, free of runtime bookkeeping costs</li>
-	<li>Threads able to locklessly exchange mutable values</li>
-	</ul>
-	<p>Despite their usefulness, 'move' values do introduce some complications, 
-	  as they don't always behave like 'copy' values.
-	  In particular, moving a value deactivates its source variable and 
-	  changes its scope, thereby delaying or accelerating its demise.
-		This page explains these important behaviors.</p>
+	<p>Sometimes, however, we have values that we can't or shouldn't copy.
+		Uncopyable values can be useful:</p>
+		<ul>
+		<li>When the value depends on some other stateful resource(s) such that creating a copy
+			would confuse how we interact with the resource(s).
+			For example, imagine the value is a handle to a just-opened file
+			and we make a copy of that handle as another value.
+			If we close the file using one handle,
+			it might then be unsafe to use the other handle.</li>
+		<li>When it is not clear how to create a faithful copy
+			of a complex value, particularly when insufficient metadata exists or when doing so involves
+			memory or resource allocation or establishing appropriate external dependencies.</li>
+		<li>When we want to take advantage of the single-owner memory management strategy.
+			If an allocated value never needs to be copied,
+			single-owner offers performance and determinacy advantages over
+			reference-counting and tracing GC.</li>
+		<li>When we want to transfer mutable data (including graphs)
+			from one thread to another, without requiring
+			the use of performance-degrading locks or atomics.</li>
+		</ul>
+	<p>This page explains what makes a value copyable or not,
+		introduces the <span class="pre">uni</span> permission,
+		and then describes how move semantics allow
+		an uncopyable value to move from one part of a program to another.</p>
 		
-		<h3>Clone method</h3>
-		<p>TBD.</p>
+	<h2>Move vs. Copy Types</h2>
+	<p>Whether a value is copyable or not	is largely determined by the value's type.
+		The compiler uses heuristics to determine whether or not a type's values are copyable,
+		based on examining the fields and methods it implements:</p>
+	<ol>
+		<li>If the <a href="refinitdrop.html#clone">clone</a> method is implemented,
+			the type's values may be copied.
+			Since the compiler automatically uses the clone method (when implemented)
+			to make all copies of values of this type, these values are clearly copyable.</li>
+		<li>If the <a href="refinitdrop.html#finalizer">drop</a> method is implemented,
+			the type's values may not be copied.
+			If the type requires a finalizer to clean up dependencies,
+			chances are excellent that creating copies will open the door to safety issues.</li>
+		<li>If <i>any</i> of the type's fields cannot be copied,
+			the type's values may not be copied.
+			This makes sense: if part of a value cannot be copied, the whole value certainly cannot be either.
+			</li>
+		<li>If any of the type's fields are references to other data structures,
+			the type's values may not be copied.
+			This is because it is not immediately obvious how to automatically and safely
+			create copies of this type's values.</li>
+		<li>If none of the above apply, the type's values may be copied.</li>
+	</ol>
 
-	<h2>Copy vs. Move Types</h2>
-	<p>A value's type dictates whether its values are treated as 'copy' or 'move'.
-	  By default, most types are 'copy'. The 'move' types include:</p>
+	<h2>uni Permission</h2>
+	<p>Declaring variables involves specifying a permission.
+		So far, we have described the 
+		<span class="pre">imm</span> (immutable) and 
+		<span class="pre">mut</span> (shared mutable) permissions.
+		To deal with uncopyable values, we add another permission to the mix:
+		<span class="pre">uni</span> (unique).
+		This permission allows the value to be viewed or changed,
+		but it forbids the value from being copied (thereby ensuring it is unique).</p>
+	<p>When declaring any variable that holds an uncopyable value
+		it can be useful to specify the <span class="pre">uni</span> permission,
+		as it provides a clear signal to readers of your code that
+		such values will be moved rather than copied:</p>
+<pre>
+uni samplefile = createFile("sample.txt")
+</pre>
+	<p>Although its use on variable declarations is optional,
+		we will later see the necessity of using the <span class="pre">uni</span> permission
+		to govern the safe use of references.</p>
+
+	<h2>Move Semantics</h2>
+	<p>Even when we want to prohibit the copying of these values,
+		we still want to be able to move such values around from variable-to-variable
+		or function-to-function.
+		This capability is called <b>move semantics</b>, which differs from the copy
+		semantics we have worked with so far.
+		Non-copyable values use move semantics.
+		Copyable values use copy semantics.</p>
+	<p>Moving values around looks just like copying,
+		but adds restrictions to ensure multiple copies of the value are never made.
+		These restrictions, if not well understood, 
+		can make it frustrating to write programs that do what is desired
+		in a way that the compiler deems acceptable.</p>
+	
+	<h3>Source Deactivation</h3>
+	<p>It would be misleading to think that moving a value does not copy it.
+		In fact, a "shallow" copy of the value might well be made on every move.
+		What the move restrictions guarantee is that only one version of the value
+		ever exists at a time.</p>
+	<p>This guarantee is implemented by deactivating the value's source as part of the move. 
+		When the source is a variable,
+		this prohibits post-move access to that variable's value:</p>
+<pre>
+uni nbr = 5       // uni signals move semantics
+uni newvar = nbr  // Move the value to newvar
+imm x = nbr + 1   // **ERROR** nbr no longer has an accessible value
+</pre>
+	<p>By de-activating use of the variable <span class="pre">nbr</span> after the move,
+		we effectively have only one "copy" of its value, which is now in <span class="pre">newvar</span>.
+		If we had not deactivated <span class="pre">nbr</span>, 
+		we would then have two copies of a non-copyable value.</p>
+	<p>The same deactivation mechanism applies when passing a non-copyable value to another function.</p>
+<pre>
+uni nbr = 5       // uni signals move semantics
+afunction(nbr)    // the number is moved to the called function
+anotherfunc(nbr)  // **ERROR**: nbr is deactivated and unusable
+</pre>
+	<p>Deactivation of the source happens even for <b>conditional moves</b>,
+	where one branch of conditional move the value but another does not.
+	When the branches join together again, the compiler can't know whether
+	the value is there or not, so conservatively, it assumes the value is gone.</p>
+
+	<p>A non-copyable value may be returned by a called function.
+		There is no need to deactivate the value's source, since it is already gone.</p>
+	<p>(<b>Note:</b> A deactivated source variable may be re-activated at any point by giving it a new value.)</p>
+
+	<h3>Scope-surfing and Destruction</h3>
+	<p>This movement of a non-copyable value can be understood as
+		shortening or lengthening the value's lifetime as it surfs from one scope to another.
+		When it fails to surf out of its last scope,
+		the value will be destroyed at the end of that scope, as it is no longer useful.</p>
+	<p>To destroy a move value more quickly, just assign it to the anonymous variable "_":</p>
+<pre>
+uni nbr = 5
+_ = nbr
+callfn(nbr)   // **ERROR**. nbr is deactivated
+</pre>
+	<p>Doing this on a copyable value has no effect.</p>
+	
+	<h3 id="swap">Field/Element Moves and Swaps</h3>
+	<p>If we want to move a non-copyable value out of a struct or array,
+		things get more complicated, as other values are now potentially affected
+		by such a move:</p>
 	<ul>
-		<li>Allocated references using the 'lex' allocator.</li>
-		<li>Any reference using the 'uni' or 'mut1' permission.</li>
-		<li>Any compound type (e.g., struct, array or variant)
-			in which any field or element type is 'move'.</li>
-		<li>A stack-allocated variable whose type implements the 'drop' method.</li>
+		<li>A non-copyable value held by a named field in a struct may be moved out.
+			However, doing so invalidates any future access to the variable holding that struct, 
+			including any values held by its other fields.</li>
+		<li>It is prohibited to move out a non-copyable value held by some indexed element
+			in an array.</li>
 	</ul>
-	<p><b>Note:</b> Any user-defined type that implements the .clone method makes
-	  that type 'copy', even if it would otherwise be 'move'.
-	  This is because the .clone method is considered a copy constructor
-	  which implements a safe way to copy this type's values.</p>
-
-	<h2>Variable Deactivation</h2>
-	<p>Let's see what happens when we do a 'move':</p>
+	<p>These are significant limitations on the use of non-copyable values in structs and arrays.
+		However, these limitations can be ameliorated by using the swap operator:</p>
 <pre>
-imm nbr = &amp;own 5
-imm newvar = nbr   // the ref has been moved to newvar
-imm b = *nbr       // **ERROR** nbr no longer has a usable value
+struct Numbers
+  uni a i32
+  b i32
+uni n = Numbers[5, 10]
+uni x = 6
+n.a &lt;=&gt; x
+// n.a now contains 6 and x contains 5
 </pre>
-	<p>We have a simple reason for deactivating the variable 'nbr' after the move.
-	  If we had not done so, we would effectively end up with two copies of a
-	  value that is supposed to be non-copyable.
-	  By deactivating 'nbr', we ensure there is only ever one usable copy in existence.</p>
-	<p>The same principle holds true when passing a 'move' value to another function.</p>
-<pre>
-imm nbr = &amp;own 5
-afunction(nbr)    // the ref is moved to the called function
-anotherfunc(nbr)  // **ERROR** nbr is deactivated
-</pre>
-
-	<h3>Borrowing references can deactivate variable</h3>
-	<p>Source variables are also deactivated whenever a borrowed reference is created to (or out of) a 'move' value.
-		This deactivation is only temporary; the original variable's use is restored after the borrowed reference expires:
-	</p>
-<pre>
-imm nbr = &amp;own 5
-do
-  imm nbrref &u32 = nbr  // Create a borrowed reference
-  // nbr is no longer usable in this Scope
-afunction(nbr) // nbr is usable again now that nbrref is gone
-</pre>
-
-	<h3>Forbidden moves</h3>
-	<p>Sometimes a move is not allowed, even on a 'move' value.
-	  This happens whenever it is not possible to cleanly deactivate the source of the value.
-	  For this reason, you may not move a 'move' value out of any kind of array
-	  or by derefencing it out of a borrowed reference.</p>
-	<p>It <i>is</i> possible to move a 'move' value out of a particular struct's field, but doing so deactivates
-	  use of the entire original struct.
-	</p>
-
-	<h3>Swapping 'move' values</h3>
-	<p><span class="pre">swap</span> may be used to safely swap two 'move' values:</p>
-<pre>
-mut a = &amp;own 5
-mut b = &amp;own 6
-swap a,b
-// a now points to 6 and b points to 5
-</pre>
-	<p><span class="pre">swap</span> offers a helpful way to get around forbidden moves.
-	  One can temporarily extract a 'move' value out of a borrowed reference or array by swapping
-	  it with some arbitrary type-compatible value. After making use of the extracted value, simply swap it back in.</p>
-<pre>
-fn func(arrref &[] &own u32, index u32)
-  mut work = &own 0         // Set up the work area with a dummy value
-  swap work, arrref[index]  // Extract the desired 'move' value
-  imm retval = *work        // Make use of the extracted 'move' value
-  swap work, arrref[index]  // Restore the original value back into the array
-  retval
-</pre>
-	<p>The reason why this works is that the original source always has a usable 'move' value,
+	<p>Swapping offers a helpful way to get around restrictive moves.
+	  One can temporarily extract a 'move' value out of a field or array element by swapping
+		it with some arbitrary type-compatible value.
+		After making use of the extracted value, simply swap it back in.</p>
+	<p>The reason why this works is that we end up with no copies of either value
+		and the source still has a valid value
 		(even if it is only a dummy value).
-	  That ensures that the original source is always completely safe to use.</p>
-
-	<h2>Scope escapes and Destruction</h2>
-	<p>In addition to variable deactivation, moving a value effectively changes its lexical scope
-	  to that of its new variable that owns it.
-	  Why this matters is that 'move' values are effectively dropped and/or destroyed at the end of the
-	  last scope they are moved into.
-	  So, by allowing a move value to hop from scope to scope, you effectively lengthen or shorten
-	  its effective lifetime.</p>
-	<p>It is legal for 'move' values to move (or not)
-		based on conditional decisions made at run-time.
-		These are called conditional moves.
-	</p>
-
-	<h3>Explicit destruction</h3>
-	<p>There is an easy way to ensure the immediate destruction of a 'move' value.
-		Just assign it to the anonymous variable "_":
-	</p>
-<pre>
-imm ref = &amp;own 5
-_ = ref
-callfn(ref)   // **ERROR**. ref is deactivated
-</pre>
-	<p>Doing this on a 'copy' value does nothing.</p>
+		That ensures that the original source stays safe to use.</p>
+		
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refptr.html"><img alt="_" src="next.png" /></a>
+		<a href="refrefs.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

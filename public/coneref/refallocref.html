@@ -147,6 +147,15 @@ imm val = *ref  // val is now 3
 	<p>De-referencing is only permitted if the reference's permission allows it.
 		Certain permissions, such as <span class="pre">opaq</span> and the locked permissions,
 		disallow de-referencing.</p>
+	<p>Similarly, de-referencing to obtain a value is prohibited
+		if <a href="refmove.html">move semantics</a> apply. This would happen
+		if the reference uses the <span class="pre">uni</span> permission or
+		points to a value of a non-copyable type.
+		This prohibition is because we likely have no way to comprehensively deactivate
+		the source of this value.
+		To get around this limitation and extract the value anyway,
+		<a href="refmove.html#swap">swap</a> the value the reference points to
+		with some other valid value.</p>
 
 	<h3>Comparison</h3>
 	<p>Two references may be compared for equality, even if they do not have the same type signature.
