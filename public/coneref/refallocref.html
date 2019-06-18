@@ -236,7 +236,7 @@ imm ref4 ?&amp;rc imm i32		 // nullable reference to an integer
 <pre>
 // This condition is true only if maybePoint is not null ...
 if maybePoint
-		imm point = *maybePoint // ... allowing us to obtain its value
+  imm point = *maybePoint // ... allowing us to obtain its value
 imm point2 = *maybePoint    // **ERROR** We don't know if maybePoint is null here
 </pre>
 	<p><b>Note:</b> A special optimization ensures that nullable references are the same size

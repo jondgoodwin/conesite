@@ -147,13 +147,11 @@ imm val = *ref     // val is now 3
 		Importantly, you do not have to know everything about references to start usefully employing them.</p>
 	<p>In progressive order, we will cover:</p>
 	<ul>
-		<li>'static region and owning references: arena, ref-counting and tracing GC</li>
-		<li>Single-owner references, <span class="pre">uni</span> permission and move semantics.</li>
-		<li>Initializers and Finalizers</li>
+		<li>Owning references, and the various regions they rely on: 
+			arena, ref-counting, tracing GC, single owner and pools.</li>
 		<li>Borrowed references, including the <span class="pre">const</span> permission,
-			lifetime annotations, and anonymous functions</li>
-		<li>First-class arenas and pools</li>
-		<li>Array references.</li>
+			lifetime annotations, initializers/finalizers, and anonymous functions.</li>
+		<li>Array references and slices.</li>
 		<li>Interface references and closures.</li>
 	</ul>
 
