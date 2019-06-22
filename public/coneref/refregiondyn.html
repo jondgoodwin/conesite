@@ -13,26 +13,6 @@
 
     <div class="text">
 
-		<h3>arena - Regional</h3>
-		<p>This strategy makes efficient use of a pre-allocated (and growable) arena of memory.
-			Every new allocation takes a bite out of this arena using a fast bump pointer.
-			Allocations are never individually freed. The entire slab is freed as a single event 
-			when the arena itself goes out of scope.</p>
-		<p>The primary benefit is speed: allocation and free are much faster
-			than malloc or equivalent, and there are no run-time bookkeeping costs.
-			The chief drawbacks are memory waste (because nothing is freed until the arena goes out of scope)
-			and the inability to support drop finalizers.</p>
-	
-		<h3>pool - Fixed-size Pool</h3>
-		<p>Similar to arena, this strategy makes use of a pre-allocated (and growable) memory area
-			that has been divided up into identically-sized slots.
-			Each new allocation quickly grabs some unused slot.
-			Reference counting is used to determine when an allocation is freed (marking its slot as reusable).</p>
-		<p>The primary benefit of pool is memory efficiency and 
-			a much faster allocation and free of size-limited values than is possible using malloc.
-			The chief drawbacks are the size limits on values
-				and the runtime bookkeeping costs of its underlying lifetime algorithm.</p>
-			
 
 
 	<p style="text-align: right; margin-top: 2em;">
