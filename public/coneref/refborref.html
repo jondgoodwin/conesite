@@ -232,14 +232,15 @@ fn freeze(n i32)
 			<a href="refallocref.html#ops">dereferenced, compared</a>, and
 			<a href="refallocref.html#handle">handled</a>
 			in the same way as owning references.
-			In addition, borrowed references can play a helpful role in iteration and matching.
 		</p>
-
-	<h2 id="match">Iteration and Borrowed References</h2>
-	<p>Tbd.</p>
-		
-	<h2 id="match">Matching and Borrowed References</h2>
-	<p>Tbd.</p>
+	<p>Additionally, one may obtain borrowed references during
+		<span class="pre">each</span> iteration or
+		pattern matching by using a borrowed reference with the required permission as the source:</p>
+<pre>
+// increment every number in list
+each x in &mut list
+  ++*x   // x is a mutable reference
+</pre>
 		
 
 	<p style="text-align: right; margin-top: 2em;">
