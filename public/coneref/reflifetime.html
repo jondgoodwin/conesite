@@ -13,23 +13,62 @@
 
     <div class="text">
 
-	<p>TBD.</p>
+	<p>An object's (or variable's) lifetime represents the execution interval
+		between when it comes into being and when it expires.
+		Variable lifetimes are bounded by the lexical block scope they are declared in.
+		Object lifetimes may also be bounded by a lexical scope,	but do not have to be.</p>
+	<p>Lifetimes play an essential role in the safe handling of references and their objects.
+		The assurance that references always point to a valid object and the
+		decision-logic for when to free an allocated object are both based on this simple truth:
+		The lifetime of an object is at least as long as the merged lifetime
+		of all references to that object.</p>
+	<p>To make this work, every reference carries information about
+		both the lifetime of the reference and the lifetime of the object it points to.
+		Most of the time, this information is invisible to the programmer
+		as the compiler is able to easily infer and check it automatically based on the
+		lexical structure of the program.
+		When it compares the lifetime of two things, it just compares
+		when their respective lifetimes end.
+		This is what makes it possible to trigger an error when a borrowed reference's lifetime
+		is extended to live beyond the known lifetime of the object it points to.</p>
+
+	<h2>Annotations</h2>
+	<p>When the lifetime of an reference's object cannot be easily inferred,
+		a reference's type must explicitly specify the lifetime of the
+		object it points to:</p>
+<pre>
+imm someref &'a u32
+</pre>
+	<p>The <span class="pre">'a</span> is a lifetime annotation on this borrowed reference.
+		A lifetime annotation starts with an apostrophe followed by any number of
+		letters, but no closing apostrophe (as that makes it a character literal).
+		It expresses the idea that the reference's object lasts at least
+		as long as the lifetime the annotation is bound to.
+		We'll go into more detail later on how an annotation is bound to a specific lifetime.</p>
 
 	<h3>'static lifetime</h3>
-	<p>The lifetime of a global variable is forever.
-		The same is true for all functions, methods and anonymous functions.
-		Any reference created directly from a global variable or function is implicitly marked 
-		with the <span class="pre">'static</span> lifetime annotation.
-		A reference may always safely point to a value that is known to be global,
-		as this never violates lifetime constraints.</p>
-	<p>References to functions preserve this <span class="pre">'static</span> lifetime even when a function reference
-		is passed from one function to another.
-		This means that function references can always be moved around freely and safely
-		between functions and safely stored and used anywhere,
-		without the need to explicit annotate them with <span class="pre">'static</span>.</p>
-	<p>However, that is not true for global variables when references to them are passed
-		around and stored. Unless the receiver reference (and any donor reference) are explicitly marked with
-		<span class="pre">'static</span>, lifetime shortening and constraints will apply.
+	<p>Some objects last as long as the program's lifetime, 
+		in particular global variables, functions, and methods.
+		This lifetime is denoted by the <span class="pre">'static</span> annotation.
+		A reference can always safely point to a <span class="pre">'static</span> object,
+		because it expires only when the program does.
+		This is why it is possible to pass a function reference around freely
+		without any lifetime constraints or annotations.</p>
+	
+	<h2>Loop Lifetime Annotations</h2>
+	<p>Over the next few pages, we will discuss situations where references require lifetime annotations.
+		But first let's show where explicit lifetimes can help with loop control flow.
+		This would be when we want a <span class="pre">break</span> or <span class="pre">continue</span>
+		to apply to an outer loop that is different than the inner-most loop:
+	</p>
+<pre>
+each 'outer n in 1...5
+  while obj.fireAShot()
+    continue 'outer if obj.impacted
+</pre>
+	<p>A <span class="pre">while</span> or <span class="pre">each</span> loop may be
+		marked with a lifetime. When a <span class="pre">break</span> or <span class="pre">continue</span>
+		also uses this lifetime, its control flow operates against that loop rather than the inner-most one.</p>
 			
 			<p style="text-align: right; margin-top: 2em;">
 		<a href="reflifefn.html"><img alt="_" src="next.png" /></a>
