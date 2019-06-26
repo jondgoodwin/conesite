@@ -13,97 +13,8 @@
 
     <div class="text">
 
-	<h3 id="lifeannot">Lifetime Annotations</h3>
-	<p>Within a function, Cone has all the information it needs to enforce lifetime constraints.
-			That is why references typically do not need to declare lifetimes.
-			However, when dealing with borrowed references that travel to and from functions,
-			Cone may not know enough about the lifetimes of these references to correctly enforce lifetime constraints.
-			In these cases, lifetime annotations are required on parameter or return references
-			to close this gap.</p>
-	<p>The way to think about it is that there is a thick brick wall that separates a called function
-		from the function that calls it. Each cannot see anything about what the other is doing with references.
-		The purpose of the lifetime annotations on function signatures is to establish a contract
-		that summarizes the lifetime relationships between parameter and return borrowed references 
-		which Cone can then enforce independently on both the caller and the callee.
-		These lifetime annotations do not tell us everything about lifetimes, only what is needed
-		to correctly enforce lifetime constraints.</p>
-	<p>Lifetime annotations <i>only</i> apply to borrowed references (not allocated references).
-		Furthermore, if none of the borrowed references can change a value and if no borrowed reference
-		is returned from the function, no lifetime annotations are required.
-		Really, there are only two circumstances where lifetime annotations <i>might</i> be required,
-		both of them requiring that the function receives multiple parameters that contain borrowed references.</p>
+	<p>TBD.</p>
 
-	<h4>Returned borrowed references</h4>
-	<p>If a function accepts multiple borrowed references
-		and returns value(s) that contain borrowed references,
-		the brick wall prevents us from knowing which of the borrowed reference parameters
-		is the source for the returned borrowed reference.
-		That means the caller does not know what the lifetime is of the returned borrowed references.
-		Without that knowledge, how can we safely enforce lifetime constraints on wherever
-		the caller might store that reference? Consider this classic example:</p>
-<pre>
-fn refswitch(nbr i32, ref1 &i32, ref2 &i32) &i32
-	if nbr &lt; 0
-		ref1
-	else
-		ref2
-
-fn caller(nbr i32)
-  mut ref &amp;i32
-  imm outer = 5
-	do
-	  imm inner = 10
-	  ref = refswitch(1, &outer, &inner) // Is this safe???
-</pre>
-	<p>To play it completely safe in the absence of lifetime annotations,
-		Cone will assume for the callee that the lifetime for all references
-		is the same. However, with the caller it will assume the returned reference
-		might have the longest lifetime of the passed references.
-		Using those rules, the above program would compile with an error in the caller,
-		since the lifetime of one of the parameters is shorter than the lifetime of ref.
-		The only way to call refswitch safely is when the lifetime of both references
-	  are at least as long as the lifetime of ref.</p>
-	<p>Lifetime annotations may be used to relax this conservative stance.
-		Marking multiple references with the same simple lifetime annotations
-		signals that the lifetimes of these borrowed references should be treated as if they were the same
-		(in the most conservative way possible). Consider:</p>
-<pre>
-fn refone(ref1 &'a i32, ref2 &i32) &'a i32
-</pre>
-  <p>Using lifetime annotations ('a), this function declares that the caller should treat
-		the lifetime of the returned reference as the same as the lifetime for ref1.
-		It also enforces that the callee's logic provides no way to return a reference
-		sourced from ref2.
-		Thus, a called function should annotate some references with lifetime annotations
-		when it knows it implements no dependences between a returned reference
-		and some parameter reference(s).</p>
-
-	<h4>Mutable borrowed reference parameters</h4>
-	<p>If a function accepts multiple references, at least one of which is mutable,
-		we have an opportunity for a different sort of lifetime problem.
-		If the called function changes the value pointed at by the mutable reference
-		to a value retrieved from a different reference parameter,
-		it has insufficient information to know that lifetime constraints are safely enforced.</p>
-<pre>
-fn refchange(refmut &amp;mut &amp;i32, refval &amp;i32)
-	*refmut = refval
-	
-fn tryit()
-	imm i = 5
-	mut a = &amp;i
-	do
-		imm b = 10
-		refchange(&amp;a, &amp;b) // Oops!
-</pre>
-  <p>In the absence of lifetime annotations, Cone will once again
-		apply the most conservative assumptions.
-		The callee will assume their lifetimes are the same.
-		The caller will assume the known lifetime of all mutable reference can never be longer
-		than the known lifetime of any non-mutable reference.
-		The use of lifetime annotations can also be used in these circumstances
-		to relax these assumptions, when the called function can guarantee there are
-		no lifetime dependences between some of the references.</p>
-	
 	<h3>'static lifetime</h3>
 	<p>The lifetime of a global variable is forever.
 		The same is true for all functions, methods and anonymous functions.
@@ -121,7 +32,7 @@ fn tryit()
 		<span class="pre">'static</span>, lifetime shortening and constraints will apply.
 			
 			<p style="text-align: right; margin-top: 2em;">
-		<a href="refregiondyn.html"><img alt="_" src="next.png" /></a>
+		<a href="reflifefn.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

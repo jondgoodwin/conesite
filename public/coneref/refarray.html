@@ -113,12 +113,13 @@ c_array[2] = c_array[1]    // the 3rd element is now the same as the second
     </p>
 <pre>
 imm nbrs = [2, 4, 6]
-imm four = nbrs[nbrs.len - 2] // =4 - the 2nd from the end
+imm four = nbrs[my.len - 2] // =4 - the 2nd from the end
 </pre>
-    <p>The less verbose equivalent uses the <span class="pre">|-</span> operator:</p>
+    <p>The less verbose equivalent uses the <span class="pre">$-</span> operator:</p>
 <pre>
-imm four = nbrs[|-2]
+imm four = nbrs[$-2]
 </pre>
+    <p><span class="pre">$-</span> is equivalent to <span class="pre">my.len - </span></p>
 
     <h3>Iterating over an array</h3>
     <p>Using indexing and the <span class="pre">len</span> method,
@@ -167,7 +168,7 @@ greetings[6..] = "Jayne"        // "Hello Jayne" (end is assumed if unspecified)
         An array segment cannot be passed as an argument in a function call or used in a comparison.
     </p>
     <p><b>Note:</b> One can also use the ampersand operator to 
-        <a href="refarrayref.html#internal">borrow an array reference (slice)</a> 
+        <a href="refarrayref.html#slice">borrow an array reference (slice)</a> 
         to a specific set of elements in an array.</p>
 
     <h3>Multi-element fills</h3>

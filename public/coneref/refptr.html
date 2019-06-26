@@ -82,6 +82,9 @@ trust
 <pre>
 ptr1[2] = ptr2[1]
 </pre>
+	<p>This never performs any bounds-check.
+	Using a pointer this way can improve performance where we know the index is safe.</p>
+
 	
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refstruct.html"><img alt="_" src="next.png" /></a>

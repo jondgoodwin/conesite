@@ -12,6 +12,8 @@
 		</div>
 
     <div class="text">
+	<p style="margin-left: 40px;"><i>Note: All of this capability is implemented
+		except the special <span class="pre">my</span> name.</i></p>
 
 	<p>Now that we have literals and variables, we can construct more complex expressions that
 	use operators, methods and functions calls to calculate new values.
@@ -44,7 +46,7 @@
 
 	<h3 id="method">Method Calls</h3>
 	<p>Additional calculations can be performed using method calls.
-	The name of the desired method follows the value, separated by the dot operator ('.'):
+	The name of the desired method follows the object value, separated by the dot operator ('.'):
 <pre>
 (-1).abs    // 1 (the absolute value, making a number positive)
 (pi/2).sin  // 1.0 (trigonometric sine function)
@@ -68,12 +70,13 @@
 // The method name is enclosed in backticks since it includes punctuation
 3+4   // is actually: 3.`+`(4)
 </pre>
-	<p>Since the arithmetic operators are simply methods, they may also be used on non-numeric values:</p>
-<pre>
-"a"+"b"  // "ab" (concatenation results when two strings are added)
-</pre>
+	</li>
 	</ul>
-	<p>Methods are covered more thoroughly in <a href="refmethod.html">a later chapter</a>.</p>
+	<p><b>Note:</b> Inside any argument on a method call,
+		the special name <span class="pre">my</span> may be used.
+		Its value is the same as the object of the method call.
+		This can be helpful to call helper methods on the object
+		to prepare other argument values.</p>
 
 	<h3>Function calls</h3>
 	<p>Function calls are very much like method calls, except they are not applied to a value in the same way.

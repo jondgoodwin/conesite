@@ -164,13 +164,9 @@ x.counter // 10
 		The index need not even be an unsigned integer, as it is for an array.
 		Dictionaries, for example, often use strings as the index.</p>
 
-	<h3>&lt;- Add Element Operator</h3>
-	<p>A collection may implement the <span class="pre">&lt;-</span> operator
-		for adding an element to a collection, typically the end of it.</p>
-	The corresponding method has <span class="pre">self</span> and the element as parameters.
-	If an array literal is used on the right-hand side of the
-	<span class="pre">&lt;-</span> operator, all of its elements are added to the
-	collection on the left, one-by-one.</p>
+	<h3>&lt;- Append Operator</h3>
+	<p>A collection may implement the <span class="pre">&lt-</span> operator
+		for adding an element or a slice's elements to the end of a collection.</p>
 		
 	<h2>() "Function call" Operator</h2>
 	<p>It is actually possible to "call" an object as if it were a function.
