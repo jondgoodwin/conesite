@@ -156,60 +156,7 @@ imm ref = &amp;mut a   // Creates a mutable borrowed reference to a's value
 		This is why creating a borrowed reference
 		defaults to <span class="pre">const</span> when no permission is specified.</p>			
 
-	<h2 id="lifetime">Lifetime Constraints</h2>
-	<p>The most distinguishing safety constraint on borrowed references is that
-		their lifetime is temporary.
-		Carefully managing the lifetime of a borrowed reference is needed for memory and race safety,
-		as it:</p>
-	<ul>
-	<li>Prevents it from pointing to any value with a shorter lifetime.</li>
-	<li>Freezes out access to the "source" of the borrowed reference for its lifetime.</li>
-	</ul>
-
-	<h3>Lifetime Comparisons</h3>
-	<p>To ensure memory safety, a reference may never survive longer than the value it points to.
-		This example demonstrates the importance of this restriction:</p>
-<pre>
-fn getval() i32
-	mut ref &amp;i32
-	do
-	  imm a = 5
-	  ref = &amp;a
-	*ref   // Oops!
-</pre>
-  <p>The scope of the variable <span class="pre">a</span> lasts only for the duration of the do block.
-	So when we are done executing that block, the variable <span class="pre">a</span> ceases to exist.
-	However, <span class="pre">ref</span> (which points to <span class="pre">a</span>) continues to exist, 
-	but now points to a value that is gone.
-	When we dereference it, we are problematically trying to retrieve a value that is no longer there.</p>
-  <p>To protect against this sort of safety violation,
-	the lifetime of a reference is never allowed to grow longer than the lifetime
-	of the value it points to.
-  The latter, at-least-as-long-as lifetime of the value is captured as part of the reference when borrowed:</p>
-  <ul>
-	<li>For a global value, the lifetime is <span class="pre">'static</span>
-		(the entire lifetime of the program).</li>
-	<li>For a parameter or local variable, the lifetime is the lexical scope
-		that variable is declared within.</li>
-	<li>When borrowing from another reference, we use the lexical scope
-		active when this borrowing took place, since we know the value it points
-		at will last at least as long as the reference it borrows from.</li>
-	<li>For any borrowed reference we have not witnessed the creation for
-		(passed as a parameter or returned by another function),
-		a <a href="reflifetime.html">lifetime annotation</a> may be required
-		to indicate the minimum-possible lifetime of the pointed-at value.</li>
-	</li>
-  </ul>
-	<p>When the borrowed reference is first created, it starts off with a very short and safe lifetime,
-		only lasting as long as the expression it was created within.
-	  This lifetime can be extended by storing it in a longer-lasting container
-	  such as a variable, another reference, field, array element, etc.
-	  When a reference's lifetime is extended, we check it against the reference's captured lifetime for the value.
-	  As the above example demonstrates, it is a compile error 
-	  to store a borrowed reference into a container whose lifetime exceeds the
-	  reference's captured value lifetime.</p>
-
-	<h3>Freezing access to the source of a borrow</h3>
+	<h2>Freezing access to the source of a borrow</h2>
 	<p>When a borrowed reference is created, its source is always a named variable.
 		That source variable either holds or points to the value we are borrowing a pointer to.
 		When we borrow from the source, we are not just gaining access to the value,
@@ -223,10 +170,10 @@ fn freeze(n i32)
   uni uniref = &one 3       // has permission uni
   if n &gt; 1
     imm borref = &*uniref   // borrowing makes uniref inaccessible in this block 
-		imm m = *uniref         // oops! uniref is frozen and may not be accessed
-	*uniref                   // Safe, because the borrow has expired.
+    imm m = *uniref         // oops! uniref is frozen and may not be accessed
+  *uniref                   // Safe, because the borrow has expired.
 </pre>
-
+	
 	<h2>Using a Borrowed Reference</h2>
 	<p>Borrowed references may be
 			<a href="refallocref.html#ops">dereferenced, compared</a>, and
@@ -241,10 +188,33 @@ fn freeze(n i32)
 each x in &mut list
   ++*x   // x is a mutable reference
 </pre>
-		
+
+	<h3 id="lifetime">Lifetime Constraints</h3>
+	<p>The most distinguishing safety constraint on a borrowed reference is that
+		its lifetime is constrained to never travel beyond the scope it is created in.
+		Carefully managing the lifetime of a borrowed reference is needed for memory safety,
+		as it prevents it from pointing to any value with a shorter lifetime.</p>
+
+	<p>This example demonstrates the importance of this restriction:</p>
+<pre>
+fn getval() i32
+  mut ref &amp;i32
+  do
+    imm a = 5
+    ref = &amp;a
+  *ref   // Oops!
+</pre>
+	<p>The scope of the variable <span class="pre">a</span> lasts only for the duration of the do block.
+	So when we are done executing that block, the variable <span class="pre">a</span> ceases to exist.
+	However, by copying the borrowed reference into <span class="pre">ref</span>, we are effectively
+	trying to extend its life beyond the scope it was created in and beyond the life of the value it points to. 
+	By attempting to dereference it, we are problematically trying to retrieve a value that is no longer there.</p>
+	<p>Most of the time, the compiler has all the information it needs to figure this
+		out and generate a error. However, sometimes it needs help in the form of
+		<a href="reflifefn.html">lifetime annotations</a>.</p>
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="reffnref.html"><img alt="_" src="next.png" /></a>
+		<a href="reflifefn.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

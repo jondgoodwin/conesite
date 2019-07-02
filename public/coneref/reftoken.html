@@ -24,6 +24,8 @@
 		begins with a double quote ("), r", or r`</li>
 		<li><b><A href="#url">URL Literal</a></b>
 		begins with an at sign (@).</li>
+		<li><b><A href="#lifetime">Lifetime Annotation</a></b>
+		begins with a single quote (').</li>
 		<li><b><a href="#ident">Identifier</a></b>
 		begins with a unicode-defined letter, 
 		a dollar sign '$', an underscore '_', or a backtick (`).</li>
@@ -182,6 +184,16 @@
 		The end of the URL happens when encountering the first white space: space, tab, lf, cr or eof.
 		This non-quoted URL is a URL literal.</p>
 		
+		<h2 id="lifetime">Lifetime Annotation</h2>
+		<p>A lifetime annotation looks similar to a character literal,
+			in that it begins with a single quote (').
+			It is followed by any number of alphabetic characters.
+			The absence of a closing single-quote distinguishes it from a character literal.</p>
+<pre>
+'a
+'static
+</pre>
+	
 		<h2 id="ident">Identifier</h2>
 		<p>Other than the reserved <a href="#keywords">keywords</a>,
 		a program may define and use any identifier as a variable, member, function, method, type, etc.</p>
