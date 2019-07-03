@@ -13,6 +13,8 @@
 
     <div class="text">
 
+		<p style="margin-left: 40px;"><i>Note: All has been implemented, except loop and lifetimes.</i></p>
+
 	<p>Use <span class="pre">while</span> to repetitively perform the same logic over and over again
 		so long as a specified condition is true. For example:</p>
 <pre>
@@ -73,7 +75,35 @@ fn countOdd(n i32) i32
     ++result
   result
 </pre>
-	
+
+	<h3>loop as expression</h3>
+	<p>To use a loop as an expression, use <span class="pre">loop</span> instead
+		of <span class="pre">while</span>. 
+		This is the equivalent of <span class="pre">while true</span>.
+		One or more <span class="pre">break</span> statements
+		will be required to signal when the loop needs to terminate,.</p>
+	<p>These <span class="pre">break</span> statements may specify a value to be returned from the loop.</p>
+<pre>
+imm found = loop
+  break -1 if idx > maxidx
+  break idx if matches(idx)
+  ++idx
+</pre>
+	<p>If this feature is used, all <span class="pre">break</span> statements in the loop
+		must return a value, all of the same type.</p>
+
+	<h3>Outer block breaks</h2>
+	<p>To make it possible for <span class="pre">break</span> or <span class="pre">continue</span>
+		to apply to a loop outside the loop it is in, mark the outer loop with a
+		<a href="reftoken.html#lifetime">lifetime annotation</a> and then use that same
+		annotation on the <span class="pre">break</span> or <span class="pre">continue</span> statement.</p>
+<pre>
+each 'outer n in 1...5
+	while obj.fireAShot()
+		continue 'outer if obj.impacted
+</pre>
+
+
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refaggtypes.html"><img alt="_" src="next.png" /></a>
 	</p>
