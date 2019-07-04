@@ -242,6 +242,19 @@ imm point2 = *maybePoint    // **ERROR** We don't know if maybePoint is null her
 	<p><b>Note:</b> A special optimization ensures that nullable references are the same size
 		as regular references.</p>
 
+	<h3>Memory Allocation Errors</h3>
+	<p>Although unlikely, it is still possible for memory allocation requests to fail.
+		This typically happens when not enough contiguous, free memory exists to
+		satisfy the request.</p>
+	<p>Failure to allocate memory will trigger a different
+		response depending on whether the owning reference is marked as nullable.</p>
+	<ul>
+		<li><b>Non-nullable reference</b>:  the program will panic and shut down.</li>
+		<li><b>Nullable reference</b>: A failed allocation returns the value
+			<span class="pre">null</span>. Any of the mechanisms provided
+			for <a href="refenum.html#nullable">handling nullable values</a>
+			may be applied in an attempt to recover from this problem.</li>
+	</ul>
 	
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refregionglo.html"><img alt="_" src="next.png" /></a>
