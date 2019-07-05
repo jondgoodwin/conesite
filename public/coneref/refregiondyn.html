@@ -13,6 +13,32 @@
 
     <div class="text">
 
+	<p>As the previous page illustrated, arena regions offer the best performance.
+		However, a global arena never frees any allocated memory until the program finishes.
+		This means memory waste and determinism worsen steadily the longer a program runs.</p>
+	<p>Dynamic arenas offer a nice solution to this problem.
+		A dynamic arena may be created at any time, used to allocate a bunch of temporary
+		objects, and then destroyed soon after, when we have no further need for any of those	objects. 
+		Short-lived arenas offer the same performance advantage, 
+		but dramatically improve determinism and memory efficiency.</p>
+	<p>A versatile dynamic arena is one that:</p>
+	<ul>
+		<li>May be allocated using any global region, ensuring
+			control over how and when it is safely freed.</li>
+		<li>Has a lifetime able to extend across any scope that needs access
+			to its objects.</li>
+		<li>Supports object references that 
+			are useful across all scopes needing access to their values.</li> 
+	</ul>
+	<p>The last two requirements create an interesting challenge:
+		how do we allow both dynamic arenas and their object references
+		to roam freely across scopes, while still ensuring memory safety?
+		It would be bad to use a reference
+		to access any object after the arena holding that object has vanished.</p>
+	<p>To protect against this, references may roam wherever they will,
+		but may only be <i>used</i> when we know the arena is still alive.
+		Let's walk through how to make this happen.</p>
+
 
 
 	<p style="text-align: right; margin-top: 2em;">
