@@ -206,7 +206,7 @@ each i, x in intslice
 
     <h3>Comparison</h3>
     <p>Two array references may be compared for equality, so long as they have the same element type,
-        even if one is a borrowed reference and the other an allocated reference.
+        even if one is a borrowed reference and the other an owning reference.
         This comparison checks for equality of both the starting pointer and the element count.</p>
 <pre>
 if ownref == borref

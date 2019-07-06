@@ -56,7 +56,30 @@
 			may very clearly see what the compiler cannot.
 		</p>
 
-		<p style="text-align: right; margin-top: 2em;">
+	<h2>Type Reinterpretation</h2>
+	<p>Unlike coercion and conversion, reinterpretation does not create a new value.
+		It interprets the existing encoded value as if it has a different type.
+		The new type must have the same size as the current type of the value.</p>
+	<p>Reinterpretation uses the <span class="pre">as</span> infix operator.
+		Unlike other infix operators, <span class="pre">as</span> expects a type (rather than a value or expression) 
+		to the right of the operator.</p>
+	<p>Reinterpretation is mostly used on references, such as when turning a reference into a pointer.</p>
+<pre>
+imm ptr = &amp;x as *Vector3
+</pre>
+	<p>Reinterpretation can be also be used on number types,
+		such as when we want to access a floating point number's bits:</p>
+<pre>
+imm highword = u32[(pi as u64) >> 32]
+</pre>
+		<p>Reinterpretation can be dangerous, as a value could behave badly 
+		when treated and manipulated within the constraints of a different type.
+		For example, a reference reinterpreted as a pointer loses permission constraints,
+		making it possible for a pointer to be used to alter an immutable object.
+		It is the responsibility of the programmer to ensure the reinterpreted value
+		is handled in a safe and useful manner.</p>
+	
+			<p style="text-align: right; margin-top: 2em;">
 			<a href="refptr.html"><img alt="_" src="next.png" /></a>
 		</p>
 		

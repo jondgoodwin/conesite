@@ -19,107 +19,133 @@
 		In most cases, an error will be reported wherever a program:</p>
 	<ul>
 		<li>Stores a value of one type into a variable or collection declared for a different type.</li>
-		<li>Passing an argument of one type to a function that expects a value of another type in that position.</li>
+		<li>Passes an argument of one type to a function that expects a value of another type in that position.</li>
 		<li>Returns a value of one type when the function's signature declares a different type for the return value.</li>
 		<li>Creates a reference (or pointer) to an object whose type does not match the reference's type declaration.</li>
 	</ul>
-	<p>These constraints protect against the program manipulating a value in ways that make no sense or could be harmful,
+	<p>These constraints protect against a program manipulating a value in ways that make no sense or could be harmful,
 		due to acting as if the value has a different meaning than it actually does.</p>
-	<p>However, sometimes we <b>do</b> need to transform a value of one type to another type.
+	<p>However, sometimes we <i>do</i> want to transform a value of one type to another type.
 		Cone supports three such capabilities:</p>
 	<ul>
 		<li><b>Coercion</b>,
-			which maps a value to its exact equivalent in a supertype.</li>
+			which implicitly and safely maps a subtype-based value to its semantic equivalent in a supertype.</li>
 		<li><b>Conversion</b>,
-			which chooses the closest "equivalent" value in another type.
-			This is not a perfect mapping: A valid mapping may not exist or some precision may be lost.</li>
+			which explicitly constructs the closest "equivalent" value in another type.
+			This mapping is imperfect, as some (or all) of the meaning of the original value could be lost.</li>
 		<li><b>Reinterpretation</b>,
-			which keeps the original value but interprets it as if it has a different type.</li>
+			which explicitly preserves the original value but re-interprets it as if it has a different type.
+			This potentially unsafe capability will be described on another 
+			<a href="reftrust.html#reinterpret">page</a>.</li>
 	</ul>
+	<p>To distinguish between coercion and conversion, 
+		it is first necessary to understand how subtyping works in Cone.</p>
 
-
-	<h2 id="coercion">Subtyping and Implicit Type Coercion</h2>
-	<p>In many cases, one type can be a <i>subtype</i> of another type.
-	  A subtype specializes its more general-purpose supertype, adding additional constraints.
-	  Many forms of subtyping are supported:</p>
+	<h2 id="subtype">Subtypes</h2>
+	<p>Subtyping captures a simple but powerful idea: if we have two types named 
+		<span class="pre">Base</span> and <span class="pre">Subtype</span>,
+		how do we determine when it is safe to substitute in a value of
+		type <span class="pre">Subtype</span> whenever our program logic
+		is looking for a value of type <span class="pre">Base</span>?</p>
+		<p>Here are two essential criteria (there are others):</p>
 	<ul>
-		<li>A struct is a subtype of any trait it implements or interface it conforms to</li>
-		<li>A type is a subtype of any variant type that includes that type as a variation</li>
-		<li>A smaller number type is a subtype of a larger version of the same type
-			(e.g., u8 is a subtype of u32)</li>
-		<li>Some permissions are subtypes of others (e.g., 'const' is a subtype of 'imm')</li>
-		<li>Borrowed references are subtype of an equivalently typed allocated reference
-			(e.g., &Foo is a subtype of &own Foo)</li>
+		<li>Every possible value in <span class="pre">Subtype</span> can be mapped uniquely
+				to its semantically identical value in <span class="pre">Base</span>.</li>
+		<li>The behavior of values in <span class="pre">Subtype</span>
+			must correspond in every way to the behavior of equivalent
+			values in <span class="pre">Base</span>.
+			In our case, that means at minimum that for every method in <span class="pre">Base</span>,
+			there exists an equivalent method in <span class="pre">Subtype</span>
+			with the same type signature and constraints.</li>
 	</ul>
-	<p>Coercion maps a value to its exact equivalent in a supertype.
-		Cone will automatically and implicitly coerce a value of some subtype to its supertype
-		when a supertype value is expected.
-		Commonly, this happens with assignments and function calls:</p>
+	<p>Many type pairs in Cone comply with these criteria and support a safe subtyping relationship:</p>
+	<ul>
+		<li>Any variant type is a subtype of the enum or union type 
+			that defines it as a variant.
+			By extension, any non-nullable type is a subtype of its
+			nullable equivalent (e.g., <span class="pre">&Foo</span> 
+			is a subtype of <span class="pre">?&Foo</span>).
+		</li>
+		<li>A borrowed reference is a subtype of an equivalently-typed owning reference
+			(e.g., <span class="pre">&Foo</span> is a subtype of <span class="pre">&so Foo</span>)</li>
+		<li>A <a href="refptr.html">pointer</a>
+			is a subtype of any reference whose object type is the same.</li>
+		<li>Some reference permissions are subtypes of others
+			(e.g., <span class="pre">const</span> is a subtype of 
+			<span class="pre">imm</span> or <span class="pre">mut</span>).
+			Similarly, most permissions are a subtype of <span class="pre">uni</span>.</li>
+		<li>A smaller number type is a subtype of a larger version of the same type
+			(e.g., <span class="pre">u8</span> is a subtype of <span class="pre">u32</span>).</li>
+		<li>A struct is a subtype of any trait it conforms to.
+			More will be said about <a href="reftrait.html">traits</a> and subtyping later.</li>
+	</ul>
+	<p>An important characteristic of subtyping relationships is that
+		it is trivially safe to transform a <span class="pre">Subtype</span> value
+		into its equivalent <span class="pre">Base</span> value.
+		However, the journey of a value back from <span class="pre">Base</span>
+		to <span class="pre">Subtype</span> often requires some sort of
+		pattern-matched guard, as there are likely to be values in <span class="pre">Base</span>
+		that do not have a valid mapping from 
+		<span class="pre">Subtype</span> to <span class="pre">Base</span>.
+		A successful pattern match guarantees we will get back a valid
+		<span class="pre">Subtype</span> value when the reverse transformation is applied.</p>
+		
+	<h2 id="coercion">Implicit Coercion</h2>
+	<p>We call it coercion when transforming a subtype value into
+		its equivalent base value.
+		Coercion is the one safe exception to the strict typing rule described earlier,
+		given that the type of a value and its receiver are not strictly the same.</p>
+	<p>Since coercion is always safe, Cone performs it implicitly
+		when copying or moving a subtype value
+		to any container (variable, parameter, return value, field, reference)
+		expecting a base value.
+		This happens during assignments, function calls and returns.
+		For example:</p>
 <pre>
-// Implicitly coerce a u8 to u32
-imm u8value = 101u8
-imm bigint u32 = u8value
+fn doStuff ()
+  imm bigint u32 = 101u8        // Coerce a u8 to u32
+  mut matrix = &so Mat4[]       // Allocate a matrix
+  imm float = mat4det(matrix)?  // Coerce &so uni Mat4 to ?&Mat4
 
-// Implicitly coerce &own uni Mat4 to &const Mat4
-mut matrix = &own Mat4[]
-imm det = mat4det(matrix)
-fn mat4det(mat &Mat4) f32
-   // ...
+fn mat4det(mat &Mat4) f32 throws DivByZero
+  // ...
+  return 1.0                     // Coerce f32 to Result&lt;&gt;
 </pre>
-	<p>Coercion can be requested explicitly by using the 'into' operator:</p>
+	<p>Coercion is more than just changing the type of some value.
+		It usually means creating a new value whose encoding is different 
+		than its source value.</p>
+	<p>Coercion can also trigger compiler mechanics:
+		In the case of coercing an owning reference to a borrowed reference,
+		it triggers appropriate borrowing mechanics on the source variable.
+		Similarly, when coercing a non-copy value, move semantics apply.</p>
+	<p>If an expression requires, it is possible to explicit request coercion.
+		For non-reference types, use the appropriate constructor
+		(as described below for conversion).
+		For references, use the <span class="pre">as</span> operator:</p>
 <pre>
-imm bigint = u8value into u32
+imm newref = oldref as &Point  // Explicitly coerce to a borrowed reference
 </pre>
 
-<p>The 'as' operator may be used to take an existing reference and create a new reference
-	with a different type signature.
-	Whenever this might create some safety risks, use of the 'as' operator will need to happen within a 'trust' blocks.
-</p>
-<pre>
-imm newref = oldref as &Point  // Coerce a reference to a borrowed reference
-</pre>
-
-<h2>Type Conversion</h2>
-	<p>Type conversion involves transforming a value of one type to its "equivalent" value in another type.
+<h2>Explicit Conversion</h2>
+	<p>Type conversion involves transforming a value of one type
+		to the closest possible value in another type.
 		For example, converting the integer 1 to the floating point number 1.0,
 		or serializing it to text:  "1".
-		Unlike coercion, conversion may not map perfectly: A valid mapping may not exist or some precision may be lost.
+		Unlike coercion, conversion may not map perfectly: 
+		A valid mapping may not exist or some precision may be lost.
 	</p>
-	<p>Converting one number type to another uses the <a href="refexpr.html#numrconv">"literal" format</a>
-		or the 'into' operator:</p>
+	<p>Conversion is typically requested using the new type's constructor
+		or invoking one of its initializers</p>
 <pre>
 imm float = f32[1]
-imm float = 1 into f32
-</pre>
-	<p>Beyond number types, conversion is typically requested using the new type's initializer or a method in the old type:</p>
-<pre>
 imm text = Text(1) // "1"
+</pre>
+	<p>In some cases, it may be more convenient to request conversion 
+		by using some method in the old type:</p>
+<pre>
 imm text = 1.text
 </pre>
-
-	<h2>Type Reinterpretation</h2>
-	<p>Unlike coercion and conversion, reinterpretation does not create a new value.
-		It interprets the existing encoded value as if it has a different type.
-		The new type must have the same size as the current type of the value.</p>
-	<p>Reinterpretation uses the <span class="pre">as</span> infix operator.
-		Unlike other infix operators, <span class="pre">as</span> expects a type (rather than a value or expression) 
-		to the right of the operator.</p>
-	<p>Reinterpretation is mostly used on references, such as when turning a reference into a pointer.</p>
-<pre>
-	imm ptr = &amp;x as *Vector3
-</pre>
-	<p>Reinterpretation can be also be used on number types,
-		such as when we want to access a floating point number's bits:</p>
-<pre>
-	imm highword = u32[(pi as u64) >> 32]
-</pre>
-  	<p>Reinterpretation can be dangerous, as a value could behave badly 
-		when treated and manipulated within the constraints of a different type.
-		For example, a reference reinterpreted as a pointer loses permission constraints,
-		making it possible for a pointer to be used to alter an immutable object.
-		It is the responsibility of the programmer to ensure the reinterpreted value
-		is handled in a safe and useful manner.</p>
-
+		
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refpure.html"><img alt="_" src="next.png" /></a>
 	</p>
