@@ -93,7 +93,7 @@ fn clone(self &new, from &)
 	<p>Whenever copies are automatically made (e.g., assignment or function calls),
 		the clone method will be used, if specified, to make these copies.</p>
 	
-	<h2 id="finalizer">drop Finalizer</h2>
+	<h2 id="finalizer">Finalizer</h2>
 	<p>When a object is destroyed at the end of its life,
 		its finalizer logic, if defined, is automatically invoked.
 		Only types that acquire a dependent relationship
@@ -103,12 +103,12 @@ fn clone(self &new, from &)
 		before the value's memory is reclaimed.</p>
 	<p>Here's a finalizer:</p>
 <pre>
-fn drop(self &uni)
+fn final(self &uni)
   file.close
 </pre>
 	<p>Key to a finalizer definition:</p>
 	<ul>
-		<li><b>The method's name must be <span class="pre">drop</span></b>.
+		<li><b>The method's name must be <span class="pre">final</span></b>.
 			Only one may be defined.</li>
 		<li><b><span class="pre">self</span> is a borrowed reference using the
 			<span class="pre">uni</span> permission</b>.

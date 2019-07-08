@@ -56,7 +56,7 @@ a          // is still 3
 			the type's values may be copied.
 			Since the compiler automatically uses the clone method (when implemented)
 			to make all copies of values of this type, these values are clearly copyable.</li>
-		<li>If the <a href="refinitdrop.html#finalizer">drop</a> method is implemented,
+		<li>If the <a href="refinitdrop.html#finalizer">final</a> method is implemented,
 			the type's values may not be copied.
 			If the type requires a finalizer to clean up dependencies,
 			chances are excellent that creating copies will open the door to safety issues.</li>

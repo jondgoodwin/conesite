@@ -108,7 +108,7 @@ $.npcs["Frosty"]
 	bind extracted contents from any successful matches.</li>
 	<li>RAII and move semantics collapses the detailed mechanics of ensuring that allocated
 	resources are safely disposed of at the end of their lexical lifetime, avoiding the need
-	for explicit invocation of drop/free logic.</li>
+	for explicit invocation of finalizers and free logic.</li>
 	<li><span class="pre">panic</span> collapses the detailed mechanics of safely handling exception
 	conditions, providing a fast path to the exit door that ensures open resources have been successfully
 	disposed of.</li>

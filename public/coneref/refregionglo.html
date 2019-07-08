@@ -74,7 +74,7 @@ childnode.parent = parentnoderef.weak
 		Periodically, runtime logic associated with the <span class="pre">gc</span> region
 		will trace out all references reachable from a root set of objects (including execution stacks).
 	  Any allocated value that cannot be traced from the root is considered unreachable,
-		and therefore is safe to automatically drop and free.</p>
+		and therefore is safe to automatically finalize and free.</p>
 	<p><span class="pre">gc</span> is a good choice if you are looking for:</p>
 	<ul>
 		<li>Data structure flexibility, supporting all kinds of data in the same way.</li>
@@ -100,7 +100,7 @@ childnode.parent = parentnoderef.weak
 		but it does so using <a href="refmove.html">move mechanics</a> 
 		to ensure no copy of the reference is ever made.
 		Because there is only one reference to the object,
-	  the memory for that value can be automatically dropped and freed when the reference expires.</p>
+	  the memory for that value can be automatically finalized and freed when the reference expires.</p>
 	<p><span class="pre">so</span> is a good choice if you are looking for:</p>
 	<ul>
 		<li>Throughput that is better than <span class="pre">gc</span> and <span class="pre">rc</span>
@@ -142,7 +142,7 @@ childnode.parent = parentnoderef.weak
 	<p>The biggest shortcomings are:</p>
 	<ul>
 		<li>Memory use grows without bounds, due to individual objects never being freed.</li>
-		<li>Awful determinism for finalizers, as objects are only dropped when the program ends.</li>
+		<li>Awful determinism for finalizers, as objects are only finalized when the program ends.</li>
 	</ul>
 	<p>The <span class="pre">ar</span> region is a surprisingly good fit for a 
 		limited-lifetime program that allocates a lot of small objects but

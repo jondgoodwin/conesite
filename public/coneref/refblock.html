@@ -107,12 +107,11 @@ fn addPlusOne(a i32, b i32) i32
 	<p>The execution lifetime of a local variable does not last beyond its lexical scope.
 	At the end of the block, any resources acquired by local variables
 	are automatically reclaimed. 
-	As we will describe later when talking about 
-	<a href="refmethod.html#drop">"drop semantics"</a>,
-	reclamation might encompass a wide variety of possible activities,
+	Reclamation might encompass a wide variety of possible activities,
 	including: freeing heap-allocated memory, decrementing counters,
-	releasing locks, closing files or channels, joining threads, 
-	removing dependencies to other objects, etc.
+	releasing locks, joining threads,
+	or other type-based <a href="refinitdrop.html">finalization</a> activity
+	that closes acquired resources or removes dependencies to other objects.
 	Once all resources attached to local variables are reclaimed,
 	any stack space made available to store the values of these local variables is also reclaimed.</p>
 		

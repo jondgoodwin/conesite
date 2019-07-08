@@ -13,7 +13,17 @@
 
     <div class="text">
 	
-	<p>Pure functions cannot touch globals</p>
+	<p>A pure function (or method) may not:</p>
+	<ul>
+		<li><b>Access global, mutable variables</b>, except to use regions to allocate memory.</li>
+		<li><b>Call functions or methods that are not pure.</b>
+			This effectively prevents the function from doing any I/O,
+			since that requires use of functions that won't be marked as pure.</li>
+	</ul>
+	<p>
+
+	</p>
+	
 	<p>For global initialization (init and final)</p>
 	<p>CTFE?</p>
 

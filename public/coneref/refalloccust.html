@@ -53,8 +53,8 @@ alloc rc
 	the variable holding the reference reaches the end of its lexical lifetime.
 	It can also happen when overwriting a reference held by an existing variable or field.</li>
 	<li><b>free</b>. This is invoked whenever the allocator determines the value is safe to free.
-	Before executing its logic, the compiler will invoke the drop method on the object, if it exist,
-	which serves as a finalizer for any resources obtained by the owning reference.</li>
+	Before executing its logic, the compiler will invoke the finalizer on the object, if it exist,
+	which disposes of any resources obtained by the owning reference.</li>
 	</ul>
 	<p>Any allocator which does not define the alias method (e.g., the 'own' allocator)
 	ensures single-owner <a href="refmove.html">move semantics</a>,
