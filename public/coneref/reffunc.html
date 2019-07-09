@@ -174,40 +174,64 @@ fn factorial(x i32, prod i32 = 1)
 	return prod if x&lt;=1
 	factorial(x-1, prod*x)
 </pre>
-	<p>If the function returns a single value calculated by any function, this may be "tail-call" optimized.
-	This optimization improves performance and reduces the risk of execution stack overrun with recursive calls.</p>
+	<p>If the function returns a single value calculated by any function, 
+		this <i>may</i> be "tail-call" optimized.
+	This optimization improves performance and 
+	reduces the risk of execution stack overrun with recursive calls.</p>
 
-	<h3>extern</h3>
-    <p>It is possible to use of functions that have been implemented in a different language (e.g., C).
-	  Such functions still need to be properly declared to Cone.
-	  This is done by preceding the function declaration with <span class="pre">extern</span>.
-	  No implementation block should be specified, since its logic is implemented elsewhere.
-	</p>
+	<h2 id="pure">Pure functions</h2>
+	<p>Sometimes it is valuable when a function guarantees that its <i>only</i> work
+		involves calculating return value(s) derived wholly 
+		from the information passed as parameters.
+		Such functions are called pure. Pure functions may not:</p>
+		<ul>
+			<li><b>Access global, mutable variables</b>, except to use regions to allocate memory.</li>
+			<li><b>Call functions or methods that are not pure.</b>
+				This effectively prevents the function from doing any I/O,
+				since that requires use of functions that won't be marked as pure.</li>
+		</ul>
+	<p>Functions complying with these constraints
+		should be marked as <span class="pre">pure</span>.</p>
 <pre>
-extern fn printFloat(nbr f32)
+pure fn factorial(n i32) i32
+  return 1 if x&lt;=1
+  mut result = 1
+  result *= n while n-- > 1
+  result
 </pre>
-	<p>An <span class="pre">extern</span> block may be used when multiple external functions require declaration.
-	  Externally initialized global variables may also be declared this way.</p>
-<pre>
-extern
-	fn printFloat(nbr f32)
-	fn printInt(nbr i32)
-	mut indentation
-</pre>
-
-	<h3>Related Capabilities</h3>
-	<p>Other language features offer a similar capability as functions:</p>
+	<p>A key benefit for marking functions <span class="pre">pure</span>:
+		it makes code easier to understand, debug and test.
+		When examining logic that uses a pure function,
+		we can be confident that:</p>
 	<ul>
-	<li><a href="refmethod.html">methods</a></li>
-	<li><a href="refclosure.html">function or closure references</a></li>
-	<li>co-routines, which preserve a function's data and execution state</li>
-	<li>behaviors, like methods for threads/actors</li>
+		<li>Passing it the same data will always return the same results.</li>
+		<li>Using it will not trigger some unexpected state-changing behavior (side-effect),
+			such as performing any sort of i/o.</li>
+		<li>It will not mutate any state other than objects it has explicitly been 
+			given mutable references to.</li>
+	</ul>
+	<p>Pure functions are also beneficial due to the safety guarantees they offer when:</p>
+	<ul>
+		<li><a href="refmodule.html#dyninit">dynamically initializing global variables</a> at runtime.</li>
+		<li>using them to calculate constant values at compile-time</li>
 	</ul>
 
-		<p style="text-align: right; margin-top: 2em;">
-			<a href="refblock.html"><img alt="_" src="next.png" /></a>
-		</p>
-		
+	<h3>Strong purity</h3>
+	<p>The compiler only enforces the purity constraints listed above, 
+		resulting in what some may consider a weak form of purity.
+		A stronger form of purity (referential transparency) may be obtained by ensuring:</p>
+	<ul>
+		<li>none of the parameters are mutable references or pointers.</li>
+		<li>the logic never uses potentially non-deterministic operations, 
+			such as comparing pointers or
+			re-casting machine-specific value encodings to other types.</li>
+	</ul>
+	<p>Only a strongly pure functions can be safely memo-ized.</p>
+	
+	<p style="text-align: right; margin-top: 2em;">
+		<a href="refblock.html"><img alt="_" src="next.png" /></a>
+	</p>
+
 	</div>
 	</body>
 </html>

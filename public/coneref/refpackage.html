@@ -39,6 +39,25 @@ import opengl
 	<p><b>Note:</b> It is never necessary to import the standard library (std). 
 	It is automatically included as part of every program.</p>
 	
+	<h2>extern</h2>
+	<p>TBD: extern is not about functions/variables. Only usable as a specialized "module".</p>
+    <p>It is possible to use of functions that have been implemented in a different language (e.g., C).
+	  Such functions still need to be properly declared to Cone.
+	  This is done by preceding the function declaration with <span class="pre">extern</span>.
+	  No implementation block should be specified, since its logic is implemented elsewhere.
+	</p>
+<pre>
+extern fn printFloat(nbr f32)
+</pre>
+	<p>An <span class="pre">extern</span> block may be used when multiple external functions require declaration.
+	  Externally initialized global variables may also be declared this way.</p>
+<pre>
+extern
+	fn printFloat(nbr f32)
+	fn printInt(nbr i32)
+	mut indentation
+</pre>
+
 	<h2 id="pathname">Namespace Path</h2>
 	<p>To reference entities defined by the package, a namespace path may be used
 		(since an imported package is treated as a module namespace).
