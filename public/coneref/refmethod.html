@@ -115,25 +115,7 @@ clear()
 	<p>Using the more concise syntax depends on not defining any local variables
 		in the method that would conflict with the type's field or method names.</p>
 
-	<h2>Static</h2>
-	<p>As we have seen, what looks like a function definition in a program
-		is understood to be a method definition within a type definition.
-		Similarly, what looks like a global variable in a program
-		becomes a field within a type definition.
-		If we actually want to define a function or global variable in a type,
-		begin by using the <span class="pre">static</span> attribute:</p>
-<pre>
-struct Counter
-	static fn factory() Counter
-			Counter{0}
-</pre>
-			
-		<p>To access the function, qualify the name with the name of the type:</p>
-<pre>
-mut cnt = Counter::factory()
-</pre>
-
-<p style="text-align: right; margin-top: 2em;">
+	<p style="text-align: right; margin-top: 2em;">
 		<a href="refmethop.html"><img alt="_" src="next.png" /></a>
 	</p>
 
