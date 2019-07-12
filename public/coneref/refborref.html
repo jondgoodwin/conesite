@@ -77,9 +77,9 @@ fn main()
 	functions and methods typically accept borrowed references as parameters.
 	This capability is what makes possible the benefits mentioned earlier:</p>
 	<ul>
-		<li>Functions and methods can be polymorphic across allocators and permissions at no cost</li>
-		<li>Using borrowed references avoids the runtime performance overhead of reference counting (for the rc allocator)
-			and reference tracing (for a tracing GC allocator) within these functions.</li>
+		<li>Functions and methods can be polymorphic across regions and permissions at no cost</li>
+		<li>Using borrowed references avoids the runtime performance overhead of reference counting (for the rc region)
+			and reference tracing (for a tracing GC region) within these functions.</li>
 	</ul>
 
 <h3 id="internal">Referring to a field or array element</h3>

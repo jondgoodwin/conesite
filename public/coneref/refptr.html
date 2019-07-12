@@ -15,7 +15,7 @@
 
 	<p>Pointers are a more powerful (but potentially unsafe) alternative to references.
 	   As compared to references, pointers have these superpowers: they support pointer arithmetic,
-	   they are never constrained by lifetimes, permissions or allocators,
+	   they are never constrained by lifetimes, permissions or regions,
 	   and they are always nullable.
 	   However, being freed from these constraints means that pointers may be used
 	   in unsafe ways, such as accessing memory locations that are invalid or protected.
@@ -24,8 +24,8 @@
 	<h2>Pointer Declaration and Creation</h2>
 	<p>The type of a pointer is declared using <span class="pre">*</span> 
 	(rather than <span class="pre">&amp;</span> for references).
-	No allocator, lifetime or permission is specified after the asterick;
-	only the value type is required:</p>
+	No region, lifetime or permission is specified after the asterick;
+	only the value's type is required:</p>
 <pre>
 imm ptr1 *i32   // Pointer to an integer
 </pre>
@@ -34,15 +34,20 @@ imm ptr1 *i32   // Pointer to an integer
 	   to reinterpret the reference's type (the value type should match):
 	</p>
 <pre>
-imm ptr2 = ref1 as *i32  // This always creates a copy of the reference
+imm ptr2 = ref1 as *i32  // This creates a copy of the reference
 </pre>
-	<p><b>Note:</b> Since pointers (unlike references) don't belong to an allocator,
-		if the pointer has been obtained via memory allocation (e.g., malloc),
+	<p><b>Note:</b> Since pointers (unlike references) don't belong to a region,
+		if the pointer has been obtained via explicit memory allocation (e.g., malloc),
 		the programmer is responsible for ensuring that the memory segment
 		is properly freed.
 	</p>
+	<p>A pointer may be coerced into a reference. 
+		This requires the use of <span class="pre">trust</span>.</p>
+<pre>
+ref = trust{ptr1 as &i32}
+</pre>
 
-	<h2>Pointer Arithmetic and Comparison</h2>
+	<h2>Pointer Arithmetic</h2>
 	<p>Unlike references, pointers are not a stand-in for the value they point at.
 	  Thus, operations on a pointer typically affect the pointer itself.
 	  This is true for pointer arithmetic and comparisons.</p>
@@ -62,6 +67,7 @@ imm ptr2 = ref1 as *i32  // This always creates a copy of the reference
 	Since a 32-bit integer is 4 bytes large, any value added to such an integer pointer
 	is effectively multiplied by 4.</p>
 
+	<h2>Pointer Comparison</h2>
 	<p>Pointer comparisons work just like they do for references.
 	So long as two pointers have the same type, they can be compared for equality.
 	It can also be valuable to know when some pointer's address is greater or less than
@@ -74,15 +80,15 @@ imm ptr2 = ref1 as *i32  // This always creates a copy of the reference
 	This requirement signals to the programmer that such de-referencing may be
 	potentially unsafe.</p>
 <pre>
-trust
-	while (*ptr2++ = *ptr1++)
+trust 
+  while (*ptr2++ = *ptr1++)
 </pre>
 	<p>Pointers also support [], the index operator, in effect treating a pointer
 		as if it were a pointer to an array of indexable values:</p>
 <pre>
-ptr1[2] = ptr2[1]
+trust{ptr1[2] = ptr2[1]}
 </pre>
-	<p>This never performs any bounds-check.
+	<p>Unlike array references, this does not performs any bounds-check.
 	Using a pointer this way can improve performance where we know the index is safe.</p>
 
 	

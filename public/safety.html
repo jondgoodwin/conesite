@@ -35,7 +35,7 @@
 	<p>Cone imposes several constraints to prevent bad memory access:</p>
 	<ul>
 	<li><b>Use-after-free.</b>
-	Each of Cone's allocators uses a different technique for calculating when an object's lifetime expires. 
+	Each of Cone's regions uses a different technique for calculating when an object's lifetime expires. 
 	An object is freed once there are no live references to it.</li>
 	<li><b>Out-of-bounds.</b>
 	All collection types in the standard library perform boundary checks, based on the known size of the collection,
