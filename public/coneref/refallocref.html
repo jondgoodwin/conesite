@@ -223,7 +223,7 @@ imm sum = ref + 4.   // sum is 0. Equivalent to *ref1 + 4.
 	<h3>Nullable References</h3>
 	<p>References only ever point to valid values.
 		However, it is possible to explicitly declare and use nullable references,
-		much like any other <a href="refenum.html#nullable">nullable value</a>.</p>
+		much like any other <a href="refenum.html#option">nullable value</a>.</p>
 <pre>
 imm ref4 ?&amp;rc imm i32		 // nullable reference to an integer
 </pre>
@@ -252,7 +252,7 @@ imm point2 = *maybePoint    // **ERROR** We don't know if maybePoint is null her
 		<li><b>Non-nullable reference</b>:  the program will panic and shut down.</li>
 		<li><b>Nullable reference</b>: A failed allocation returns the value
 			<span class="pre">null</span>. Any of the mechanisms provided
-			for <a href="refenum.html#nullable">handling nullable values</a>
+			for <a href="refenum.html#option">handling nullable values</a>
 			may be applied in an attempt to recover from this problem.</li>
 	</ul>
 	

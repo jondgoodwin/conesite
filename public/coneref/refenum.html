@@ -125,18 +125,18 @@ sum += intval if oddval ~~ intval=SomeInt
 		If they are equal, the appropriately-typed interior values are compared
 		using the <span class="pre">==</span> method.</p>
 
-	<h2>Nullable and Result Types</h2>
+	<h2>Option and Result Types</h2>
 
 	<p>Two particular enum patterns are so pervasive that special
 		support is baked in to make them easier to use:</p>
 	<ul>
 		<li><b>Result</b>. The value can be either a valid value or
 			an exception value.</li>
-		<li><b>Nullable</b>. The value can be either a valid value or
+		<li><b>Option</b>. The value can be either a valid value or
 		  <span class="pre">null</span> ("not a value").</li>
 	</ul>
 
-	<h3>Result Type</h3>
+	<h3 id="result">Result Type</h3>
 	<p>In our earlier discussion about <a href="refexcept.html">exception handling</a>,
 		we introduced the idea that some functions can choose to throw an exception value
 		on failure and a regular value on success.
@@ -152,8 +152,8 @@ sum += intval if oddval ~~ intval=SomeInt
 		offer more concise and readable ways to perform various common patterns for applying
 		pattern matching blocks against a Result value.</p>
 
-	<h3 id="nullable">Nullable Type</h3>
-	<p>The nullable type is useful when we want to express the idea that
+	<h3 id="option">Option Type</h3>
+	<p>The Option type is useful when we want to express the idea that
 		we may or may not have a value of a certain type.
 		<span class="pre">null</span> is the name used to represent the absence of a value.
 		<span class="pre">some[x]</span> represents some specific value.

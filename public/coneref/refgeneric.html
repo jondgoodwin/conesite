@@ -1,0 +1,102 @@
+<html>
+  <head>
+	  <title>Generics - Cone Reference</title>
+		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	  <link rel="stylesheet" type="text/css" href="standard.css" />
+	</head>
+  <body>
+		<div id="header">
+			<a href="/"><div id="title">Cone</div></a>
+			<div id="sub">Generics</div>
+		</div>
+
+    <div class="text">
+
+	<p>Generics enable the creation of type or function logic 
+		that works across all types that conform to specified constraints.
+		Collection types such as lists and dictionaries are well served by this approach, 
+		as a single generic can apply the same algorithmic logic
+		across all types the collection stores or indexes with.
+		The built-in <a href="refenum.html#result">Result</a> and 
+		<a href="refenum.html#option">Option</a> types
+		are also implemented using generics.</p>
+
+	<h2>Type Generic</h2>
+	<p>The basic idea is to write the type declaration 
+		in nearly the same way as we would ordinarily.
+		However, instead of hard-coding the name of a specific type,
+		we declare and use a placeholder name which, later on,
+		we want to substitute for the real type.
+
+	<h3>Enum Generic</h3>>
+		For example:</p>
+	<pre>
+enum Option&lt;T&gt;
+  Some T
+  null
+</pre>
+	<p>The placeholder name is called <span class="pre">T</span>, 
+		which is declared in angle braces just after the type's name.
+		This placeholder is then used when declaring the type
+		of the variant type <span class="pre">Some</span>.</p>
+	<p>With <span class="pre">Option</span> declared, 
+		we can use it to specify the type for some values:</p>
+<pre>
+mut anint Option&lt;i32&gt;
+mut someint Option&lt;i32&gt;
+mut afloat Option&lt;f32&gt;
+</pre>
+	<p><span class="pre">anint</span> and <span class="pre">someint</span>
+		have the same type: a nullable integer.
+		However, <span class="pre">afloat</span>'s type, a nullable float,
+		is different. Rather than having to declare a new type for every
+		variation, a single generic type declaration supporting type substitution
+		can get the same job done more easily.</p>
+	<p>Once declared, a generic type may be used anywhere any other declared
+		type may be used, including a generic type as a parameter into another
+		generic type.</p>
+
+	<h3>Generic Struct</h3>
+	<p>A generic struct may be declared in the same way.
+		This generic type defines a resizeable array:</p>
+<pre>
+struct Vec&lt;T&gt;
+	used usize
+	arr &so []T
+</pre>
+	<p>And now we can use it:</p>
+<pre>
+mut string Vec&lt;u8&gt;
+mut pointers Vec&lt;&so Node&gt;
+</pre>
+
+	<h3>Generic Functions</h3>
+	<p>Auto inference</p>
+
+	<h2>Multiple Types</h2>
+	<p>As one might expect, a generic type can substitute more than one type:</p>
+<pre>
+enum Result&lt;T,E&gt;
+  Ok T
+  Err E
+</pre>
+	<p>Once again, we can use this generic declaration to create specialized
+		result types for different values:</p>
+<pre>
+mut i32OrBad Result&lt;i32, BadArith&gt;
+int openFile Result&lt;FileHandle, IoError&gt;
+</pre>
+
+	<h2>Recursive</h2>
+	<p>Self</p>
+
+	<h2>Arrays, references, and functions as generic types</h2>
+
+	<p style="text-align: right; margin-top: 2em;">
+		<a href="refconstraint.html"><img alt="_" src="next.png" /></a>
+	</p>
+
+	</div>
+	</body>
+</html>

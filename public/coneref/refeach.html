@@ -93,7 +93,7 @@ each i, x in intslice
 			retrieve values from a streaming resource, algorithmically calculate a sequence of values, etc.
 		Because closure's are stateful, they can generate a new value on every call.</p>
 	<p>In order for a closure to be suitable as an iterator, it must be able to signal when it is done producing values.
-		 It typically does this by returning a <a href="refenum.html#nullable">nullable value</a>,
+		 It typically does this by returning a <a href="refenum.html#option">nullable value</a>,
 		 with the value of <span class="pre">null</span> signalling when it is done.</p>
 	<p>In the following example, imagine a closure that starts off
 	holding the value 12, and halves (and returns) its value on each call. When the value gets to 0,
