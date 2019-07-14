@@ -16,7 +16,7 @@
 	<p>Traits look so much like structs, no one would blame you for being confused:</p>
 <pre>
 trait Eq
-  fn `==`(a Eq, b Eq) Bool
+  fn `==`(a Self, b Self) Bool
 </pre>
 	<p>This trait defines no fields and only a single method that overloads the
 		<span class="pre">==</span> operator. 
@@ -46,9 +46,13 @@ imm anEqValue Eq    // *** ERROR ***
 		<li><a href="refconstraint.html"><b>Generic constraints</b></a>, to help detect whether a type is
 			supported for expansion by a specific generic type or function.</li>
 	</ul>
-	<p>A trait may loosely be thought of as a virtual that allows us to
+	<p>A trait may loosely be compared to a filter that allows us to
 		see into the fields, methods and constrained behavior of other
-		compliant types.</p>
+		compliant types. By compliant, we simply mean that for each and
+		every field and method defined by the trait, we can find
+		exactly the same field or method defined in the compliant type.
+		The compliant type may implement more fields and methods,
+		but it must implement at least the ones the trait defines.</p>
 
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refvirtref.html"><img alt="_" src="next.png" /></a>
