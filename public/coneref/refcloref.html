@@ -50,7 +50,7 @@ counter()   // 2
 		(though the default 'uni' permission is very useful for moving around ownership of event handlers).
 	</p>
 
-	<h3>Closure Interface</h3>
+	<h3>Closure Traits</h3>
 	<p>Let's examine a more complex example: 
 		using a closure as an event handler.</p>
 <pre>
@@ -59,16 +59,16 @@ window.whenClicked(&fn {window}() { ... })
 
 <p>Since our anonymous closure has no named type, what declared type does the whenClicked method expect?
 	It needs to be a type that can accept a number of different anonymous closures.
-	In this case, the correct answer is to use the standard library's predefined Closure interface.
+	In this case, the correct answer is to use the standard library's predefined Closure trait.
   Closure is declared like this:</p>
 </p>
 <pre>
-interface Closure
+trait Closure
   fn `()`()
 </pre>
 <p>With this definition, Closure is a match for any struct that implements the `()` method
 	with no parameters.
-	Since closures are implemented using structs (more on that below), the Closure interface
+	Since closures are implemented using structs (more on that below), the Closure trait
 	will then match on any closure whose method has no parameters and returns no values.</p>
 	<p>We can now declare window.whenClicked as follows:
 </p>
@@ -99,7 +99,7 @@ window.whenClicked(&handler)
 </pre>
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refspecblock.html"><img alt="_" src="next.png" /></a>
+		<a href="refinherit.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

@@ -13,14 +13,45 @@
 
     <div class="text">
 
-	<p>Abstract Type. constitutes a contract/type constraint. Cannot be instantiated, dereffed.</p>
-
-	<p>Preview: static monomorph/dynamic dispatch.</p>
-	<h2 id="match">Partial match</h2>
-	<p>TBD.</p>
+	<p>Traits look so much like structs, no one would blame you for being confused:</p>
+<pre>
+trait Eq
+  fn `==`(a Eq, b Eq) Bool
+</pre>
+	<p>This trait defines no fields and only a single method that overloads the
+		<span class="pre">==</span> operator. 
+		Unlike a struct, however, no implementation is given for the method.
+		Even stranger, no variable may declare its value as having the
+		<span class="pre">Eq</span> type:</p>
+<pre>
+imm anEqValue Eq    // *** ERROR ***
+</pre>
+	<p>Traits are a different kind of type.
+		Whereas <span class="pre">struct</span>, <span class="pre">enum</span>, 
+		etc. enable the creation of concrete types,
+		<span class="pre">trait</span> is used to create abstract types.
+		Abstract types play an indirect role as a catalyst for new capabilities.
+		Using an abstract type (like <span class="pre">Eq</span>), 
+		we improve the reusability features of any concrete type
+		whose structure conforms to <span class="pre">Eq</span>.
+		In particular, traits facilitate:</p>
+	<ul>
+		<li><a href="refvirtref.html"><b>Virtual references</b></a>,
+			enabling access to fields or methods of values whose concrete
+			types we won't know until run-time.</li>
+		<li><a href="refinherit.html"><b>Inheritance</b></a>, for making it easier to create concrete types
+			that share common implementations for fields and methods.</li>
+		<li><a href="refmarker.html"><b>Type markers</b></a>, to distinguish between types that support
+			a certain behavior and those that forbid it.</li>
+		<li><a href="refconstraint.html"><b>Generic constraints</b></a>, to help detect whether a type is
+			supported for expansion by a specific generic type or function.</li>
+	</ul>
+	<p>A trait may loosely be thought of as a virtual that allows us to
+		see into the fields, methods and constrained behavior of other
+		compliant types.</p>
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refalloc.html"><img alt="_" src="next.png" /></a>
+		<a href="refvirtref.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

@@ -26,7 +26,7 @@
 		and have it work across many data types and diverse operating environments.
 		This kind of code reuse is called polymorphism.
 		Cone offers a comprehensive range mechanisms that make polymorphism easy to accomplish:
-		implicit, lossless type coercions, interfaces and traits, generics, and metaprogramming.</p>
+		implicit, lossless type coercions, traits, generics, and metaprogramming.</p>
 	<p>Programmers also need the ability to work with data whose precise type may not be known until the program runs.
 		Such dynamic typing makes it easy to support heterogeneous collections, optional values,
 		success/failure results, and more.
@@ -42,14 +42,14 @@
 		<ul>
 			<li>Owning references coerce to borrowed references</li>
 			<li>Nearly all reference permissions coerce to <span class="pre">const</span></li>
-			<li>Concrete types can coerce to traits or interfaces</li>
+			<li>Concrete types can coerce to traits</li>
 			<li>Non-nullable references can coerce to nullable references</li>
 		</ul>
 	<p>If separate logic were needed for every combination of permissions and regions, code could get quite verbose!
 		Better yet, use of implicit coercions is "free": 
 		it neither bloats the size of generated code nor carries a runtime performance penalty.</p>
 	
-	<p><b>Interfaces and Traits</b></p>
+	<p><b>Traits</b></p>
 	<p>Often a program uses several types that define identically-typed methods or fields.
 		It can be useful for some part of the program to act on values of these types in the same way by virtue of this similarity.
 		By restricting itself to a common subset, a code's behavior can be written in a general-purpose way,
@@ -57,12 +57,10 @@
 		using either static or virtual dispatch.</p>
 		<p>Cone offers two distinct mechanisms for this:</p>
 	<ul>
-	<li>User-defined <b>interfaces</b> define type similarities structurally, 
-		defining only the method and field signatures in common.
-		The advantage of interfaces is that they can be implicitly applied to <i>any</i> value whose type complies to the signature.</li>
-	<li>User-defined <b>traits</b> define type similarities nominally,
-		requiring all compliant types to explicitly declare they implement the trait.
-		The advantage of traits over interfaces is their support for code and field inheritance.
+	<li>User-defined <b>traits</b> may define type similarities structurally or nominally. 
+		The advantage of structural traits is that they can be 
+		implicitly applied to <i>any</i> value whose type complies to the signature.
+		The advantage of nominal traits (explicit implementation) is their support for code and field inheritance.
 		A type may implement (mix in) multiple traits.</li>
 	</ul>
 	<p>Cone also supports a related dispatch capability: <b>method overloading</b>,
@@ -73,7 +71,7 @@
 
 	<p><b>Generics</b></p>
 	<p>Generics enable the creation of type or function logic that works across all types that conform
-		to specified interface or trait guard(s).
+		to specified trait guard(s).
 		Collection types are well served by this approach, as a single generic
 		can apply the same algorithmic logic across all types the collection stores or indexes with.</p>
 	<p>Depending on the nature of the generic's parametric types, the instantiation of a generic can vary.
@@ -100,11 +98,11 @@
 	Variant types are useful for optional values (and nullable references), returned result/error, and many other uses.
 	The type flexibility of dynamic languages, including their support for heterogeneous collections,
 	is based on the use of variant types.
-	Downcasting an interface reference to its original tagged type requires the use of variant types.</p>
+	Downcasting a virtual reference to its original tagged type requires the use of variant types.</p>
 	<p>Information about the value's current type is carried as a part of the value.
 	Pattern matching is used to safely extract a properly typed value for appropriate manipulation.</p>
-	<p>Similar to interfaces, variant types can also help reduce redundant logic.
-		Variant types are more flexible in some ways than interfaces, 
+	<p>Similar to traits, variant types can also help reduce redundant logic.
+		Variant types are more flexible in some ways than traits, 
 		since the types contained within a variant type need not share common methods.
 	   However, variant types do bear some added memory and performance costs.</p>
 			   
