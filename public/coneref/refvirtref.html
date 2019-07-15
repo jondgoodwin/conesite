@@ -13,11 +13,148 @@
 
     <div class="text">
 
-	<p>Static vs dynamic dispatch. On enum/union.</p>
-	<p>Cannot be de-reffed.</p>
+	<p>Virtual references are another kind of reference, distinct from simple and array references.
+		A virtual reference is used to access some of an object's fields or invoke some of its methods,
+		without actually knowing its specific, concrete type.
+		This is necessary when we can't know the concrete type at compile-time, 
+		as the decision of the value's type is made at run-time.
+		All the reference knows is that it points to an object whose structure and behavior
+		conforms to some specified trait.</p>
 
-	<h2 id="match">Partial match</h2>
-	<p>TBD.</p>
+	<h2>A trait example</h2>
+	<p>Let's illustrate this with an example:</p>
+<pre>
+struct Rectangle
+  height f32
+  width f32
+  fn area(self &)
+    height * width
+  fn perimeter(self &)
+    2. * (height + width)
+
+struct Circle
+  r f32
+  fn area(self &)
+    f32::pi * r * r
+  fn perimeter(self &)
+    2. * f32::pi * r
+
+trait Shape
+  fn area(self &)
+  fn perimeter(self &)
+	
+fn doMath(shape &amp;&lt;Shape) f32, f32
+  shape.area, shape.perimeter
+	
+fn tester()
+  imm circle = Circle[5]
+  doMath(&circle)             // 78.5, 31.4
+  imm square = Rectangle[10, 10]
+  doMath(&square)             // 100, 40
+</pre>
+	<p>We define two different types, <span class="pre">Rectangle</span> and <span class="pre">Circle</span>,
+		each with different fields. However, both of them implement the
+		<span class="pre">area</span> and <span class="pre">perimeter</span> methods.
+		We also define a <span class="pre">Shape</span> trait that declares the same two methods.
+		Despite the fact that <span class="pre">Rectangle</span> and <span class="pre">Circle</span>
+		never say that they comply with the <span class="pre">Shape</span> trait, the fact
+		that both types implement all its methods means they are compliant with this trait.</p>
+	<p>The <span class="pre">doMath</span> function accepts a virtual reference
+		(denoted by <span class="pre">&amp;&lt;</span>)
+		to some object whose type is compliant with the <span class="pre">Shape</span> trait.
+		Using this reference, it returns two numbers calculated by applying
+		the <span class="pre">area</span> and <span class="pre">perimeter</span>
+		methods on the object. If the object happens to be a <span class="pre">Rectangle</span>,
+		it will use the methods defined for <span class="pre">Rectangle</span>.
+		Likewise, it will use the <span class="pre">Circle</span> methods,
+		if that is actual type of the object.</p>
+	<p>The <span class="pre">tester</span> function demonstrates this behavior
+		by creating a specific circle and rectangle, borrowing a reference to each,
+		and then calling <span class="pre">doMath</span> on them both.
+		The calculated results we get back reflect that the right method was used,
+		based on the actual type of the object.</p>
+
+	<h2>How the Magic Works</h2>
+	<p>Even though <span class="pre">doMath</span> <i>seems</i> to have no idea what
+		the concrete type is of <span class="pre">shape</span>, it nonetheless
+		correctly invokes the appropriate concrete type method. It can do this because
+		virtual references are "fat" references containing two pieces of information: 
+		a reference to the real object itself and a reference to a <i>vtable</i>. 
+		This vtable makes the magic possible
+		by describing key information about the object's concrete type
+		as viewed from the perspective of the trait.
+		In particular, it captures reference addresses for the type's trait-declared methods
+		and location information for trait-declared fields,
+		as well as unique id identifying the concrete type.</p>
+	<p>In this example, the vtable contains two references to the concrete type's
+		<span class="pre">area</span> and <span class="pre">perimeter</span> methods.
+		There are actually two different versions of this vtable,
+		one for references to <span class="pre">Circle</span> objects
+		and a different one for references to <span class="pre">Rectangle</span> objects.
+		When a borrowed reference to one of those two types of objects is
+		passed to <span class="pre">doMath</span>, a virtual reference is automatically
+		created by attaching the type-specific vtable to the known pointer to the object.</p>
+	<p>When <span class="pre">doMath</span> invokes a method using a virtual reference,
+		it retrieves a reference to that method out of the virtual reference's vtable.
+		Then it calls that method passing the appropriate information,
+		in this case the reference to the object.
+		Calling a method indirectly (via a vtable) is called dynamic (or virtual) dispatch.</p>
+	
+	<h3>Working with Virtual References</h3>
+	<p>As the example above shows, a virtual reference is automatically created (coerced)
+		when passing a regular reference to a variable or function expecting a virtual reference.
+		This is called <i>upcasting</i>.
+		A compiler error will be triggered if the type does not conform to the expected trait.
+		This coercion may be explicitly requested using the <span class="pre">as</span> operator:</p>
+<pre>
+mut virtref = &circle as &amp;&lt;Shape
+</pre>
+	<p>Virtual references can be owning or borrowed. 
+		They can be freely passed around, stored, or compared much like all other references.
+		However, virtual references may not be de-referenced using the 
+		<span class="pre">*</span> operator, as a virtual reference can point to objects
+		of very different size and data composition.</p>
+	<p>The primary use of virtual references lies with the dot operator.
+		This is how one dispatches trait-declared methods and accesses trait-declared fields.</p>
+	
+	<h2>Pattern matching</h2>
+	<p>Sometimes we want to re-obtain the specific, concrete-type reference to an object
+		we have a virtual reference for. This is called downcasting.
+		This can be accomplished using pattern matching:</p>
+<pre>
+match shape
+  ~~Circle:
+    // 'shape' is now usable as having type &Circle
+  ~~Rectangle:
+    // 'shape' is now usable as having type &Rectangle
+  _:
+    // some other unknown shape type
+</pre>
+	<p>Since a virtual reference might have been created from objects of many different types,
+		we need pattern matching to figure out which concrete type originally created the object.</p>
+
+	<h2>enum-based Virtual References</h2>
+	<p>Besides traits, virtual references can be also be created from enum- or union-typed values.
+		Think of the enum type as if it were acting in the role of a trait.
+		In order for the virtual reference to dispatch to methods,
+		outer enum type needs to define signatures for all the methods 
+		it expects to find in common across all the variant types it enumerates.
+		Obviously, every variant type also needs to have implementations for all those methods.</p>
+	<p>Instead of using a trait, we could define our example above with Shape as an enum:</p>
+<pre>
+enum Shape
+  fn area(self &)
+  fn perimeter(self &)
+	
+  Circle
+  Rectangle
+</pre>		
+	
+	<p>A virtual reference built on an enum works the same way as one built using traits. 
+		This approach can be valuable when you already want to use sum types for other
+		reasons (fixed-sized, value-based data), but also want to
+		leverage dynamic dispatch where that sort of runtime, method-based
+		dispatch flexibility is required.</p>
 
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refcloref.html"><img alt="_" src="next.png" /></a>
