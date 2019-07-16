@@ -84,10 +84,18 @@ counter(2)        // 3
 	<p>As we learned on the previous page, an object may be "called" just like a function.
 		Doing so invokes the <span class="pre">()</span> method.
 		In this way any explicitly callable struct is effectively also a closure.</p>
-	<p>This is not all there is to say about closures.
-		We'll come back later to talk about the more powerful
-		<a href="refclosref.html">closure references</a> later,
-		when we cover references and traits.</p>
+
+	<h2>Closure References</h2>
+	<p>A closure can be passed like any struct value,
+		so long as each receiver knows the exact size and type signature of the closure.
+		However, sometimes a function (or data structure) needs to
+		work with differently-sourced closures that have the same calling signature,
+		but vary in the size and composition of the underlying struct.
+		This is true for a event-handling framework that allows registration of closures
+		which should fire when specific events are triggered.</p>
+	<p>To handle this requirement, use
+		<a href="refvirtref.html#cloref">closure references</a>,
+		which are covered as part of talking about virtual references.</p>
 
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refspecblock.html"><img alt="_" src="next.png" /></a>
