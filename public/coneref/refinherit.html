@@ -13,9 +13,37 @@
 
     <div class="text">
 
+	<p>Broadly speaking, inheritance is a mechanism that allows one type
+		to reuse (inherit) the state or methods defined by some other type.</p>
+	<p>Inheritance is a namespace mechanism that enables a
+		new type to "reuse" fields and methods defined by another type.
+	</p>
+	<p>Imagine we have this type:</p>
+<pre>
+struct Node
+  line u32
+  col  u32
+
+  fn printLoc() { ... }
+</pre>
+
+	<p>This new type reuses all of <span class="pre">Node</span>'s fields and methods:</p>
+<pre>
+struct BinaryNode
+  node Node use *	
+  left  u32
+  right u32
+	
+  fn check() { ... }
+</pre>
+
+
+	<h2>Method Inheritance</h2>
+
+	<h2>Field Inheritance</h2>
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refmarker.html"><img alt="_" src="next.png" /></a>
+		<a href="refvariant.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

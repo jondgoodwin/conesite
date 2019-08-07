@@ -133,6 +133,14 @@ match shape
 	<p>Since a virtual reference might have been created from objects of many different types,
 		we need pattern matching to figure out which concrete type originally created the object.</p>
 
+	<h2>Trait Restrictions</h2>
+	<p>Since traits may serve in multiple roles, some traits may not be suitable
+		or limited when used as a foundation for virtual references.
+		This would be the case if any method were defined as a generic function.
+		It would also happen if the trait makes any use of <span class="pre">Self</span>
+		in any form other than as a virtual reference 
+		(<span class="pre">&amp;&lt;Self</span>).</p>
+
 	<h2>enum-based Virtual References</h2>
 	<p>Besides traits, virtual references can be also be created from enum- or union-typed values.
 		Think of the enum type as if it were acting in the role of a trait.
@@ -186,7 +194,7 @@ handler()
 </pre>
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refinherit.html"><img alt="_" src="next.png" /></a>
+		<a href="refmarker.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

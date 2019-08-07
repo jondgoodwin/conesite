@@ -87,11 +87,9 @@ imm signbit = Bool[trust {pi as u64} >> 63]
 		floating point functions not supported by the CPU,
 		such as trigonometric operations.</p>
 
-	<h2>Non-discriminated Unions</h2>
-	<p>A <a href="refunion.html">union type</a> declaration does not have
-		to name the <span class="pre">struct</span> field that discriminates
-		which of the union variants applies.
-		However, omitting the discriminant field leaves the compiler
+	<h2>Unions</h2>
+	<p>A union provides similar capability to enums and variant types.
+		However, since it does explicitly designate a discriminant
 		unable to verify that the appropriate pattern match was done
 		prior to accessing a union's field.
 		<span class="pre">trust</span> is the programmers way to
