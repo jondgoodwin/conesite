@@ -183,15 +183,6 @@ match oddval
   None:                      0
 </pre>
 
-	<h3 id="union">Union-based struct partial matches</h3>
-	<p>The patterns are a mix of the enum and struct pattern:</p>
-<pre>
-match event
-  ~~ mbutton = MouseButton:   mbutton.x
-  ~~ key = Keyboard:          i32[key.keysym]
-  ~~ Quit:                    0
-</pre>
-						
 	<h2>First-class patterns</h2>
 	<p>Whole and partial matching patterns handle many situations, but not all.
 	First-class patterns make it possible to support more sophisticated matching

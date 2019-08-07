@@ -163,7 +163,7 @@ mut eventPool RcPool&lt;Event&gt;
 </pre>
 	<p>This example creates a new region called <span class="pre">eventPool</span>.
 		All its allocated object have the type <span class="pre">Event</span> 
-		(which might be an enum or union type).
+		(which might be an enum type).
 		This pool is an <span class="pre">RcPool</span>,
 		which means references to pool-allocated objects
 		are reference-counted, thereby determining when to free the object.
