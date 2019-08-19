@@ -61,44 +61,23 @@ counter(2)        // 3
 		It simplifies the code (like here) when the closure variable is not a mirror of an existing
 		variable in an outer scope, but can be initialized with some expression or literal.
 		It is also useful when we want to bind by reference.</p>
-	
-	<h2>Closures are anonymous structs</h2>
-	<p>A closure is really just syntactic sugar for an anonymous struct.
-		The following code is equivalent to the above example:
-	</p>
-<pre>
-struct _cntstr
-  _cnt = 0
-  fn `()`(n i32)
-    _cnt += n
 
-mut counter = _cntstr[]
-counter(1)        // 1
-counter(2)        // 3
-</pre>
-	<p>As this example demonstrates, the closure itself is defined by the
-		<span class="pre">_cntstr</span> struct.
-		The closure's state is define by its field(s).
-		The functional logic is captured within a single method named
-		<span class="pre">()</span>.</p>
-	<p>As we learned on the previous page, an object may be "called" just like a function.
-		Doing so invokes the <span class="pre">()</span> method.
-		In this way any explicitly callable struct is effectively also a closure.</p>
-
-	<h2>Closure References</h2>
-	<p>A closure can be passed like any struct value,
-		so long as each receiver knows the exact size and type signature of the closure.
-		However, sometimes a function (or data structure) needs to
-		work with differently-sourced closures that have the same calling signature,
-		but vary in the size and composition of the underlying struct.
-		This is true for a event-handling framework that allows registration of closures
-		which should fire when specific events are triggered.</p>
-	<p>To handle this requirement, use
-		<a href="refvirtref.html#cloref">closure references</a>,
-		which are covered as part of talking about virtual references.</p>
+	<h2>Closures are values</h2>
+	<p>This page offers a simplistic first-glance at closures.
+		Later pages add important details on the use of closures:</p>
+	<ul>
+	<li>A closure is <a href="refmethop.html#clotype">syntactic sugar for an anonymous struct</a>.
+		Knowing its underlying type makes it possible to pass around a closure (and its state)
+		just like any other value.</li>
+	<li>Like any value, a closure may be allocated on the heap.</li>
+	<li>A closure may be passed as a 
+		<a href="refvirtref.html#cloref">virtual reference</a> to another function,
+		allowing it to be used by that function without regard for the shape of its state.
+	</li>
+	</ul>
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refspecblock.html"><img alt="_" src="next.png" /></a>
+		<a href="refblock.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

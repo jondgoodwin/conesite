@@ -168,10 +168,10 @@ enum Shape
 	<p>Earlier, we introduced value-based <a href="refclosure.html">closures</a>.
 		Value-based closures struggle when we need closures that have a specific calling signature,
 		but whose underlying struct state may vary in size and fields.
-		To satisfy this requirement, a closure should be created as a virtual reference.</p>
+		To satisfy this requirement, a closure may be passed as a virtual reference.</p>
 	<p>Let's illustrate this with a simple event-handling example:</p>
 <pre>
-window.whenClicked(&amp;&lt;so |{window}| { ... })
+window.whenClicked(&amp;so |{window}| { ... })
 </pre>
 	<p>Here we allocate a new click-handling closure using the single-owner region
 		(ensuring it is automatically freed after being triggered and discarded).

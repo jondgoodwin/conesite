@@ -172,8 +172,28 @@ x.counter // 10
 	<p>It is actually possible to "call" an object as if it were a function.
 		Doing so will actually invoke the <span class="pre">()</span> method
 		for the object.
-		This is what makes it possibe to support 
-		<a href="refclosure.html">closures</a>.</p>
+
+	<h3>Closures as anonymous structs</h3>
+	<p>A closure is really just syntactic sugar for an anonymous struct
+		that implements the <span class="pre">()</span> method.
+		The closure <span class="pre">|n i32 {cnt = 0}| cnt += n</span>
+		is roughly equivalent to:</p>
+<pre>
+struct _cntstr
+  _cnt = 0
+  fn `()`(n i32)
+    _cnt += n
+
+mut counter = _cntstr[]
+counter(1)        // 1
+counter(2)        // 3
+</pre>
+	<p>As this example demonstrates, the closure itself is defined by the
+		<span class="pre">_cntstr</span> struct.
+		The closure's state is define by its field(s).
+		The functional logic is captured within a single method named
+		<span class="pre">()</span>.</p>
+	<p>Any explicitly callable struct is effectively also a closure.</p>
 
 	<h2>Initializers and Finalizers</h2>
 	<p>A type may define one or more <b>initializers</b>.
