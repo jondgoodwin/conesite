@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>This Blocks - Cone Reference</title>
+	  <title>With Blocks - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -8,30 +8,31 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">This Blocks</div>
+			<div id="sub">With Blocks</div>
 		</div>
 
     <div class="text">
 
-	<p>A <span class="pre">this</span> block focuses logic on a single value.
-		Although it may sometimes resemble method chaining or cascades in other languages, 
-		it is much more versatile.
-		(<b>Note:</b> This feature has nothing to do with
-		<a href="refmethod.html#self"><span class="pre">self</span></a>,
-		which some languages call <span class="pre">this</span>.)</p>
+	<p>A <span class="pre">with</span> block focuses its logic on a single value.
+		Its sugar offers a concise way to invoke many methods on, or access fields belonging to, some value.
+		Although it may resemble method chaining or cascades in other languages, 
+		it is more versatile.</p>
 	<p>A <span class="pre">this</span> block's simple mechanism consists of two aspects:</p>
 	<ul>
-		<li>implicit definition of a <span class="pre">this</span> variable within a block</li>
+		<li>implicit definition of a <span class="pre">this</span> variable within a block
+			(not to be confused with 
+			<a href="refmethod.html#self"><span class="pre">self</span></a>.)
+		</li>
 		<li>using operators that implicitly rely on the <span class="pre">this</span> variable</li>
 	</ul>
 	
 	<h2>Implicit <span class="pre">this</span> Variable</h2>
-	<p>A <span class="pre">this</span> block is simply an expression followed by a code block.
+	<p>A <span class="pre">with</span> block is simply an expression followed by a code block.
 		Throughout the block, the variable <span class="pre">this</span> is understood to hold
 		the evaluated value of that expression.</p>
 <pre>
 // Calculate the value of 'this' (0.174533)
-Float.Pi/180
+with Float.Pi/180
 	quarter = 90 * this  // Use 'this' to convert to radians
 	acute = 10 * this
 </pre>
@@ -42,23 +43,23 @@ do
   quarter = 90 * this  // Use 'this' to convert to radians
   acute = 10 * this	
 </pre>
-	<p>Since <span class="pre">this</span> blocks can be nested within each other,
+	<p>Since <span class="pre">with</span> blocks can be nested within each other,
 		the value of <span class="pre">this</span> for any statement refers
-	  to the inner-most <span class="pre">this</span> block's expression's value.</p>
+	  to the inner-most <span class="pre">with</span> block's expression's value.</p>
 
 	<h2>'.' Prefix Operator</h2>
-	<p>The convenience of a <span class="pre">this</span> block comes from using
+	<p>The convenience of a <span class="pre">with</span> block comes from using
 	operators which implicitly work with the value of <span class="pre">this</span>.
 	The most common of these is the dot ('.') operator, used to call methods or access fields.</p>
 	<p>Normally, the '.' operator specifies some data object to the left,
 		on which a method might be invoked or whose field is accessed.
 		However, if no object is specified to the left of '.',
 		<span class="pre">this</span> is assumed.
-		It is common to find <span class="pre">this</span> block logic
+		It is common to find <span class="pre">with</span> block logic
 		taking advantage of this shortcut:</p>
 <pre>
 // Normalize point to unit length
-point
+with point
   imm len = (.x * .x + .y * .y).sqrt
   if len > 0
     .x /= len
@@ -76,13 +77,22 @@ point
 	<li>Method calls may appear at any point in the block logic, instead of having to be sequenced together.</li>
 	<li>It supports field access as well as method calls.</li>
 	</ul>
+			
+	<h2>'.[]' indexing</h2>
+	<p>'.[]' may be used to access or modify some element of a collection:</p>
+<pre>
+with myScene.numbers
+  .[4] = 1.6      // Equivalent to: myScene.numbers[4] = 1.6
+  .[6] = 1.9
+  .sort       // Sort the list of numbers
+</pre>
 
 	<h2>'&lt;-' Prefix Operator</h2>
 	<p>The &lt;- operator adds the element on the right to the collection on the left.
 		If no collection is specified on the left, <span class="pre">this</span> is assumed.</p>
 <pre>
 // numbers is a vector of floating-point numbers
-myScene.numbers
+with myScene.numbers
   &lt;- 3.4
   &lt;- 2.6
   &lt;- 1.4
@@ -94,26 +104,15 @@ myScene.numbers
 	</p>
 	<p><b>Note:</b> If we just want to add three numbers without sorting:</p>
 <pre>
-myScene.numbers &lt;- [
+with myScene.numbers &lt;- [
   3.4
   2.6
   1.4
 ]
 </pre>
-			
-	<h2>The ':' operator</h2>
-	<p>Within a <span class="pre">this</span>, the ':' operator may be used to
-	replace a collection's member at some specific index with another value:</p>
-<pre>
-myScene.numbers
-  4: 1.6      // Equivalent to: myScene.numbers[4] = 1.6
-  6: 1.9
-  &lt;- 3.4      // Append a new number to the list of numbers
-  .sort       // Sort the list of numbers
-</pre>
 
 		<p style="text-align: right; margin-top: 2em;">
-			<a href="refeach.html"><img alt="_" src="next.png" /></a>
+			<a href="refif.html"><img alt="_" src="next.png" /></a>
 		</p>
 		
 	</div>

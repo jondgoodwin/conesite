@@ -13,21 +13,21 @@
 
     <div class="text">
 
-	<p>On the previous page, we called the function's implementation a "block".
-	  Blocks offer a versatile, easy-to-apprehend way to structure logic.
+	<p>Blocks offer a versatile, easy-to-apprehend way to structure logic.
 	  Their well-defined single point of entry and exit establishes clear
 	  boundaries around control flow as well as the local context it manages.
 	  Versatility comes from being able to nest different kinds of block easily within each other.
 	  This inherent modularity is useful when used in conjunction
 	  with control flow statements or to establish a context for compiler operations
-	  (e.g., safety constraints).</p>
+		(e.g., safety constraints).</p>
+	<p>All of a function's (or closure's) implementation logic is a block.
+		Any block may contain other blocks nested within it.</p>
 	<p>All blocks support these key roles:</p>
 	  <ul>
 		<li>Holding an ordered collection of statements</li>
 		<li>Establishing a lexical scope for a local context</li>
 		<li>Building and/or returning a value</li>
 	  </ul>
-	</p>
 
 	<h2>Ordered Collection of Statements</h2>
 	<p>At its simplest, a block is merely a ordered set of statements.
@@ -51,8 +51,7 @@ fn addPlusOne(a i32, b i32) i32
 	<p>Note that the <span class="pre">do</span> keyword need not be specified if explicit curly
 	braces are used to delimit the basic block.
 	(The reason we need the <span class="pre">do</span> with significant indentation
-	is because it might otherwise be confused with 
-	a <a href="refthis.html"><span class="pre">this</span></a> block.)</p>
+	is because the block will be considered part of the preceding statement.</p>
 <pre>
 fn addPlusOne(a i32, b i32) i32 {
   ++a;
@@ -128,7 +127,7 @@ a =
 </pre>
 
 		<p style="text-align: right; margin-top: 2em;">
-			<a href="refif.html"><img alt="_" src="next.png" /></a>
+			<a href="refwith.html"><img alt="_" src="next.png" /></a>
 		</p>
 		
 	</div>

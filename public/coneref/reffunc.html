@@ -155,13 +155,13 @@ fn ceil(x i32) i32, i32
 	else
 		x, x   // implicit return
 </pre></li>
-	<li>A final <a href="refthis.html"><span class="pre">this</span></a> block returns the value of 
+	<li>A final <a href="refwith.html"><span class="pre">with</span></a> block returns the value of 
 	<span class="pre">this</span>.</li>
 <pre>
 fn newthing() Thing
-	+Thing    // implicitly returns this newly created thing
-		name:  "Doofus"
-		color: "brown"
+	with thing    // implicitly returns thing
+		.name = "Doofus"
+		.color = "brown"
 </pre>
 	</ul>
 	<p>Should the correct number of type-matching return values not be found as described above,

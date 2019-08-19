@@ -39,23 +39,20 @@ counter()                // 6
 	<p>A closure's state is bound by value, which means it is created using a <i>copy</i> of the bound variable(s).
 		Any change to <span class="pre">cnt</span> within the closure has
 		no impact on the outer scope's <span class="pre">cnt</span> variable.
-		(Binding state by reference is also possible. We will talk about this after
-		introducing reference types.)</p>
+		(Binding state by reference is also possible, but must be always done explicitly
+		such that the value is a reference.)</p>
 	
 	<h2>Explicit State Definition</h2>
-  <p>Often it is clearer and more convenient to define a closure's state explicitly.
+  <p>Sometime, it easier (or clearer) to define a closure's state explicitly.
 		For example:</p>
 <pre>
 mut counter = |n i32 {cnt = 0}| cnt += n
 counter(1)        // 1
 counter(2)        // 3
 </pre>
-  <p>This closure's state is defined explicitly within curly braces at the end of the parameter list.
+  <p>This closure's state is explicitly defined within curly braces at the end of the parameter list.
 			Each closure variable should specify an initial value.
-			Multiple closure variables are delimited by semi-colons.
-			Think of the state definition as defining an anonymous struct. Here it defines one field called
-		<span class="pre">cnt</span> whose initial value is 0.
-	</p>
+			Multiple closure variables are delimited by semi-colons.</p>
 	<p>It is often better to define an explicit state.
 		It signals to the code reader which variables represent the closure's state.
 		It simplifies the code (like here) when the closure variable is not a mirror of an existing
