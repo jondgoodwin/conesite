@@ -17,7 +17,7 @@
 
 	<p>As with <span class="pre">if</span>, pattern matching is about deciding
 	which code path to perform. 
-	Its approach is to match a single value in order against multiple patterns.
+	Its approach is to match a single value against multiple patterns.
 	The code block associated with the first matching pattern is performed.</p>
 	<p>Let's illustrate this with a simple (but mathematically unusual) example:</p>
 <pre>
@@ -28,7 +28,7 @@ fn power(n i32, pow i32) i32
     2: n * n
     _: -1
 </pre>
-	<p>This example returns a value calculated differently based on the value of pow.
+	<p>This example calculates its value differently based on the value of pow.
 	If pow is zero, we return 1. If pow is 1, we return n.
 	If pow is two, we return n squared. 
 	Finally, if pow is any other value, we return -1.</p>
@@ -136,7 +136,7 @@ match nbr
 	<p>Partial match patterns begin with the <span class="pre">~~</span> operator. 
 		Additional specifics of the pattern vary by type.</p>
 
-	<h3 id="array">Array partial matches</h3>
+	<h3 id="array">Collection partial matches</h3>
 	<p>The simplest partial match checks whether an array (or array reference) begins with
 		certain elements:</p>
 <pre>
@@ -165,8 +165,8 @@ match points
 </pre>
 	<p>Any unspecified fields in a struct pattern are assumed to match.</p>
 
-	<h3 id="enum">Enum partial matches</h3>
-	<p>An enum pattern typically just matches against each option's variant type,
+	<h3 id="enum">Variant type partial matches</h3>
+	<p>An variant pattern typically just matches against each option's variant type,
 		binding to a variable:</p>
 <pre>
 match oddval
@@ -189,14 +189,14 @@ match oddval
 	algorithms.
 	Such algorithms are implemented in a callable function or method
 	that returns true for a successful match.
-	<p>Use of a first-class pattern is signaled using the <span class="pre">with</span> keyword.
+	<p>Use of a first-class pattern is signaled using the <span class="pre">using</span> keyword.
 	The matchee value is implicitly included as part of the call
 	(essentially, the first parameter for a function and the second for a method call):</p>
 <pre>
 match n
-  with isPrime(): 0  // invokes isPrime(n)
-  with isOdd():   1  // invokes isOdd(n)
-  _:              2
+  using isPrime(): 0  // invokes isPrime(n)
+  using isOdd():   1  // invokes isOdd(n)
+  _:               2
 </pre>
 	<p>This technique can be quite powerful, 
 	as it makes it possible to support a broad range of complex

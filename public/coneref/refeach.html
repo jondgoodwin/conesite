@@ -15,10 +15,9 @@
 
 	<p style="margin-left: 40px;"><i>Note: Only numeric range iterators have been implemented.</i></p>
 
-	<p>Although <span class="pre">while</span> can be used to implement any structured loop,
-		<span class="pre">each</span> makes it easier to implement a common loop pattern:
-		iterating over a sequence of values.
-		Let's re-implement the factorial function using <span class="pre">each</span>:</p>
+	<p><span class="pre">each</span> makes it easier than <span class="pre">while</span>
+		to iterate over a sequence of values.
+		For example, here's the factorial function using <span class="pre">each</span>:</p>
 <pre>
 fn fact(n i32) i32
   mut result = 1
@@ -38,8 +37,7 @@ fn fact(n i32) i32
 		</ul>
 	
 	<h2>Each clause, break and continue</h2>
-	<p><span class="pre">each</span> is like <span class="pre">while</span> in two more ways.
-		It may be used as a statement suffix:</p>
+	<p><span class="pre">each</span> may be used as a statement suffix:</p>
 <pre>
 fn fact(n i32) i32
   mut result = 1
@@ -51,9 +49,14 @@ fn fact(n i32) i32
 		<span class="pre">each</span> block to stop or re-start the loop.</p>
 
 	<h2>Iterators</h2>
-	<p>Several forms of iterators are supported.</p>
+	<p><span class="pre">each</span> supports several ways to iterate over a sequence of values:</p>
+	<ul>
+		<li><b>Number range</b>, for simple arithmetic progressions.</li>
+		<li><b>Collection</b>, to work with individual elements within a collection.</li>
+		<li><b>Closure</b>, to deal with algorithmically-generated values.</li>
+	</ul>
 
-	<h3>Numeric Range Iterator</h3>
+	<h3>Number Range Iterator</h3>
 	<p>As the above example shows, the <span class="pre">...</span> or <span class="pre">..</span>
 		range operator can be used to iterate successively over integers or floating point numbers.
 		Iteration begins with the first number and then increments by 1 until it
@@ -73,15 +76,15 @@ each x in 0 ... 10 by 2 // iterates: 0, 2, 4, 6, 8, 10
   sum += x	
 </pre>
 
-	<h3 id="array">Array Iterator</h3>
-	<p><span class="pre">each</span> can be used to iterate successively through 
-		every element in an array	one at a time. For example:</p>
+	<h3 id="array">Collection Iterator</h3>
+	<p><span class="pre">each</span> can be used to iterate through 
+		every element in a collection,	one at a time. For example:</p>
 <pre>
 mut sum = 0
 each x in [4, 3, 8, 2]
   sum += x
 </pre>
-	<p>Iteration can also show the index number for each value:</p>
+	<p>Iteration can also capture the index or key for each element value:</p>
 <pre>
 each i, x in intslice
   newslice[i] = x
@@ -91,7 +94,7 @@ each i, x in intslice
 	<p>Look to closures for iterator versatility.
 			Using closure iterators, one can scan through elements in a complex collection,
 			retrieve values from a streaming resource, algorithmically calculate a sequence of values, etc.
-		Because closure's are stateful, they can generate a new value on every call.</p>
+		Because closures are stateful, they can generate a new value on every call.</p>
 	<p>In order for a closure to be suitable as an iterator, it must be able to signal when it is done producing values.
 		 It typically does this by returning a <a href="refenum.html#option">nullable value</a>,
 		 with the value of <span class="pre">null</span> signalling when it is done.</p>
