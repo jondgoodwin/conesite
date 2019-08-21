@@ -13,19 +13,27 @@
 
     <div class="text">
 
-	<p>Types may be used as a foundation on which to build other types.
-		For example, <span class="pre">struct</span> defines a new type that
-		is composed of fields, each with its own type.</p>
+		<p>Until now, the only data types we have worked with are the
+			<a href="refterm.html#vtype">integer and floating-point number types</a>
+			and the <span class="pre">Bool</span> type
+			(for <span class="pre">true</span> and <span class="pre">false</span>).
+			Let's broaden our repertoire.</p>
+		<p>Types may be composed to form new types.
+		For example, <a href="refstruct.html"><span class="pre">struct</span></a> 
+		is used to define a new named type that
+		is composed of one or more co-located fields, each with its own name and type.
+		A new type may also define its functional behavior in the form of 
+		<a href="refmethod.html">methods</a>.</p>
 	<p>More complex forms of type composition are possible:</p>
 	<ul>
-		<li><b>Inheritance,</b>
+		<li><a href="refinherit.html"><b>Inheritance</b></a>,
 			where one type reuses state or methods defined by another type.</li>
-		<li><b>Traits,</b>
-			abstract types that may be used to build variant types sharing common type properties.</li>
+		<li><a href="reftrait.html"><b>Traits</b></a>,
+			abstract types that can serve as a shared foundation for defining other types.</li>
 	</ul>
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refinherit.html"><img alt="_" src="next.png" /></a>
+		<a href="refstruct.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

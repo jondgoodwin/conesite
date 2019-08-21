@@ -18,21 +18,21 @@
 			and can be individually accessed using the field's name.</p>
 	<p>Let's illustrate by declaring a new struct type:</p>
 <pre>
-struct Liner
-  line [80] u8
-  pos u32
+struct Complex
+  real f32
+  imag f32
 </pre>
-	<p>This defines a new struct type called <span class="pre">Liner</span> that holds two fields of data.
-		The field named <span class="pre">line</span> is an array of 80 bytes.
-		The field named <span class="pre">pos</span> is an unsigned integer.</p>
-	<p>Variables can be declared using this new type, each with its own values in these two fields:</p>
+	<p>This defines a new struct type called <span class="pre">Complex</span> that holds two fields of data.
+		The fields named <span class="pre">real</span> are both 32-bit floating point numbers.</p>
+	<p>Variables can be declared and initialized using this new type, each with its own values in these two fields:</p>
 <pre>
-imm liner1 = Liner[line: [80; ' '], pos: 0u]
-mut liner2 = Liner[line: [80; '\0'], pos: 10u]
+imm comp1 = Complex[real: 3.2, imag: 0.0]
+mut comp2 = Complex[real: 0.0, imag: 1.0]
 </pre>
 	<p>This page focuses on using structs to hold field-oriented data.
 		Subsequent pages will enrich what can be done with a struct by adding
-		<a href="refmethod.html">method</a> and <a href="refinherit.html">trait</a> definitions.</p>
+		<a href="refmethod.html">methods</a>, <a href="refinherit.html">inheritance</a>,
+		or <a href="reftrait.html">traits</a>.</p>
 	
 	<h2>Declaration</h2>
 	<p>Before we can make use of a specific data structure,
@@ -96,7 +96,7 @@ imm pt3 = Point[]                // Uses x,y's declared default values of 0.
 			if the struct has any private field lacking a default value.</li>
 	</ul>
 	<p>It is also possible to initialize a new struct value by using one of the struct's defined
-		<a href="refmethod.html#init">initializer methods</a> instead.
+		<a href="refinitdrop.html#initializer">initializer methods</a> instead.
 		Under the covers,
 		initializer methods also use the struct constructor to initialize the struct's value.</p>
 	
@@ -154,7 +154,7 @@ pt.y = pt.x
 		which some external function has created, as well as invoke any methods defined for it.</p>
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refenum.html"><img alt="_" src="next.png" /></a>
+		<a href="refmethod.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>
