@@ -14,7 +14,7 @@
     <div class="text">
 
 	<p>Inheritance makes it easy to declare
-		a new type that reuses (inherits) the state or methods defined by some other type.</p>
+		a new type that reuses (inherits) the fields or methods defined by some other type.</p>
 	<p>Cone's version of inheritance looks and behaves somewhat differently than
 		in other languages.
 		At its heart, Cone's inheritance is a composition-based approach that offers
@@ -79,6 +79,12 @@ struct SuperEngine
 		as well as the <span class="pre">thrust</span> method from <span class="pre">engine</span>.
 		It does not inherit the <span class="pre">power</span> method,
 		since it has its own implementation of it.</p>
+
+	<p>When a type inherits all the fields of another type, 
+		its constructor may name those fields individually or collectively.
+	  Thus, <span class="pre">SuperEngine[engine: Engine[fuel: 1.0, torgue: 2.0]]</span>
+		and <span class="pre">SuperEngine[fuel: 1.0, torgue: 2.0]</span>
+		are equivalent and equally acceptable.</p>
 
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="reftrait.html"><img alt="_" src="next.png" /></a>

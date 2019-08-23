@@ -13,49 +13,59 @@
 
     <div class="text">
 
-	<p>Traits look so much like structs, no one would blame you for being confused:</p>
+	<p>Like <span class="pre">struct</span><span class="pre">, trait</span>
+		defines a new type composed of named fields and methods.
+		For example:</p>
 <pre>
-trait Eq
-  fn `==`(self, other) Bool
+trait Node
+  id u32
+  fn print()
 </pre>
-	<p>This trait defines no fields and only a single method that overloads the
-		<span class="pre">==</span> operator. 
-		Unlike a struct, however, no implementation is given for the method.
-		Even stranger, no variable may declare its value as having the
-		<span class="pre">Eq</span> type:</p>
-<pre>
-imm anEqValue Eq    // *** ERROR ***
-</pre>
-	<p>Traits are a different kind of type.
-		Whereas <span class="pre">struct</span>, <span class="pre">enum</span>, 
-		etc. enable the creation of concrete types,
-		<span class="pre">trait</span> is used to create abstract types.
-		Abstract types play an indirect role as a catalyst for new capabilities.
-		Using an abstract type (like <span class="pre">Eq</span>), 
-		we improve the reusability features of any concrete type
-		whose structure conforms to <span class="pre">Eq</span>.
-		In particular, traits facilitate:</p>
+	<p>Traits differ from structs in two important ways:</p>
 	<ul>
-		<li><a href="refvirtref.html"><b>Virtual references</b></a>,
-			enabling access to fields or methods of values whose concrete
-			types we won't know until run-time.</li>
-		<li><a href="refinherit.html"><b>Inheritance</b></a>, for making it easier to create concrete types
-			that share common implementations for fields and methods.</li>
-		<li><a href="refmarker.html"><b>Type markers</b></a>, to distinguish between types that support
-			a certain behavior and those that forbid it.</li>
-		<li><a href="refconstraint.html"><b>Generic constraints</b></a>, to help detect whether a type is
-			supported for expansion by a specific generic type or function.</li>
+		<li>It is not possible to directly create a value or variable of this type
+			(e.g., <span class="pre">imm node = Node[12]</span> is illegal).</li>
+		<li>A trait may define methods that have no implementation logic,
+			as the <span class="pre">print</span> method demonstrates.</li>
 	</ul>
-	<p>A trait may loosely be compared to a filter that allows us to
-		see into the fields, methods and constrained behavior of other
-		compliant types. By compliant, we simply mean that for each and
-		every field and method defined by the trait, we can find
-		exactly the same field or method defined in the compliant type.
-		The compliant type may implement more fields and methods,
-		but it must implement at least the ones the trait defines.</p>
+	<p>Traits are versatile, supporting many roles:</p>
+	<ul>
+		<li><a href="#inherit"><b>Inheritance</b></a>, to create concrete types
+			(including variant types) that share common fields and methods.</li>
+		<li><a href="#marker"><b>Type markers</b></a>, to distinguish between types that support
+			a certain behavior and those that forbid it.</li>
+		<li><a href="refvirtref.html"><b>Virtual references</b></a>,
+			to access fields or use methods of values whose concrete
+			types we won't know until run-time.</li>
+		<li><a href="refconstraint.html"><b>Generic constraints</b></a>, to declare which types
+			generic type or function can safely support, when instantiated.</li>
+	</ul>
 
-	<h2>Marker traits</h2>
-	<p>Copy vs. Move</p>
+	<h2 id="inherit">Trait-base Inheritance</h2>
+	<p>A trait type may be used to build another trait or struct type.</p>
+<pre>
+struct NbrNode
+  _ Node    // Inherit from the Node trait
+  nbr f32
+
+  fn print() { ... }
+</pre>
+	<p>No name is given for the composed trait, since we cannot work with it as an aggregate value anyway.
+		The trait's fields are incorporated into the struct at the indicated place.
+		No <span class="pre">use *</span> is required to indicate inheritance, 
+		because traits are always completely inherited.</p>
+	<p>As for methods: 
+		The struct must implement every trait method that has no implementation.
+		The struct may provide its own implementation for any method that the trait has implemented.
+		If it does not, the trait's method implementation is inherited.</p>
+
+	<h2 id="marker">Marker traits</h2>
+	<p>A marker trait defines no fields nor methods.
+		Its value comes from other trait or struct types inheriting it.
+		Its use then becomes a testable attribute of that type (e.g., by generics), 
+		allowing one to distinguish between types that support
+		a certain behavior and those that don't.</p>
+
 
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refrefs.html"><img alt="_" src="next.png" /></a>
