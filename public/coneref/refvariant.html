@@ -13,18 +13,26 @@
 
     <div class="text">
 
-	<p>
-
-	</p>
+	<p>Variant types are used for values whose type
+		could be one of several compliant concrete types.
+		Use of a variant-typed value requires pattern-matching
+		or virtual dispatch.</p>
+	<p>There are several kinds of variant types:</p>
 	<ul>
-		<li><b><a href="refenum.html">Enum types</a></b>.
-			Enums hold a single value whose type could be one of several possible variations.
-		</li>
+		<li><b><a href="refoption.html">Option</a></b>.
+			A value that might be some type or could be <span class="pre">null</span>.</li>
+		<li><b><a href="refresult.html">Result</a></b>.
+			A value that might be one type for success and a different type for an error.</li>
+		<li><b><a href="refenum.html">Enums</a></b>.
+			A simple, fixed-sized value that could be one of several enumerated types.</li>
+		<li><b><a href="reftagtype.html">Tagged Variants</a></b>.
+			An explicitly tagged value that could be one of several enumerated types.</li>
+		<li><b><a href="refvirtref.html">Virtual references</a></b>.
+			A dispatchable reference to some concrete type.</li>
 	</ul>
-
 	
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refenum.html"><img alt="_" src="next.png" /></a>
+		<a href="refoption.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

@@ -1,0 +1,85 @@
+<html>
+  <head>
+	  <title>Option Types - Cone Reference</title>
+		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	  <link rel="stylesheet" type="text/css" href="standard.css" />
+	</head>
+  <body>
+		<div id="header">
+			<a href="/"><div id="title">Cone</div></a>
+			<div id="sub">Option Types</div>
+		</div>
+
+    <div class="text">
+	<p style="margin-left: 40px;"><i>Note: None of this capability is currently implemented.</i></p>
+
+	<p>The Option type is useful when we want to express the idea that
+		we may or may not have a value of a certain type.
+		<span class="pre">null</span> is the name used to represent the absence of a value.
+		<span class="pre">some[x]</span> represents some specific value.
+		Nullable values are needed so often that special syntax exist to make them easier to use.</p>
+	<p>To declare a nullable type, simply put a question mark before the type.
+		For example:</p>
+<pre>
+mut maybeInt ?i32 = null   // Initial value indicates the absence of a value
+if maybeInt == null        // or: if !maybeInt
+  maybeInt = 4             // Give it the value 4
+</pre>
+	<p>If the type of a declared variable is omitted but an initial value is specified,
+		the initial value needs to be wrapped in the <span class="pre">some</span> constructor:</p>
+<pre>
+mut maybeInt = some[4]
+</pre>
+	<p><b>Nullable References</b>
+		Nullable references take no more space than regular references.
+		The null reference value is just a non-addressable address (typically, 0).
+	</p>
+
+	<h3>nullable operators</h3>
+	<p>The <span class="pre">?</span> and <span class="pre">||</span> operators
+		that are so helpful for Result values can also be applied to
+		nullable values.</p>
+
+	<h4>Give null a default value</h4>
+	<p>Use the <span class="pre">||</span> operator to establish
+		a real value in the event of null.</p>
+<pre>
+imm val = maybeInt || 0
+</pre>
+	<p><span class="pre">val</span> will be the value of <span class="pre">maybeInt</span>
+		if it is not null. Otherwise it will be 0.
+		The value to the right of the operator cannot be a nullable type,
+		and its type must match that of a valid value for the nullable value on the left.</p>
+
+	<h4>Handle null as an exception</h4>
+	<p>Use the <span class="pre">?</span> operator to treat 
+		a <span class="pre">null</span> value as an exception.</p>
+<pre>
+imm val = maybeInt?
+</pre>
+	<p><span class="pre">val</span> will be the value of <span class="pre">maybeInt</span>
+		if it is not null. Otherwise it will panic.</p>
+	<p>If a <span class="pre">catch null</span> handler is provided, it will
+		be invoked instead of a panic.</p>
+
+	<h4>null propagation</h4>
+	<p>A variation of the method call operator allows safe method calls on
+		a nullable value:</P>
+<pre>
+imm x = maybePoint?.dist
+</pre>
+	<p>In effect, this propagates nullability from 
+		<span class="pre">maybePoint</span> to <span class="pre">x</span>.
+		If <span class="pre">maybePoint</span> holds a valid value,
+		the method is called and its return value is wrapped as nullable.
+		If <span class="pre">maybePoint</span> is null,
+		then so will <span class="pre">x</span> be.</p>
+
+	<p style="text-align: right; margin-top: 2em;">
+		<a href="refresult.html"><img alt="_" src="next.png" /></a>
+	</p>
+
+	</div>
+	</body>
+</html>
