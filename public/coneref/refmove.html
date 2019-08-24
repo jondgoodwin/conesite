@@ -43,13 +43,12 @@ a          // is still 3
 			the use of performance-degrading locks or atomics.</li>
 		</ul>
 	<p>This page explains what makes a value copyable or not,
-		introduces the <span class="pre">uni</span> permission,
 		and then describes how move semantics allow
 		an uncopyable value to move from one part of a program to another.</p>
 		
 	<h2>Move vs. Copy Types</h2>
 	<p>Whether a value is copyable or not	is largely determined by the value's type.
-		The compiler uses heuristics to determine whether or not a type's values are copyable,
+		The compiler uses heuristics to infer whether or not a type's values are copyable,
 		based on examining the fields and methods it implements:</p>
 	<ol>
 		<li>If the <a href="refinitdrop.html#clone">clone</a> method is implemented,
@@ -70,26 +69,6 @@ a          // is still 3
 			create copies of this type's values.</li>
 		<li>If none of the above apply, the type's values may be copied.</li>
 	</ol>
-
-	<h2>uni Permission</h2>
-	<p>Declaring variables involves specifying a permission.
-		So far, we have described the 
-		<span class="pre">imm</span> (immutable) and 
-		<span class="pre">mut</span> (shared mutable) permissions.
-		To deal with uncopyable values, we add another permission to the mix:
-		<span class="pre">uni</span> (unique).
-		This permission allows the value to be viewed or changed,
-		but it forbids the value from being copied (thereby ensuring it is unique).</p>
-	<p>When declaring any variable that holds an uncopyable value
-		it can be useful to specify the <span class="pre">uni</span> permission,
-		as it provides a clear signal to readers of your code that
-		such values will be moved rather than copied:</p>
-<pre>
-uni samplefile = createFile("sample.txt")
-</pre>
-	<p>Although its use on variable declarations is optional,
-		we will later see the necessity of using the <span class="pre">uni</span> permission
-		to govern the safe use of references.</p>
 
 	<h2>Move Semantics</h2>
 	<p>Even when we want to prohibit the copying of these values,
@@ -114,19 +93,19 @@ uni samplefile = createFile("sample.txt")
 		When the source is a variable,
 		this prohibits post-move access to that variable's value:</p>
 <pre>
-uni nbr = 5       // uni signals move semantics
-uni newvar = nbr  // Move the value to newvar
-imm x = nbr + 1   // **ERROR** nbr no longer has an accessible value
+imm socket = Socket() // Open a new network socket (move semantics)
+imm sock2 = socket    // Move the value to sock2
+socket.poll()         // **ERROR** socket no longer has an accessible value
 </pre>
-	<p>By de-activating use of the variable <span class="pre">nbr</span> after the move,
-		we effectively have only one "copy" of its value, which is now in <span class="pre">newvar</span>.
-		If we had not deactivated <span class="pre">nbr</span>, 
+	<p>By de-activating use of the variable <span class="pre">socket</span> after the move,
+		we effectively have only one "copy" of its value, which is now in <span class="pre">sock2</span>.
+		If we had not deactivated <span class="pre">socket</span>, 
 		we would then have two copies of a non-copyable value.</p>
 	<p>The same deactivation mechanism applies when passing a non-copyable value to another function.</p>
 <pre>
-uni nbr = 5       // uni signals move semantics
-afunction(nbr)    // the number is moved to the called function
-anotherfunc(nbr)  // **ERROR**: nbr is deactivated and unusable
+imm socket = Socket() // Open a new network socket (move semantics)
+afunction(socket)     // the socket is moved to the called function
+anotherfunc(socket)   // **ERROR**: socket is deactivated and unusable
 </pre>
 	<p>Deactivation of the source happens even for <b>conditional moves</b>,
 	where one branch of conditional move the value but another does not.
@@ -144,9 +123,9 @@ anotherfunc(nbr)  // **ERROR**: nbr is deactivated and unusable
 		the value will be destroyed at the end of that scope, as it is no longer useful.</p>
 	<p>To destroy a move value more quickly, just assign it to the anonymous variable "_":</p>
 <pre>
-uni nbr = 5
-_ = nbr
-callfn(nbr)   // **ERROR**. nbr is deactivated
+imm socket = Socket() // Open a new network socket (move semantics)
+_ = socket
+callfn(socket)        // **ERROR**. socket is deactivated
 </pre>
 	<p>Doing this on a copyable value has no effect.</p>
 	
@@ -164,13 +143,13 @@ callfn(nbr)   // **ERROR**. nbr is deactivated
 	<p>These are significant limitations on the use of non-copyable values in structs and arrays.
 		However, these limitations can be ameliorated by using the swap operator:</p>
 <pre>
-struct Numbers
-  uni a i32
+struct Connection
+  s Socket
   b i32
-uni n = Numbers[5, 10]
-uni x = 6
-n.a &lt;=&gt; x
-// n.a now contains 6 and x contains 5
+mut conn = Connection[Socket(), 10]
+mut x = Socket()  // Open another socket
+conn.s &lt;=&gt; x
+// conn now contains the new socket and x contains the old one
 </pre>
 	<p>Swapping offers a helpful way to get around restrictive moves.
 	  One can temporarily extract a 'move' value out of a field or array element by swapping
@@ -180,6 +159,18 @@ n.a &lt;=&gt; x
 		and the source still has a valid value
 		(even if it is only a dummy value).
 		That ensures that the original source stays safe to use.</p>
+	
+	<h3>Assignment</h3>
+	<p>Assignment is an expression whose value (for copy semantics) 
+		is a copy of the value of the right-hand expression. 
+		With a move-only value, however,
+		the value of the assignment expression is the value previously stored in
+		the left-hand (lval) memory location.</p>
+<pre>
+mut conn = Connection[Socket(), 10]
+mut x = conn.s = Socket()
+// conn now contains the new socket and x contains the old one
+</pre>
 		
 
 	<p style="text-align: right; margin-top: 2em;">
