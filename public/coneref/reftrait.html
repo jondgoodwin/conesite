@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>Traits - Cone Reference</title>
+	  <title>Trait - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -66,9 +66,122 @@ struct NbrNode
 		allowing one to distinguish between types that support
 		a certain behavior and those that don't.</p>
 
+	<p>Although <span class="pre">enum</span> is sufficient for simple variant types,
+		we sometimes need to define more complex variant types that
+		share fields in common or support same-named methods which are implemented
+		differently for each variant.
+		We accomplish this by defining each variant types as inheriting from
+		a common <span class="pre">trait</span> or <span class="pre">enumtrait</span>.
+		For example:</p>
+<pre>
+enumtrait Event
+	enum u8
+	time Time
+
+struct MouseEvent
+	_ Event
+	button u8
+	x i32
+	y i32
+
+struct KeyEvent
+	_ Event
+	key KeySym
+
+struct QuitEvent
+	_ Event
+</pre>
+	<p>Variants of the <span class="pre">Event</span> type encode user-initiated events,
+			such as clicking a mouse button, pressing a key on the keyboard, or quitting the program.
+			These event types share some fields in common, such as
+			<span class="pre">time</span>'s timestamp info.
+			Each event variant may also have its own specific fields.</p>
+	<p>Let's unpack some details based on this example.</p>
+
+	<h3>trait vs. enumtrait</h3>
+	<p>The only difference between <span class="pre">enumtrait</span> and <span class="pre">trait</span>
+		is that <span class="pre">enumtrait</span> ensures that all variant types are the same size
+		(the same guarantee <span class="pre">enum</span> makes for its variants).
+		Since <span class="pre">MouseEvent</span> is the largest variant type in the above example,
+		the use of <span class="pre">enumtrait</span> ensures the size of
+		<span class="pre">KeyEvent</span> and <span class="pre">QuitEvent</span> are padded to be as large.</p>
+		<p>A struct value with an embedded union may be passed around, by copy, just like any other value.
+				As with enums, all variant values of a union-based struct type are the same size.
+			</p>
+		<p>Several benefits flow from all variant values having the same size.
+		The biggest is that you can replace (in place) a <span class="pre">Event</span> value
+		of one variant type with a value of a different variant type.
+		Another benefit is that one may use a pool region to more quickly allocate
+		space for any new event, regardless of the type.</p>
+	<p>If we had used <span class="pre">trait</span> instead of <span class="pre">enumtrait</span>,
+		each variant type would be sized differently, which potentially wastes less space. 
+		When variant values have different sizes, it is not possible to overwrite one Event value with another.
+		One would need to use references to effectively replace one event with another.</p>
+
+	<h3>Tag field</h3>
+	<p>In the <span class="pre">enumtrait</span> definition above,
+		<span class="pre">enum u8</span> explicitly specifies 
+		the position and type of the variant type's tag field.
+		This is the same tag field that <span class="pre">enum</span> implicitly defines,
+		used by pattern matching to discriminate which type some variant value holds.</p>
+	<p>The presence of this <span class="pre">enum</span> tag field indicates
+		that we are defining tagged variant types.
+		All variant types inheriting from a tagged trait must be part of the
+		same module as the trait is defined in, so that the compiler
+		can easily calculate exactly how many variants there are and
+		assign each one a different unique integer number.</p>
+	<p>Although it is a field, it has no name because its contents are not
+		accessible nor changeable in the same way as other fields.
+		The tag field is implicitly set based on which variant type's constructor
+		is used. Its value is used for pattern matching.</p>
+	
+	<h3>Common Fields</h3>
+	<p>A trait's fields are inherited by all its variants,
+		accessible just like any other field in the variant.
+		Because these common fields are located in the same place across all variants,
+		pattern matching is unnecessary to access them.</p>
+			
+	<h3>Constructor</h3>
+	<p>A constructor for a variant type is the struct constructor:</p>
+<pre>
+mut event = MouseEvent[time: now, button: 0, x: 140, y: 170]
+event = KeyEvent[now, 'a']
+event = QuitEvent[now]
+</pre>
+	<p>The common field <span class="pre">time</span> must be initialized alongside the other fields.
+	The tag field will be implicitly initialized by the constructor.</p>
+
+		<h3>Value Access</h3>
+		<p>Any field in common across all variants is easily accessible, regardless of variant type:</p>
+<pre>
+imm when = event.time
+</pre>
+		<p>However, much like enum, to safely gain access to any of the variant fields,
+			we must use <a href="refmatch.html">pattern matching</a>:</p>
+<pre>
+match event
+	~~ mbutton = MouseButton:   mbutton.x
+	~~ key = Keyboard:          i32[key.keysym]
+	~~ Quit:                    0
+</pre>
+
+	<h3>Comparing</h3>
+	<p>Just like with vanilla structs,
+			two variant values may be only compared if the struct implements
+			the <a href="refmethod.html#compare">comparison methods</a>.
+		</p>
+
+	<h2>Methods</h2>
+	<p>Another advantage of trait-based variant types is the ability to define methods on the variants.
+		As discussed earlier, a trait may define methods that are implemented or not,
+		its variants inherit and must ensure all are implemented.
+		One can then use methods on variant types freely.
+	</p>
+		
+	
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refmove.html"><img alt="_" src="next.png" /></a>
+		<a href="refvirtref.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

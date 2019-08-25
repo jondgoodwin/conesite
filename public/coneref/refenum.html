@@ -76,6 +76,12 @@ enum Colors
 	Blue  = 0x0000FF
 </pre>
 
+		<h3>Methods</h3>
+		<p>An <span class="pre">enum</span> type may define methods.
+			These methods may be invoked on any variant value.
+			Each method would typically use pattern matching to customize
+			its behavior based on which variant type the value holds.</p>
+
 		<h3>Initialization</h3>
 		<p>An enum initial value is built using the enum constructor:</p>
 <pre>
@@ -126,7 +132,7 @@ sum += intval if oddval ~~ intval=SomeInt
 		using the <span class="pre">==</span> method.</p>
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="reftagtype.html"><img alt="_" src="next.png" /></a>
+		<a href="reftrait.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>
