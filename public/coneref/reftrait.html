@@ -14,7 +14,8 @@
     <div class="text">
 
 	<p>Like <span class="pre">struct</span><span class="pre">, trait</span>
-		defines a new type composed of named fields and methods.
+		and <span class="pre">enumtrait</span>
+		define a new type composed of named fields and methods.
 		For example:</p>
 <pre>
 trait Node
@@ -23,17 +24,16 @@ trait Node
 </pre>
 	<p>Traits differ from structs in two important ways:</p>
 	<ul>
-		<li>It is not possible to directly create a value or variable of this type
+		<li>It is not possible to use a constructor of this type
 			(e.g., <span class="pre">imm node = Node[12]</span> is illegal).</li>
-		<li>A trait may define methods that have no implementation logic,
+		<li>A trait may define methods that have no implementation logic (virtual methods),
 			as the <span class="pre">print</span> method demonstrates.</li>
 	</ul>
-	<p>Traits are versatile, supporting many roles:</p>
+	<p>Traits are versatile, supporting many roles. 
+		On this page, we will focus on using traits to create variant, concrete types
+		that share common fields, methods, and <a href="#marker">marker</a> attributes.
+		Future pages will address other valuable uses of traits:</p>
 	<ul>
-		<li><a href="#inherit"><b>Inheritance</b></a>, to create concrete types
-			(including variant types) that share common fields and methods.</li>
-		<li><a href="#marker"><b>Type markers</b></a>, to distinguish between types that support
-			a certain behavior and those that forbid it.</li>
 		<li><a href="refvirtref.html"><b>Virtual references</b></a>,
 			to access fields or use methods of values whose concrete
 			types we won't know until run-time.</li>
@@ -41,143 +41,195 @@ trait Node
 			generic type or function can safely support, when instantiated.</li>
 	</ul>
 
-	<h2 id="inherit">Trait-base Inheritance</h2>
-	<p>A trait type may be used to build another trait or struct type.</p>
-<pre>
-struct NbrNode
-  _ Node    // Inherit from the Node trait
-  nbr f32
-
-  fn print() { ... }
-</pre>
-	<p>No name is given for the composed trait, since we cannot work with it as an aggregate value anyway.
-		The trait's fields are incorporated into the struct at the indicated place.
-		No <span class="pre">use *</span> is required to indicate inheritance, 
-		because traits are always completely inherited.</p>
-	<p>As for methods: 
-		The struct must implement every trait method that has no implementation.
-		The struct may provide its own implementation for any method that the trait has implemented.
-		If it does not, the trait's method implementation is inherited.</p>
-
-	<h2 id="marker">Marker traits</h2>
-	<p>A marker trait defines no fields nor methods.
-		Its value comes from other trait or struct types inheriting it.
-		Its use then becomes a testable attribute of that type (e.g., by generics), 
-		allowing one to distinguish between types that support
-		a certain behavior and those that don't.</p>
-
+	<h2 id="inherit">Trait-based Variant Types</h2>
 	<p>Although <span class="pre">enum</span> is sufficient for simple variant types,
-		we sometimes need to define more complex variant types that
+		we sometimes need more complex variant types that
 		share fields in common or support same-named methods which are implemented
 		differently for each variant.
 		We accomplish this by defining each variant types as inheriting from
 		a common <span class="pre">trait</span> or <span class="pre">enumtrait</span>.
 		For example:</p>
 <pre>
+// Common trait "base" for variant event types
+// 'enumtrait' pads all variants to be the same size
 enumtrait Event
-	enum u8
-	time Time
+  enum u8     // explicit tag field to discriminate variants
+  time Time   // All events are time-stamped
 
+// Mouse event type
 struct MouseEvent
-	_ Event
-	button u8
-	x i32
-	y i32
+  _ Event     // Inherit from Event trait
+  button u8
+  x i32
+  y i32
 
+// Keystroke event type
 struct KeyEvent
-	_ Event
-	key KeySym
+  _ Event
+  key KeySym
 
+// Quit event type
 struct QuitEvent
-	_ Event
+  _ Event
 </pre>
-	<p>Variants of the <span class="pre">Event</span> type encode user-initiated events,
-			such as clicking a mouse button, pressing a key on the keyboard, or quitting the program.
-			These event types share some fields in common, such as
-			<span class="pre">time</span>'s timestamp info.
-			Each event variant may also have its own specific fields.</p>
-	<p>Let's unpack some details based on this example.</p>
+	<p>This example defines three variant event types
+		(for mouse-button clicks, keyboard changes, and quit requests),
+		all built on a common Event trait type base.
+		These event types share some fields in common, such as
+		<span class="pre">time</span>'s timestamp info.
+		Each event variant may also have its own specific fields.
+		All event values take up the same amount of memory.</p>
 
-	<h3>trait vs. enumtrait</h3>
+	<h3>Trait type</h3>
+	<p>Let's unpack details by focusing first on the definition of the trait type.</p>
+
+	<h4>trait vs. enumtrait</h4>
 	<p>The only difference between <span class="pre">enumtrait</span> and <span class="pre">trait</span>
-		is that <span class="pre">enumtrait</span> ensures that all variant types are the same size
-		(the same guarantee <span class="pre">enum</span> makes for its variants).
+		is that <span class="pre">enumtrait</span> ensures that all variant types are the same size.
+		(This is the same guarantee <span class="pre">enum</span> makes for its variants.)
 		Since <span class="pre">MouseEvent</span> is the largest variant type in the above example,
-		the use of <span class="pre">enumtrait</span> ensures the size of
-		<span class="pre">KeyEvent</span> and <span class="pre">QuitEvent</span> are padded to be as large.</p>
-		<p>A struct value with an embedded union may be passed around, by copy, just like any other value.
-				As with enums, all variant values of a union-based struct type are the same size.
-			</p>
-		<p>Several benefits flow from all variant values having the same size.
-		The biggest is that you can replace (in place) a <span class="pre">Event</span> value
-		of one variant type with a value of a different variant type.
-		Another benefit is that one may use a pool region to more quickly allocate
-		space for any new event, regardless of the type.</p>
-	<p>If we had used <span class="pre">trait</span> instead of <span class="pre">enumtrait</span>,
-		each variant type would be sized differently, which potentially wastes less space. 
-		When variant values have different sizes, it is not possible to overwrite one Event value with another.
-		One would need to use references to effectively replace one event with another.</p>
+		<span class="pre">Event</span>'s use of <span class="pre">enumtrait</span> ensures the size of
+		<span class="pre">KeyEvent</span> and <span class="pre">QuitEvent</span> are padded to be as large.
+		To successfully calculate this, <span class="pre">enumtrait</span> requires that all
+		variant types be defined in the same module as the trait.</p>
+	<p>If all variants have the same size, one may work with trait-typed values 
+		either as values (<span class="pre">Event</span>) 
+		or as references (<span class="pre">&Event</span>). 
+		When variants have different sizes, a trait type may only be used as a reference.
+		Being able to work with a trait type as a value offers some performance and other benefits:</p>
+	<ul>
+		<li>One variant type's value may be replaced (in place)
+			with a value of a different variant type.</li>
+		<li>The pool region may be used to more quickly allocate
+				space for any new value, regardless of the concrete variant type.</li>
+		<li>Access to field information is faster for values than when using references.</li>
+	</ul>
+	<p>When <span class="pre">trait</span> is used instead of <span class="pre">enumtrait</span>,
+		two key benefits accrue:</p>
+	<ul>
+		<li>Variant types may be defined in different modules than the trait type.</li>
+		<li>Memory waste may be less than with fixed-size variant types,
+			as each variant type only takes as much space as it requires.
+			This may matter when variant types vary greatly in size and are used in great numbers.</li>
+	</ul>
 
-	<h3>Tag field</h3>
-	<p>In the <span class="pre">enumtrait</span> definition above,
-		<span class="pre">enum u8</span> explicitly specifies 
-		the position and type of the variant type's tag field.
-		This is the same tag field that <span class="pre">enum</span> implicitly defines,
-		used by pattern matching to discriminate which type some variant value holds.</p>
-	<p>The presence of this <span class="pre">enum</span> tag field indicates
-		that we are defining tagged variant types.
-		All variant types inheriting from a tagged trait must be part of the
-		same module as the trait is defined in, so that the compiler
+	<h4>Tag field</h4>
+	<p>The <span class="pre">Event </span> trait above uses
+		<span class="pre">enum u8</span> to explicitly specify
+		that all its variant types will carry a tag field at this position and size.
+		(This is the same tag field that <span class="pre">enum</span>
+		implicitly defines for all its variants.)</p>
+	<p>The tag field's only use is to make pattern matching possible on a
+		variant type value (<span class="pre">Event</span>) 
+		or basic reference (<span class="pre">&Event</span>),
+		as the tag's integer value uniquely discriminates which variant type a value currently holds.
+		So, if no such pattern matching is expected 
+		(e.g., because virtual references will be used instead),
+		there is no need to define a tag field in the trait.</p>
+	<p>The primary benefit of having a tag field,
+		is that tag-based pattern matching will likely
+		perform better than virtual reference dispatch.
+		The presence of a tag field also means one can use a basic reference
+		to the trait type (<span class="pre">&Event</span>), rather than having to
+		use a more expensive virtual reference (<span class="pre">&amp;&lt;Event</span>).</p>
+	<p>The downsides of the tag field is the extra memory space it requires
+		and the restriction that all variant types
+		must be defined in the same module as the trait they inherit from.
+		This requirement ensures the compiler
 		can easily calculate exactly how many variants there are and
 		assign each one a different unique integer number.</p>
-	<p>Although it is a field, it has no name because its contents are not
+	<p>Although it occupies space like other fields, it has no name because its contents are not
 		accessible nor changeable in the same way as other fields.
-		The tag field is implicitly set based on which variant type's constructor
-		is used. Its value is used for pattern matching.</p>
+		The tag field's content is implicitly and correctly initialized by the variant type's constructor.</p>
 	
-	<h3>Common Fields</h3>
+	<h4>Common Fields</h4>
 	<p>A trait's fields are inherited by all its variants,
 		accessible just like any other field in the variant.
-		Because these common fields are located in the same place across all variants,
-		pattern matching is unnecessary to access them.</p>
-			
-	<h3>Constructor</h3>
-	<p>A constructor for a variant type is the struct constructor:</p>
+		Because a tagged trait's common fields are located in the same place across all variants,
+		pattern matching is never required to access them.</p>
+
+	<h4>Common Methods</h4>
+	<p>Traits may define methods. 
+		These methods may have implementations, but they are not required to.
+		A trait's method without an implementation must be implemented by all variant types.
+		A trait's method with an implementation is used as the default implementation
+		for a variant type, if that variant type does not override it with its own implementation.</p>
+
+	<h3>Variant Type</h3>
+	<p>Now let's examine the definition and use of concrete variant types
+		which inherit from the trait type. 
+		These are defined using <span class="pre">struct</span>,
+		ensuring we can instantiate specific values of these types.</p>
+
+	<h4>Inheriting Traits</h4>
+	<p>A variant struct type may explicitly inherit from one or more traits
+		by specifying them as unnamed fields of the trait's type (e.g., <span class="pre">_ Event</span>).
+		No name is given, since we cannot work with such fields as an aggregate values anyway.
+		A trait's fields are incorporated into the struct at the indicated place,
+		as if individually specified there.
+		No <span class="pre">use *</span> is required to indicate inheritance, 
+		because traits are always completely inherited.</p>
+	<p>Even though a struct may inherit from multiple traits, there are restrictions:</p>
+	<ul>
+		<li>Only one trait may have a tag field. That tagged trait must be the first field in the variant type's struct.</li>
+		<li>Only one trait may be <span class="pre">enumtrait</span>.
+			The rest must be <span class="pre">trait</span>.</li>
+		<li>Every named field is only defined once, by one trait or the variant type.</li>
+		<li>Two different traits may not offer implementations of a method with the same name and signature.</li>
+	</ul>
+
+	<h4>Fields and Methods</h4>
+	<p>Each variant type may define its own unique fields. Similarly, it may define its own methods.
+		Every trait method without an implementation must be implemented by the variant type.
+		Any implemented trait method may be overridden by the variant type,
+		otherwise the default trait's method applies.</p>
+
+	<h4>Variant Type Values</h4>
+	<p>Since a variant type is a struct, one works with it as with most any struct.
+	A new value is created using a struct constructor specifying both the common fields and the
+	variant type's unique fields (any tag is automatically filled in with the correct integer):</p>
 <pre>
+// Notice that all constructors must provide a timestamp for the common time field
 mut event = MouseEvent[time: now, button: 0, x: 140, y: 170]
 event = KeyEvent[now, 'a']
 event = QuitEvent[now]
 </pre>
-	<p>The common field <span class="pre">time</span> must be initialized alongside the other fields.
-	The tag field will be implicitly initialized by the constructor.</p>
-
-		<h3>Value Access</h3>
-		<p>Any field in common across all variants is easily accessible, regardless of variant type:</p>
-<pre>
-imm when = event.time
-</pre>
-		<p>However, much like enum, to safely gain access to any of the variant fields,
-			we must use <a href="refmatch.html">pattern matching</a>:</p>
+	<p>If the variant type is based on an <span class="pre">enumtrait</span>,
+		the type of its values is the name of the trait 
+		(e.g., <span class="pre">Event</span>). Common fields may be accessed in the usual way.
+		However, unique fields and methods are only accessible after 
+		<a href="refmatch.html">pattern matching</a>.</p>
 <pre>
 match event
-	~~ mbutton = MouseButton:   mbutton.x
-	~~ key = Keyboard:          i32[key.keysym]
-	~~ Quit:                    0
+  ~~ mbutton = MouseButton:   mbutton.x
+  ~~ key = Keyboard:          i32[key.keysym]
+  ~~ Quit:                    0
 </pre>
+	<p>If the variant type is based on <span class="pre">trait</span>,
+	  its type is the name of the variant type
+		(e.g., <span class="pre">QuitEvent</span>).
+		Common and unique fields and methods are accessed in the usual way.</p>
+	
+	<h4>Upcasting to a Trait Reference</h4>
+	<p>A trait-based basic reference may be created that points to any variant type's value.</p>
+<pre>
+imm refevent &amp;Event = &event
+</pre>
+	<p>(Note: On the next page, we also show that a trait-based virtual reference may be created.)</p>
+	<p>A trait-based basic reference only has access to the trait's common fields
+		and any trait-based implemented methods never overwritten by any variant type.</p>
+<pre>
+imm when = refevent.time
+</pre>
+	<p>Use pattern-matching to downcast it to its original variant type.</p>
 
-	<h3>Comparing</h3>
-	<p>Just like with vanilla structs,
-			two variant values may be only compared if the struct implements
-			the <a href="refmethod.html#compare">comparison methods</a>.
-		</p>
-
-	<h2>Methods</h2>
-	<p>Another advantage of trait-based variant types is the ability to define methods on the variants.
-		As discussed earlier, a trait may define methods that are implemented or not,
-		its variants inherit and must ensure all are implemented.
-		One can then use methods on variant types freely.
-	</p>
-		
+	
+	<h2 id="marker">Marker traits</h2>
+	<p>A marker trait defines no fields nor methods.
+		Its value comes from other trait or struct types inheriting it.
+		Its use then becomes a testable attribute of that type (e.g., by generics), 
+		allowing one to distinguish between types that support
+		a certain behavior and those that don't.</p>
 	
 
 	<p style="text-align: right; margin-top: 2em;">
