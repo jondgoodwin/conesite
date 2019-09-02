@@ -127,34 +127,31 @@ imm ref3 = &amp;pointref.x   // equivalent to:  &amp;*pointref.x
 	<h2>Permissions</h2>
 	<p>Like owning references, borrowed references may specify a permission which
 		governs what may be done with the reference.
-		This permission is specified after the ampersand operator:</p>
+		This permission is specified after the ampersand operator.
+		If none is specified, <span class="pre">const</span> is assumed.</p>
 <pre>
 mut a = 3
 imm ref = &amp;mut a   // Creates a mutable borrowed reference to a's value
 *ref = 4           // a is now set to 4
 </pre>
-	<p>The permission requested must be allowed by the source we are borrowing from.
-		For example, a mutable borrowed reference may not be obtained from an immutable variable.</p>
 
-	<h3 id="const">const Permission</h3>
-	<p>If no permission is specified when creating a borrowed reference
-		(as demonstrated in earlier examples),
-		the <span class="pre">const</span> permission is assumed.
-		A <span class="pre">const</span> reference may read its value, but may not modify that value.
-		This description may sound like <span class="pre">imm</span>, but it is not the same.
-		<span class="pre">imm</span> guarantees that <i>no</i> other mutable reference to the same object exists,
-		making it safe to share between threads. <span class="pre">const</span> makes no such guarantee.
-		Therefore, <span class="pre">const</span> references cannot be safely shared with another thread.</p>
-		<p>The primary value of <span class="pre">const</span> is how it makes polymorphic
-		any functions and methods that promise to not change a referred-to value. 
-		By declaring a reference parameter as <span class="pre">const</span>,
-		the function or method can safely accept references which the caller sees as
-		<span class="pre">mut</span>, <span class="pre">imm</span>, <span class="pre">uni</span>,
-		or <span class="pre">const</span>.
-		For this reason, <span class="pre">const</span> is the effectively
-		the commonly-used, universal receiver for other permissions.
-		This is why creating a borrowed reference
-		defaults to <span class="pre">const</span> when no permission is specified.</p>			
+	<h3 id="permtrans">Temporary Permission Transitions</h3>
+	<p>The permission requested for the borrowed reference must be allowed by the source we are borrowing from.
+		For example, a mutable borrowed reference may not be obtained from an immutable variable.</p>
+	<p>Using borrowed references <i>does</i> make it possible to temporarily transition
+		a <span class="pre">uni</span> reference to some shared reference permission. 
+		During the lifetime of a borrowed reference, the source for the borrowed reference may not be used.
+		However, once the lifetime of the borrowed reference expires,
+		the original source becomes usable again:</p>
+<pre>
+imm uniref = &amp;rc 5
+do
+  imm bref1 &amp;mut i32 = uniref   // Coerce owning reference to a 'mut' borrowed reference
+  imm bref2 = ref2              // Share with another borrowed reference
+  *bref2 = *bref1 + 1
+  *uniref = 6                   // Error, uniref is unusable during scope of borrowed 'bref1'
+*uniref = 7                     // Allowed, since borrowed references have expired
+</pre>
 
 	<h2>Freezing access to the source of a borrow</h2>
 	<p>When a borrowed reference is created, its source is always a named variable.

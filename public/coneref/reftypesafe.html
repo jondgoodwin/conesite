@@ -60,12 +60,11 @@
 	</ul>
 	<p>Many type pairs in Cone comply with these criteria and support a safe subtyping relationship:</p>
 	<ul>
-		<li>Any variant type is a subtype of the enum type 
-			that defines it as a variant.
-			By extension, any non-nullable type is a subtype of its
+		<li>Any variant type is a subtype of any trait or struct type 
+			that it complies with, even if it does not inherit from it.</li>
+		<li>Any non-nullable type is a subtype of its
 			nullable equivalent (e.g., <span class="pre">&Foo</span> 
-			is a subtype of <span class="pre">?&Foo</span>).
-		</li>
+			is a subtype of <span class="pre">?&Foo</span>).</li>
 		<li>A borrowed reference is a subtype of an equivalently-typed owning reference
 			(e.g., <span class="pre">&Foo</span> is a subtype of <span class="pre">&so Foo</span>)</li>
 		<li>A <a href="refptr.html">pointer</a>

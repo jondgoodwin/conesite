@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>Reference Permissions - Cone Reference</title>
+	  <title>Permissions - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -8,210 +8,230 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Reference Permissions and uni</div>
+			<div id="sub">Permissions</div>
 		</div>
 
     <div class="text">
 
-	<p>While talking about references, several unfamiliar permissions have been mentioned in passing.
-		It is now time for a more detailed treatment.
-		This is important not only because the list of permissions is incomplete,
-		but also because many of these permissions offer fluid, polymorphic, and <i>safe</i> transitions.</p>
-	<p>The primary role of permissions is to improve program safety by preventing race conditions,
-	where multiple concurrent threads step on each other when trying to access the same value.
-	Prudent use of permissions can also help make code easier to understand and improve execution performance.</p>
-	<p>Every variable, field and reference declares its permission,
-	which enables and constrains its use.
-	For example, different permissions grant or deny the right to read a value, modify a value, 
-	share references to the same value, or share access to values across threads.</p>
-	<p>Permissions come in two flavors:</p>
-	<ul>
-	<li><b>Static</b> permissions are completely enforced when the program is compiled,
-	Since they need no runtime enforcement mechanisms, they do not slow down a program.
-	There are a fixed number of these built-in, static permissions.</li>
-	<li><b>Runtime</b> permissions are enforced partly by the compiler and partly by runtime mechanisms.
-	It is possible to define additional runtime permissions beyond those provided by the language.</li>
-	</ul>
-	<p>Notice that the <i>variable</i> 'ref3' that holds the reference is itself immutable
-		(it can only ever refer to 'localvar'). However, it holds a <i>reference</i> able to change (mutate) 'localvar'.
-		In this statement, 'imm' prohibits the variable 'ref3' from being changed,
-		whereas the implicit 'mut' allows the value pointed at by ref3 to be changed.
-		These are separable concerns.</p>
+	<p>Every reference's type specifies a permission which controls
+		what may, and may not, be done with that reference.
+		Permissions affect such capabilities as the reference's right to 
+		view (or modify) the value it points to,
+		create multiple copies of that reference, 
+		and use locks or atomics for synchronizing access to the reference's value.</p>
+	<p>The primary purpose of permissions is to improve program safety by preventing data races,
+		where multiple concurrent threads step on each other when trying to access the same value.
+		Each permission uses a different strategy to make it impossible for multiple
+		threads to perform lifetime-overlapping atomic transactions on the same value.
+		For some of these permissions, their guarantees can be enforced entirely by the compiler,
+		which means they are free from runtime overhead.
+		Others are enforced by a combination of compiler and runtime mechanisms
+		(e.g., locks).</p>
+	<p>Prudent use of permissions can also help make code easier to understand and improve execution performance.</p>
 
+	<h2>List of Permissions</h2>
+	<p>Let's introduce each permission, one at a time.</p>
 	
-	<h2>imm and mut</h2>
-	<p>Let's begin with two static permissions introduced <a href="refterm.html#varperm">earlier</a>.
-	  The rules for these permissions also apply to references:</p>
-	<ul>
-	<li><span class="pre">imm</span> (immutable)
-	declares that a reference's value will never change after it is initialized.
-	Concurrent threads may share access to immutable values.</li>
-	<li><span class="pre">mut</span> (mutable)
-	allows multiple references to a value to freely access or change that value at any time.
-	However, all references to any specific value are restricted to a single thread.</li>
-	</ul>
-	
-	<h2 id-"uni">uni</h2>
-	<p>Let's add a new static permission to our collection.
-	The static <span class="pre">uni</span> (unique) permission
-	allows its value to be read or changed (similar to <span class="pre">mut</span>).
-	However, <span class="pre">uni</span> carries a significant restriction:
-	there can only be <i>one</i> active reference to its value at a time.
-	Ownership of such a reference may not be shared,
-	it can only be transferred (<a href="refmove.html">moved</a>) to another variable, function, or thread.</p>
-	<p>The <span class="pre">uni</span> permission, and its single reference restriction,
-	may seem a bit unusual. However, the concept is incredibly valuable and not new to Cone.
-	Rust's &mut reference, C++'s unique_ptr&lt;&gt;, C's restrict keyword,
-	and Pony's iso reference capability take advantage of this same pattern.
-	Let's explore the implications of using this permission.</p>
-	
-	<h3>uni as the first permission</h3>
-	<p><span class="pre">uni</span> is best understood as
-	the first permission an owning reference gets in the early days of its existence.
-	Whenever an owning reference is created, 
-	it has the <span class="pre">uni</span> permission by default.
-	This makes sense: since the just-created reference is the only one in existence, 
-	it naturally complies with the single reference restriction.</p>
-	<p>So long as the reference keeps its <span class="pre">uni</span> permission,
-	this single reference to an object can be freely and safely moved around a program,
-	hopping from function-to-function or even thread-to-thread.
-	When a <span class="pre">uni</span> reference is assigned to another variable or
-	passed to a function (or returned), the reference moves to its new owner.
-	Any subsequent attempt to use the previous owner of the reference will trigger an error:
+	<h3 id="uni">uni</h3>
+	<p>The <span class="pre">uni</span> (unique) permission is quite permissive.
+		It may be used to view or mutate the value it points to.
+		It may hop safely from thread to thread without any runtime penalty,
+		making it the fastest way to move mutable data from one thread to another.</p>
+	<p>The name, "unique", signals its one restriction:
+		there can only be <i>one</i> active reference to its value at a time.
+		Because of this, its use is governed by	<a href="refmove.html">move semantics</a>.
+		The reference may be moved to another variable, function, or thread,
+		but doing so makes it inaccessible at its former home.</p>
 <pre>
-imm ref = &rc 5    // Allocate a new value and return a uni reference
+imm ref = &so 5    // uni is the default permission for owning reference
 imm newref = ref   // Move uni-based reference to newref
-imm x = ref.x      // ERROR! ref is no longer usable
+imm x = ref.x      // ERROR! ref is no longer usable, as its value moved to newref
+</pre>
+	<p><span class="pre">uni</span> is the default permission on an owning reference,
+		if no permission is explicitly specified.</p>
+	<p><span class="pre">uni</span> is ideal when we never need multiple owning references to the same value
+		(a situation that would also benefit by using the <span class="pre">so</span> region).
+		<span class="pre">uni</span> is also valuable when multiple, owning references are not needed
+		early in the lifetime of the object, but we do want it to be able to move from thread to thread.
+		Performance optimization benefits
+		may also result from knowing the reference is unique.</p>
+
+	<h3>imm</h3>
+	<p>The <span class="pre">imm</span> (immutable) permission 
+		declares that a reference's value will never change after it is initialized.
+		Multiple references may point to the same immutable value,
+		even across multiple threads.
+		An <span class="pre">imm</span> reference may view its value,
+		but not alter it.</p>
+
+	<h3>mut</h3>
+	<p>The <span class="pre">mut</span> (mutable) permission
+		allows multiple references to freely access or change the same value at any time.
+		However, all references to the same value are restricted to a single thread.</p>
+	<p>A <span class="pre">mut</span> array reference may not re-size its array.
+		Similarly, a <span class="pre">mut</span> reference may not alter a variant value.</p>
+
+	<h3 id="const">const</h3>
+	<p>A <span class="pre">const</span> reference may read, but not modify, the value it points to.
+		This may sound like <span class="pre">imm</span>, but it is not the same.
+		<span class="pre">imm</span> guarantees that <i>no</i> other mutable reference to the same object exists,
+		making it safe to share between threads. 
+		<span class="pre">const</span> makes no such guarantee.
+		Therefore, <span class="pre">const</span> references cannot be safely shared with another thread.</p>
+	<p>The primary use for <span class="pre">const</span> rests in how it 
+		allows a function to take in a reference of 
+		<a href="#toconst">nearly any permission</a>,
+		simply by promising not to change the value the reference points at.
+		This polymorphic flexibility is why a borrowed reference's default permission
+		is <span class="pre">const</span>, if no permission is explicitly specified.</p>
+	
+	<h3>mutex</h3>
+	<p>The <span class="pre">mutex</span> permission 
+		enables multiple, mutable references to be shared across threads.
+		A <span class="pre">mutex</span> reference itself 
+		cannot directly access or change the value it points to,
+		except by using atomic operations.</p>
+	<p>To obtain direct access to the value, one must first obtain a 
+		<a href="refborref.html">borrowed reference</a>
+		from the <span class="pre">mutex</span> reference.
+		Obtaining the borrowed reference automatically acquires a runtime lock
+		that ensures only one reference at a time can 
+		view or modify the value the reference points to.</p>
+<pre>
+imm point = &amp;gc mutex Point(x:2, y: 3)
+do
+  pointref = &mut *point     // Obtain borrowed ref to unlock access to the point
+  pointref.x += pointref.y   // Access to point safely protected by mutex
+</pre>
+	<p>When the borrowed reference expires, so does the acquired lock.</p>
+
+	<h3>rwlock</h3>
+	<p>The <span class="pre">rwlock</span> permission
+		works very much the same way as <span class="pre">mutex</span>,
+		except that it allows multiple read-only borrowed references to be obtained
+		at the same time. 
+		However, only one mutable borrowed reference may be obtained at a time.</p>
+
+	<h3>rwcell</h3>
+	<p>The <span class="pre">rwcell</span> permission
+		is quite similar to <span class="pre">rwlock</span>,
+		except that all its reference copies are constrained to say in a single thread.
+		This is useful when one withes to serialize at runtime the acquisition
+		of interior references to variant or collection values.</p>
+		
+	<h3>opaq</h3>
+	<p>An <span class="pre">opaq</span> (opaque) reference
+	may never be used to read or modify the value it points to.
+	This restriction is useful for references to functions or
+	<a href="refstruct.html#opaque">opaque</a> values,
+	where it makes no sense to access the value they point to.</p>
+
+	<h2>Variable vs. Reference Permissions</h2>
+	<p>Initially, it may feel confusing,  distinguishing the role of
+		a permission on a reference vs. on a <a href="refterm.html#varperm">variable</a>,
+		particularly if the variable holds a reference.
+		Quite simply, a <b>variable</b>'s permission governs whether you can give
+		the variable a new value.
+		A <b>reference</b>'s permission governs what you can do with the reference.
+		These are separable concerns.</p>
+		<p>Consider:</p>
+<pre>
+imm ref1 = &so imm 5  // You may not change anything
+imm ref2 = &so mut 5  // You may not change ref2, but can change the number: *ref2 = 10
+mut ref3 = &so imm 5  // ref3 can get a new reference, but you may not change its number
+mut ref4 = &so mut 5  // You may change ref4 or its pointed-at number
 </pre>
 
-	<h3>uni as the universal donor</h3>
-	<p>In many cases, the single reference restriction of <span class="pre">uni</span>
-	poses no hardship and the reference keeps its <span class="pre">uni</span>
-	permission throughout the allocated value's lifetime.
-	In addition to flexibility of movement, there can be 
-	other benefits to keeping a mutable reference as <span class="pre">uni</span>,
-	such as improved performance optimizations and variant type safety.</p>
-	<p>However, the single reference restriction makes <span class="pre">uni</span> references unsuitable for
-	many data structures that require the use of multiple references to the same value.
-	Should a program's logic need multiple references to the same value,
-	the <span class="pre">uni</span> reference may be transitioned to a new reference with a sharable permission, 
-	such as <span class="pre">mut</span> or <span class="pre">imm</span>:
+<h4>Reference vs. Variable Permissions</h4>
+<p>To avoid confusion, let's clarify the role that permissions play with references.
+	The permission on a reference governs that reference itself:
+	what you can or cannot do with the value that the reference points to.
+	This is distinct and separate from the role of the permission on
+	any variable that holds a reference, which governs what we can do with the variable.</p>
+<p>To illustrate this, consider these variations:</p>
+<pre>
+imm ref1 = &amp;rc imm 3
+imm ref2 = &amp;rc mut 3
+mut ref3 = &amp;rc imm 3
+mut ref4 = &amp;rc mut 3
+</pre>
+<p>Because of the <span class="pre">mut</span> variable permission,
+	<span class="pre">ref3</span> and <span class="pre">ref4</span>
+	may be changed to hold a different reference.
+	<span class="pre">ref1</span> and <span class="pre">ref2</span> cannot.
+</p>
+<pre>
+ref1 = &amp;rc imm 5   // ** ILLEGAL! **
+ref2 = &amp;rc mut 5   // ** ILLEGAL! **
+ref3 = &amp;rc imm 5   // ok
+ref4 = &amp;rc mut 5   // ok
+</pre>
+<p>In contrast, because of the <span class="pre">mut</span> reference permission,
+	the references in <span class="pre">ref2</span> and <span class="pre">ref4</span>
+	may be changed to point to a different value.
+	The values pointed to by <span class="pre">ref1</span> and <span class="pre">ref3</span> cannot be altered.
+</p>
+<pre>
+*ref1 = 5   // ** ILLEGAL! **
+*ref2 = 5   // ok
+*ref3 = 5   // ** ILLEGAL! **
+*ref4 = 5   // ok
+</pre>
+
+<h2>Permission Transitions</h2>
+	<p>A new copy of a reference typically has the same permission as the
+		original reference, which is often necessary to preserve the reference's safety guarantees.
+		In certain cases, however, we may safely create a
+		reference copy carrying a different permission.</p>
+
+	<h3>From 'uni'</h3>
+	<p>At some point in the lifetime of a	<span class="pre">uni</span> reference's value, 
+		one may need to transition to allowing multiple, shared references to that value.
+		On a temporary basis (for some lexical lifetime), this transition may be accomplished
+		by using <a href="refborref.html#permtrans">borrowed references</a>.</p>
+	<p>It is also possible to permanently transition a
+		<span class="pre">uni</span> reference to references holding shared permissions,
+		such as <span class="pre">mut</span> or <span class="pre">imm</span>.
+		This is accomplished by moving the `uni` reference value to
+		a reference that holds a shared permission.
+		The original <span class="pre">uni</span> reference is consumed (because of move semantics),
+		leaving us with a new sharable reference, from which copies can be made.</p>		
 <pre>
 imm ref = &amp;rc 5                 // Allocate new value, return 'uni' reference
 imm newref1 &amp;mut i32 = ref      // Move reference to newref with 'mut' permission
 imm newref2 &amp;mut i32 = newref1  // Two 'mut' references to the same object
 *newref2 = *newref1             // Either reference may be used (but not ref any longer)
 </pre>
-	<p><b>Note:</b> This transition may be more concisely performed when the reference is created:</p>
-<pre>
-imm newref1 = &amp;rc mut 5 // Allocate new 'mut' integer
-</pre>
+	<p>The transition of an owning reference
+		from <span class="pre">uni</span> to a shared permission reference is a one way trip.
+		Once this transition has happened,
+		you cannot safely transition a <span class="pre">mut</span> reference back to a
+		<span class="pre">uni</span> reference (or even to an <span class="pre">imm</span> reference).
+		The reference is now "frozen" to the restrictions of its new permission:
+		As <span class="pre">mut</span>, it can never be shared across threads.
+		As <span class="pre">imm</span>, it can never be altered.</p>
 
-	<h3>uni and temporary transitions</h3>
-	<p>The ownership transition from <span class="pre">uni</span> to a shared reference is a one way trip.
-	Once this transition has happened,
-	you cannot safely transition a <span class="pre">mut</span> reference back to a
-	<span class="pre">uni</span> reference (or even to an <span class="pre">imm</span> reference).
-	The reference is now "frozen" to the restrictions of its new permission:
-	As <span class="pre">mut</span>, it can never be shared across threads.
-	As <span class="pre">imm</span>, it can never be altered.</p>
-	<p>However, using borrowed references <i>does</i> make it possible to temporarily transition
-	a uni reference to another permission. 
-	During the lifetime of a borrowed reference, the original <span class="pre">uni</span> reference may not be used.
-	However, once the lifetime of the borrowed reference expires,
-	the original <span class="pre">uni</span> reference becomes usable again:</p>
-<pre>
-imm uniref = &amp;rc 5
-do
-  imm bref1 &amp;mut i32 = uniref   // Coerce owning reference to a 'mut' borrowed reference
-  imm bref2 = ref2              // Share with another borrowed reference
-  *bref2 = *bref1 + 1
-  *uniref = 6                   // Error, uniref is unusable during scope of borrowed 'bref1'
-*uniref = 7                     // Allowed, since borrowed references have expired
-</pre>
-	
-	<h2>mut1</h2>
-	<p>The <span class="pre">mut1</span> permission
-	is the mutable counterpart of <span class="pre">const</span>.
-	A <span class="pre">mut1</span> reference may inspect or change its value.
-	During its lifetime, it promises that references borrowed from it are either
-	a) multiple <span class="pre">const</span> references
-	or b) a single usable <span class="pre">mut1</span> reference.
-	<span class="pre">mut1</span> may not be shared or moved across threads.</p>
-	<p><span class="pre">mut1</span> is typically the best permission to specify when a function or method
-	needs a reference able to change its value.
-	This is because <span class="pre">mut1</span> can safely accept references that are declared as
-	<span class="pre">mut</span>, <span class="pre">uni</span>, or <span class="pre">mut1</span>.
-	This is more flexible than if we defined a mutable borrowed reference parameter as <span class="pre">mut</span>,
-	which would not be able accept <span class="pre">uni</span> owning references, 
-	references to variant types, or <span class="pre">mut1</span> references.</p>
-	
-	<h4>mut1 for sum type owning references</h4>
-	<p><span class="pre">mut1</span> may also be used on owning references.
-	Its main purpose is to allow multiple references to a value that guarantee
-	that only one can modify the value at a time and only via a <span class="pre">mut1</span> borrowed reference.
-	This can be useful when a program needs multiple mutable owning references to sum types which,
-	for safety reasons, may never be <span class="pre">mut</span>.</p>
-	<p>Sum types, variable-sized arrays and other types need restrictions on shared mutability for memory safety,
-	even in single-threaded situations. 
-	Otherwise, it might be possible for one reference to alter the structure of the object
-	while another reference holds an interior pointer now invalidated by the structural change.
-	Unsafe things could happen if the interior pointer was then used.</p>
-	<p>Enforcement of this guarantee requires a run-time mechanism.
-	As with all runtime permissions, this means that
-	<span class="pre">mut1</span> <b>must</b> be specified as the permission
-	when allocating the first reference to that value.</p>
+	<h3 id="toconst">To 'const'</h3>
+	<p>It is safe to create a <span class="pre">const</span> copy of any 
+		<span class="pre">mut</span> or <span class="pre">imm</span> owning reference.
+		Even better, it is safe to borrow a <span class="pre">const</span>
+		reference from a reference of any permission other than <span class="pre">opaq</span>.
+		This quality is what makes it attractive for functions to polymorphically
+		accept <span class="pre">const</span> references to any values
+		they do not intend to modify.</p>
 
-	<h2>opaq</h2>
-	<p><span class="pre">opaq</span> (opaque)
-	declares that this reference will never be used to read or modify its value.
-	It may be compared with another reference.
-	It may be derived (coerced) from any reference.
-	Its primary value is for references to functions or
-	<a href="refstruct.html#opaque">opaque</a> values,
-	where it makes no sense to try to dereference them to see or change their data state.</p>
-
-	<h2>Runtime (Synchronization) Permissions</h2>
-	<p>In addition to the static permissions, Cone also offers runtime permissions.
-	Runtime permissions enable the use of shared, mutable references that are not limited by 
-	the restrictions placed on <span class="pre">mut</span> references.
-	Using runtime permissions, it becomes possible to share value references across threads
-	or to obtain interior references to shared references on sum or array types.</p>
-	<p>The penalty for this added freedom is that reference use carries a small runtime performance hit.
-	This is because runtime permissions wrap every use of the reference to access its contents
-	with that runtime permission's synchronization mechanism
-	which ensures that only one reference at a time can read or change its value.
-	The other potential drawback is that use of runtime permissions 
-	can sometimes suffer from deadlocks or runtime panics.</p>
-	
-	<h3>Runtime Permission Coercions</h3>
-	<p>Runtime permissions do not allow coercion to or from any other permission.
-	Thus, the runtime permission must be specified when creating a new owning reference to a value.
-	All copies of that reference carry the same permission.</p>
-	<p>This means that objects protected by runtime permissions cannot use functions
-	that accept <span class="pre">const</span> or <span class="pre">mut1</span> references.
-	They can only use functions whose reference parameters declare the same runtime permission.</p>
-	
-	<h3>mutex</h3>
-	<p>The mutex permission enables multiple, mutable references to be shared and used across threads.
-	It makes use of hardware intrinsics to ensure only one reference at a time can
-	read or modify the contents of the reference.</p>
-<pre>
-imm point &amp;mutex Point = &amp;Gc Lock Point(x:2, y: 3)
-thread.sendPoint(point)  // Now another thread has a copy of this reference
-point.x += point.y  // Access to point safely protected by mutex twice
-</pre>
-	
-	<h2>Permissions and Threads</h2>
-	<p>Only <span class="pre">imm</span>, <span class="pre">opaq</span>,
-	and the runtime "locked" permissions may be shared freely between threads.
-	Furthermore, a <span class="pre">uni</span> reference may be 
-	moved from one thread to another. References with any other permission
-	(<span class="pre">mut</span>, <span class="pre">const</span>, and <span class="pre">mut1</span>)
-	restrict access to their values to a single thread.</p>
-	
-	<h2 id="view">Viewpoint Adaptation for Struct fields</h3>
-	<p>TBD</p>
+	<h2 id="view">When Type Fields are References</h3>
+	<p>If a type has a <span class="pre">uni</span> reference field,
+		values of that type are likely also governed by move semantics.</p>
+	<p>If a type defines a reference field whose permission stops it from
+		being shared across multiple threads
+		(<span class="pre">mut</span>, <span class="pre">const</span>
+		and <span class="pre">rwcell</span>), 
+		values of that type (and references to values of that type) 
+		are also prevented from being shared across multiple threads.</p>
+	<p>If we have a reference that prohibits mutation of its pointed-at value,
+		that mutability restriction also applies to any reference fields it holds,
+		even if they might otherwise allow mutation of their values.</p>
 	
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refborref.html"><img alt="_" src="next.png" /></a>

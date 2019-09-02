@@ -93,12 +93,11 @@ imm val = *ref     // val is now 3
 	</ul>
 	
 	<h2>Reference Mechanisms</h2>
-	<p>To accomplish these versatile memory management and safety responsibilities,
-		references are composed of four largely-independent mechanisms
-		(inspired by similar mechanisms in Cyclone, Rust and Pony).
+	<p>To accomplish these memory management and safety responsibilities,
+		references are composed of four largely-independent mechanisms.
 		These are specified (often implicitly) as part of a reference's type signature:
 	<ul>
-		<li><b>Region</b></a>.
+		<li><b><a href="refregionglo.html">Region</a></b></a>.
 			Every reference points to data owned by a specific memory region.
 			A region knows how to allocate memory for all the data it owns.
 			It also knows how to automatically reclaim memory for any owned data
@@ -106,27 +105,25 @@ imm val = *ref     // val is now 3
 			Regions allow a program to make use of multiple memory management strategies.
 			An "owned" reference specifies its owning region as part of its type signature.
 			A "borrowed" reference is unaware of which region owns the data it points to.</li>
-		<li><b>Lifetime</b>.
+		<li><b><a href="reflifefn.html">Lifetime</a></b>.
 			A lifetime is some span of time in the execution of a program,
-			often bounded by some lexical scope.
+			often bounded by a lexical scope.
 			In a very real way, the lifetime of an allocated data is determined
 			by the aggregate lifetime of all the usable references that point to it.
 			Often, references need not specify lifetimes explicitly,
 			as they can be inferred by context.</li>
-		<li><b>Permission</b>.
-			Like <a href="refterm.html#vars">variables</a>, every reference specifies the permission
-			that governs what may be done with it.
+		<li><b><a href="refperm.html">Permission</a></b>.
+			A reference's permission governs what may be done with it.
 			Each distinct permission grants and denies certain rights, such as the ability to read
 			or change the value the reference points at, or the ability to make a copy of a reference.
-			Permissions also govern the use of atomics, locks and other synchronization mechanisms.
-			So far, only the <span class="pre">imm</span>	and <span class="pre">mut</span> permissions
-			have been described. Later, we will introduce several others.</li>
+			Permissions also govern the use of atomics, locks and other synchronization mechanisms.</li>
 	  <li><b>Value type</b>.
 		The value type specifies the type of the value that the reference points to.
-		References are often treated as simply a stand-in for a value of this type.
-		<p>For most value types, references are handled in a simple, straightforward way.
-			However, references for certain value types are twice as large ("fat" references)
-			and require more complex handling:</p>
+		References are often treated as simply a stand-in for a value of this type.</li>
+	</ul>
+
+		<p>In addition to basic references, there are also special-purpose "fat" references
+			which are handled somewhat differently:</p>
 		<ul>
 				<li><a href="refarrayref.html"><b>Array references</b></a>
 				point to a collection of identically-typed elements.
@@ -138,8 +135,6 @@ imm val = *ref     // val is now 3
 				In addition to pointing at the value's data, the reference also points to
 				runtime type information that facilitates field access or method dispatch.</li>
 			</ul>
-		</li>
-	</ul>
 	<h2>What's Next?</h2>
 	<p>This page introduced many reference concepts rather quickly,
 		and perhaps overwhelmingly. Let's slow down and walk through each of them carefully

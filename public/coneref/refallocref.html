@@ -28,7 +28,7 @@
 	</ul>
 	<p>Cone offers additional region types that are explicitly used to dynamically allocate space for new values,
 		such as <span class="pre">&amp;rc</span> (reference counting), <span class="pre">&amp;gc</span> (tracing GC),
-		<span class="pre">&amp;ar</span> (arena) and <span class="pre">&amp;one</span> (single owner).
+		<span class="pre">&amp;ar</span> (arena) and <span class="pre">&amp;so</span> (single owner).
 		Later pages will describe these and other region types in detail,
 		along with offering guidelines for selecting which to use when.</p>
 	<p>First, however, we need to understand owning references,
@@ -44,11 +44,13 @@ imm nbrref = &amp;rc imm 4
 	<p>This uses the ampersand operator to dynamically allocate and initialize a new value,
 		specifying:</p>
 	<ul>
-		<li><b>Region</b> which allocates the value and manages its lifetime.
+		<li><a href="refregionglo.html"><b>Region</b></a> which allocates the value and manages its lifetime.
 			In this case, the value is allocated in the <span class="pre">rc</span> region.</li>
-		<li><b>Permission</b>. As with variables, this governs access to the value.
-			<span class="pre">imm</span> allows views but not changes.
-			(<b>Note:</b> <span class="pre">uni</span> is assumed when no permission is specified.)
+		<li><b><a href="refperm.html">Permission</a></b>.
+			This governs what you may do with the reference.
+			<span class="pre">imm</span> allows one to see the reference's value, but not change it.
+			(<b>Note:</b> <span class="pre">uni</span> is assumed for an owning reference
+			when no permission is specified.)
 		</li>
 		<li><b>Initial Value</b>.
 			A copy of this value is stored in the newly allocated memory location.
@@ -65,42 +67,6 @@ imm nbrref = &amp;rc imm 4
 imm gcref = &amp;gc mut Point3[1f, 2f, 3f]  // Allocate a new Point3 value using a constructor
 </pre>
 				
-	<h4>Reference vs. Variable Permissions</h4>
-	<p>To avoid confusion, let's clarify the role that permissions play with references.
-		The permission on a reference governs that reference itself:
-		what you can or cannot do with the value that the reference points to.
-		This is distinct and separate from the role of the permission on
-		any variable that holds a reference, which governs what we can do with the variable.</p>
-	<p>To illustrate this, consider these variations:</p>
-<pre>
-imm ref1 = &amp;rc imm 3
-imm ref2 = &amp;rc mut 3
-mut ref3 = &amp;rc imm 3
-mut ref4 = &amp;rc mut 3
-</pre>
-	<p>Because of the <span class="pre">mut</span> variable permission,
-		<span class="pre">ref3</span> and <span class="pre">ref4</span>
-		may be changed to hold a different reference.
-		<span class="pre">ref1</span> and <span class="pre">ref2</span> cannot.
-	</p>
-<pre>
-ref1 = &amp;rc imm 5   // ** ILLEGAL! **
-ref2 = &amp;rc mut 5   // ** ILLEGAL! **
-ref3 = &amp;rc imm 5   // ok
-ref4 = &amp;rc mut 5   // ok
-</pre>
-	<p>In contrast, because of the <span class="pre">mut</span> reference permission,
-		the references in <span class="pre">ref2</span> and <span class="pre">ref4</span>
-		may be changed to point to a different value.
-		The values pointed to by <span class="pre">ref1</span> and <span class="pre">ref3</span> cannot be altered.
-	</p>
-<pre>
-*ref1 = 5   // ** ILLEGAL! **
-*ref2 = 5   // ok
-*ref3 = 5   // ** ILLEGAL! **
-*ref4 = 5   // ok
-</pre>
-
 	<h3>Creating Multiple References to the Same Value</h3>
 	<p>The creation of the <i>first</i> owning reference to a new value always comes from an allocation, as shown above.
 		Additional owning references to that value may then be created
