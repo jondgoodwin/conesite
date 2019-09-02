@@ -134,28 +134,14 @@ do
 		the variable a new value.
 		A <b>reference</b>'s permission governs what you can do with the reference.
 		These are separable concerns.</p>
-		<p>Consider:</p>
-<pre>
-imm ref1 = &so imm 5  // You may not change anything
-imm ref2 = &so mut 5  // You may not change ref2, but can change the number: *ref2 = 10
-mut ref3 = &so imm 5  // ref3 can get a new reference, but you may not change its number
-mut ref4 = &so mut 5  // You may change ref4 or its pointed-at number
-</pre>
-
-<h4>Reference vs. Variable Permissions</h4>
-<p>To avoid confusion, let's clarify the role that permissions play with references.
-	The permission on a reference governs that reference itself:
-	what you can or cannot do with the value that the reference points to.
-	This is distinct and separate from the role of the permission on
-	any variable that holds a reference, which governs what we can do with the variable.</p>
-<p>To illustrate this, consider these variations:</p>
+	<p>To illustrate this, consider these variations:</p>
 <pre>
 imm ref1 = &amp;rc imm 3
 imm ref2 = &amp;rc mut 3
 mut ref3 = &amp;rc imm 3
 mut ref4 = &amp;rc mut 3
 </pre>
-<p>Because of the <span class="pre">mut</span> variable permission,
+	<p>Because of the <span class="pre">mut</span> variable permission,
 	<span class="pre">ref3</span> and <span class="pre">ref4</span>
 	may be changed to hold a different reference.
 	<span class="pre">ref1</span> and <span class="pre">ref2</span> cannot.
@@ -166,7 +152,7 @@ ref2 = &amp;rc mut 5   // ** ILLEGAL! **
 ref3 = &amp;rc imm 5   // ok
 ref4 = &amp;rc mut 5   // ok
 </pre>
-<p>In contrast, because of the <span class="pre">mut</span> reference permission,
+	<p>In contrast, because of the <span class="pre">mut</span> reference permission,
 	the references in <span class="pre">ref2</span> and <span class="pre">ref4</span>
 	may be changed to point to a different value.
 	The values pointed to by <span class="pre">ref1</span> and <span class="pre">ref3</span> cannot be altered.
