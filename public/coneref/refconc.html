@@ -1,0 +1,69 @@
+<html>
+  <head>
+	  <title>Concurrence - Cone Reference</title>
+		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	  <link rel="stylesheet" type="text/css" href="standard.css" />
+	</head>
+  <body>
+		<div id="header">
+			<a href="/"><div id="title">Cone</div></a>
+			<div id="sub">Concurrence</div>
+		</div>
+
+    <div class="text">
+
+	<p>The detailed design for Cone's concurrence capability is unfinished.
+		Most of the heavy lifting for concurrence is handled by library packages,
+		rather than language capabilities.
+		For now, this page offers a sketch of the sort of concurrrency capabilities to expect
+		to see at some point.</p>
+
+	<h2>OS-based parallelism</h2>
+	<p>Libraries provide the ability to spawn additional OS-based processes or threads.
+		A spawned thread is an owned resource, where move semantics make support for structured
+		concurrency possible. The finalizer for the thread effectively joins that thread
+		with the current one.</p>
+	<p>The reference permissions prevent race conditions between threads 
+		that share access to the same memory. They can do this,
+		as the compiler knows what data types are able to move
+		references from one thread to another.
+		Among these library-defined types are lockless deques 
+		that can be used as communicating channels between threads.</p>
+
+	<h2>m:n threading</h2>
+	<p>Using OS threads, one can build a pool of work-stealing worker threads
+		that accept channel-enqueud work requests from anywhere.
+		The nature of the work request could be any message, including
+		a closure, co-routine or actor.
+		The type-compatible work scheduler
+		pops its work off the queue and dispatches it, in many cases
+		expecting it to run quickly to completion.</p>
+	<p>There will likely be some metaprogramming and method-call syntax sugar
+		to make it easy to make message passing look like a method call.</p>
+	<p>Generally speaking, work requests that make use of blocking i/o
+		should be performed on an extra native thread so as to not degrade the
+		throughput and latency of non-blocking work.
+		It is possible that functions will be annotated (like purity) such that
+		the compiler can detect whether a thread is known to not block.</p>
+
+	<h2>Co-routines and Asynchronous I/O</h2>
+	<p>In some cases, dispatched work may be a co-routine that yields before finishing.
+		The dispatcher needs to know how to handle the data types yielded from these
+		co-routines, how to reschedule the work, and how to pass expected data back in on resumption.
+	</p>
+	<p>A common use of such yielding co-routines is when a work thread wants to
+		issue non-blocking i/o requests. Any i/o functions it uses
+		automatically yield after submitting the i/o request, suspending work on the co-routine.
+		After the i/o thread determines the i/o request has been handled,
+		it triggers the co-routine to be rescheduled and resumed, 
+		feeding it the appropriate Result from that request.</p>
+
+
+	<p style="text-align: right; margin-top: 2em;">
+		<a href="refcorout.html"><img alt="_" src="next.png" /></a>
+	</p>
+
+	</div>
+	</body>
+</html>
