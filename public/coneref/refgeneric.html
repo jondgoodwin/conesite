@@ -13,43 +13,69 @@
 
     <div class="text">
 
-	<p>Generics enable the creation of generic type or function logic 
+	<p>Generics enable the creation of generic function or type logic 
 		that works across all types that conform to specified constraints.
-		The compiler can automatically specialize this logic
-		to fit each type you applied to the generic code.
+		The compiler automatically specializes this logic
+		to fit every type you apply to the generic code.
 		Generics improve programmer productivity by making it
-		easy to create and use reusable code.</p>
+		easier to define and use reproducible, type-flexible logic.</p>
 		<p>Collection types such as lists and dictionaries are well served by this approach, 
 		as a single generic can apply the same algorithmic logic
 		across all types the collection stores or indexes with.
-		The built-in <a href="refresult.html">Result</a> and 
+		The usefulness of generics extends well beyond collections.
+		For example, the built-in <a href="refresult.html">Result</a> and 
 		<a href="refoption.html">Option</a> types
 		are also implemented using generics.</p>
 
-	<h2>Type Generic</h2>
-	<p>The basic idea is to write the type declaration 
-		in nearly the same way as we would ordinarily.
-		However, instead of hard-coding the name of a specific type,
-		we declare and use a placeholder name which, later on,
-		we want to substitute for the real type.
+	<h2>Generic Functions</h2>
+	<p>A generic function definition resembles a regular function definition,
+		just adding a list of type names it is generic over.
+		For example, this simple generic function returns the larger of two values:</p>
+<pre>
+fn max[T](a T, b T) T
+  if a > b {a} else {b}
+</pre>
+	<p>The use of square brackets after the function name indicate this is a generic
+		function. <span class="pre">T</span> represents some arbitrary type.
+		In this example, the function expects that both its parameters, 
+		and its return value, have a value of this type.</p>
+	<p>We can use this function on values of different types:</p>
+<pre>
+imm val1 = max[i32](4, 6)      // 10
+imm val2 = max[f32](2.0, 5.0)  // 7.0
+</pre>
+	<p>In effect, the compiler will create multiple max functions,
+		substituting the specified type everywhere the generic function
+		made use of the type <span class="pre">T</span>.
+		In this case, it will create a max function that works with i32 values
+		and another that works with f32 values.</p>
 
-	<h3>Enum Generic</h3>>
-		For example:</p>
-	<pre>
-enum Option&lt;T&gt;
+	<h3>Generic Type Inference</h3>
+	<p>When using a generic function, we do not need to specify the type
+		for <span class="pre">T</span> if it can easily be inferred 
+		based on the type(s) of the parameter values.
+		Thus, this simple use is possible:</p>
+<pre>
+imm val1 = max(4, 6)
+</pre>
+	
+	<h2>Generic Types</h2>
+	<p>Generic types work similarly to generic functions.
+		They look like regular type definitions but specify a list of types
+		they are generic over.</p>
+	<p>For example, one can define something like the built-in Option type
+		using a generic enum:</p>
+<pre>
+enum Option[T]
   Some T
   null
 </pre>
-	<p>The placeholder name is called <span class="pre">T</span>, 
-		which is declared in angle braces just after the type's name.
-		This placeholder is then used when declaring the type
-		of the variant type <span class="pre">Some</span>.</p>
 	<p>With <span class="pre">Option</span> declared, 
 		we can use it to specify the type for some values:</p>
 <pre>
-mut anint Option&lt;i32&gt;
-mut someint Option&lt;i32&gt;
-mut afloat Option&lt;f32&gt;
+mut anint Option[i32]
+mut someint Option[i32]
+mut afloat Option[f32]
 </pre>
 	<p><span class="pre">anint</span> and <span class="pre">someint</span>
 		have the same type: a nullable integer.
@@ -63,42 +89,82 @@ mut afloat Option&lt;f32&gt;
 
 	<h3>Generic Struct</h3>
 	<p>A generic struct may be declared in the same way.
-		This generic type defines a resizeable array:</p>
+		This generic type defines a resizeable collection:</p>
 <pre>
-struct Vec&lt;T&gt;
+struct Vec[T]
 	used usize
 	arr &[]so T
 </pre>
 	<p>And now we can use it:</p>
 <pre>
-mut string Vec&lt;u8&gt;
-mut pointers Vec&lt;&so Node&gt;
+mut string Vec[u8]
+mut pointers Vec[&so Node]
 </pre>
 
-	<h3>Generic Functions</h3>
-	<p>Auto inference</p>
+	<h3>Generic Methods</h3>
+	<p>A regular or generic type may define and use generic methods.
+		Generic methods look and act much like generic functions.</p>
 
 	<h2>Multiple Types</h2>
-	<p>As one might expect, a generic type can substitute more than one type:</p>
+	<p>A generic type (or function) can substitute more than one type:</p>
 <pre>
-enum Result&lt;T,E&gt;
+enum Result[T,E]
   Ok T
   Err E
 </pre>
 	<p>Once again, we can use this generic declaration to create specialized
 		result types for different values:</p>
 <pre>
-mut i32OrBad Result&lt;i32, BadArith&gt;
-int openFile Result&lt;FileHandle, IoError&gt;
+mut i32OrBad Result[i32, BadArith]
+int openFile Result[FileHandle, IoError]
 </pre>
 
-	<h2>Recursive</h2>
-	<p>Self</p>
+	<h2>Generic Constraints</h2>
+	<p>Constraints act as a early-warning system, helping to determine
+		whether generic logic can be successfully applied to any given types.
+		For example, the <span class="pre">max</span> generic function cannot
+		be applied to a type that does not support the comparison operators.</p>
 
-	<h2>Arrays, references, and functions as generic types</h2>
+	<h3>Supertypes as constraints</h3>
+	<p>The simplest form of generic constraint is to specify a Supertype
+		when declaring the generic types:</p>
+<pre>
+trait Comparable
+	fn `&gt;`(a Self, b Self) Bool
+	
+fn max[T Comparable](a T, b T) T
+  if a > b {a} else {b}
+</pre>
+	<p>The trait <span class="pre">Comparable</span> applies to
+		any type that implements the greater-than operator on two values of its type
+		and returns either true or false. 
+		By constraining <span class="pre">T</span> to comply with the
+		<span class="pre">Comparable</span> trait constraint,
+		we get a clearer error should we try to apply max to a
+		type that does not implement the greater than operator.</p>
+
+	<h3>Combining supertypes</h3>
+	<p>Multiple supertypes may be specified as constraints for a single
+		generic variable using <span class="pre">+</span>.
+		This ensures the supertype complies with all of their requirements:</p>
+<pre>
+fn some[T Comparable + Float](a T)
+  ...
+</pre>
+	
+	<h3>Where clause</h3>
+	<p>Some type constraints, such as relationships between two generic types,
+		cannot be expressed within the square brackets.
+		These constraints should be expressed as part of a
+		<span class="pre">where</span> clause just before the start of the block.</p>
+<pre>
+struct Xyz[T, Y] where T &lt; Y && Option[T]: Node
+</pre>
+	<p>This expresses the criteria that T is a supertype of Y 
+		and that a nullable T is a valid Node.</p>
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refconstraint.html"><img alt="_" src="next.png" /></a>
+		<a href="refmeta.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>
