@@ -13,7 +13,10 @@
 
     <div class="text">
 
-	<p>Borrowed references are different from owning references:
+	<p style="margin-left: 40px;"><i>Note: These are largely implemented,
+			but freezing/lifetime enforcement is missing and they struggles across method calls.</i></p>
+	
+		<p>Borrowed references are different from owning references:
 		they neither know nor care which region owns the value they point to.
 		As the name suggests, borrowed references are created to point to values that already exist in memory.</p>
 	<p>A very common scenario is when we have some existing value and, for some limited lexical scope,

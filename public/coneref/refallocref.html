@@ -13,7 +13,10 @@
 
     <div class="text">
 
-	<p>A program's memory is partitioned into regions,
+	<p style="margin-left: 40px;"><i>Note: Much of this capability is implemented
+			except for nullable references and error handling on bad allocations.</i></p>
+	
+		<p>A program's memory is partitioned into regions,
 			each with its own strategy for allocating and reclaiming memory for values.
 			Every program value is wholly located within and governed by its owning region.</p>
 	<p>For example, space for all variable values are automatically allocated
