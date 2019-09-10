@@ -1,0 +1,34 @@
+<html>
+  <head>
+	  <title>Macros - Cone Reference</title>
+		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	  <link rel="stylesheet" type="text/css" href="standard.css" />
+	</head>
+  <body>
+		<div id="header">
+			<a href="/"><div id="title">Cone</div></a>
+			<div id="sub">Macros</div>
+		</div>
+
+    <div class="text">
+
+	<p>Macros are like compile-time functions that generate code wherever they are used.</p>
+<pre>
+// Define a macro
+macro #fn(a i32)
+	... some logic ...
+	
+// Now use it
+#fn(15)
+</pre>
+	<p>Meta-conditionals within a macro are evaluated when the macro is generated.
+		The same is true when used within a generic.</p>
+
+	<p style="text-align: right; margin-top: 2em;">
+		<a href="refconc.html"><img alt="_" src="next.png" /></a>
+	</p>
+
+	</div>
+	</body>
+</html>
