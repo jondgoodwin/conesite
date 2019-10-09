@@ -22,8 +22,6 @@
 		begins with a single quote (').</li>
 		<li><b><a href="#string">String Literal</a></b>
 		begins with a double quote ("), r", or r`</li>
-		<li><b><A href="#url">URL Literal</a></b>
-		begins with an at sign (@).</li>
 		<li><b><A href="#lifetime">Lifetime Annotation</a></b>
 		begins with a single quote (').</li>
 		<li><b><a href="#ident">Identifier</a></b>
@@ -171,23 +169,10 @@
    "
 </pre>
 		
-		<h2 id="url">URL Literal</h2>
-		<p>As described later, the '@' operator returns the value of the resource whose 
-		<a href="https://en.wikipedia.org/wiki/URL">URL</a>
-		follows as a text value. 
-		The resource is loaded at compile-time if the text is a literal value enclosed in double quotes.
-		Otherwise, the resource whose URL is specified by an parentheses-wrapped text expression
-		will be loaded at run-time.</p>
-		<p>As a convenience, it is possible to specify the URL's literal value without surrounding it with
-		double quotes. This happens when the character that follows the '@' is not 
-		a double quote ("), open parenthesis ('('), space, tab, lf, cr, or eof. 
-		The end of the URL happens when encountering the first white space: space, tab, lf, cr or eof.
-		This non-quoted URL is a URL literal.</p>
-		
 		<h2 id="lifetime">Lifetime Annotation</h2>
 		<p>A lifetime annotation looks similar to a character literal,
 			in that it begins with a single quote (').
-			It is followed by any number of alphabetic characters.
+			It is followed by a letter and then any number of alphanumeric characters.
 			The absence of a closing single-quote distinguishes it from a character literal.</p>
 <pre>
 'a
