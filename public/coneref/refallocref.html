@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>Regions and Owning References - Cone Reference</title>
+	  <title>Owning References - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -8,7 +8,7 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Regions and Owning References</div>
+			<div id="sub">Owning References</div>
 		</div>
 
     <div class="text">
@@ -16,25 +16,25 @@
 	<p style="margin-left: 40px;"><i>Note: Much of this capability is implemented
 			except for nullable references and error handling on bad allocations.</i></p>
 	
-		<p>A program's memory is partitioned into regions,
+	<p>Imagine that a program's memory is conceptually partitioned into regions,
 			each with its own strategy for allocating and reclaiming memory for values.
 			Every program value is wholly located within and governed by its owning region.</p>
-	<p>For example, space for all variable values are automatically allocated
-			in either:</p>
+	<p>By way of illustration (even though we have not said so until now), the memory space for every
+		variable's value is automatically allocated in one of these regions:</p>
 	<ul>
 		<li><b>Global region</b>.
-			All global variable values are stored here at fixed locations.</li>
+			All global variable values are stored at fixed locations in the global region.</li>
 		<li><b>Execution Stack regions</b>.
-			Local variable values are allocated and de-allocated here in LIFO order
+			Local variable values are allocated and de-allocated in LIFO order from a stack region
 			as execution unfolds.
 			Each execution thread has its own stack region.</li>
 	</ul>
-	<p>Cone offers additional region types that are explicitly used to dynamically allocate space for new values,
+	<p>These are not the only kinds of regions supported by Cone.
+		A broad range of region strategies may be used to dynamically allocate space for new values,
 		such as <span class="pre">&amp;rc</span> (reference counting), <span class="pre">&amp;gc</span> (tracing GC),
 		<span class="pre">&amp;ar</span> (arena) and <span class="pre">&amp;so</span> (single owner).
-		Later pages will describe these and other region types in detail,
-		along with offering guidelines for selecting which to use when.</p>
-	<p>First, however, we need to understand owning references,
+		The next page describes and evaluates different region strategies in more detail.</p>
+	<p>Before we get to that, let's focus first on owning references,
 		the handles we use to work with values dynamically allocated by regions.
 		All owning references point to some valid, allocated value.
 		This page describes how owning references are created and used.</p>

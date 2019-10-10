@@ -41,9 +41,15 @@ imm nbrref = &rc imm 5  // the 'rc' region counts references
 		because no one strategy handles all these criteria well.
 		This power of choice ensures each allocated object can select
 		the optimal region that best serves the way the program needs that object to behave.</p>
-	<p>There are five basic flavors of regions that can be used when creating an owning reference.
-		Let's describe the mechanism that each uses,
-		and then assess how they compare on the above criteria.</p>
+	<p>This page does not list every possible region that can be used by a Cone program,
+		as new ones can be defined within the language itself.
+		Instead, this page summarizes the five distinct, commonly-used region strategies
+		used to allocate new objects pointed at by an owning reference.
+		The focus is to describe the mechanism used by each of these region strategies
+		and assess how they compare on the above criteria.
+		In reality, each of these region strategies may be implemented by multiple concrete regions
+		that vary somewhat in how they work (e.g., &amp;rc might only work within a single thread,
+		whereas &amp;arc might allow multiple threads to share references to the same object).</p>
 
 	<h2>rc - Reference Counting</h2>
 	<p>As the name suggests, the <span class="pre">rc</span> region keeps a running
@@ -64,7 +70,8 @@ imm nbrref = &rc imm 5  // the 'rc' region counts references
 			and frequent cache-damaging reference counts updates.</li>
 		<li>Memory leaks due to cyclic reference counts that keep unused data islands alive forever.</li>
 	</ul>
-	<p>To prevent cycle-based memory leaks, one can use "weak" references to make any cycle breakable.
+	<p>To prevent cycle-based memory leaks, one can use 
+		<a href="refweakref.html">weak references</a> to make any cycle breakable.
 		A weak reference may be obtained from any owning reference:</p>
 <pre>
 childnode.parent = parentnoderef.weak
@@ -107,7 +114,10 @@ childnode.parent = parentnoderef.weak
 	<ul>
 		<li>Throughput that is better than <span class="pre">gc</span> and <span class="pre">rc</span>
 			(as there is no runtime bookkeeping cost). It will be worse than arenas, however.</li>
-		<li>Determinism, as reclamation happens immediately after the last reference expires.</li>
+		<li>Determinism, as reclamation happens immediately after the last reference expires.
+			Indeed, single owner is one of the few region strategies that allow the program to decide
+			exactly when the object is to be explicitly destroyed, and even support exception
+			handling in the event of an unsuccessful destruction.</li>
 		<li>Efficient use of memory.</li>
 		<li>Negligible runtime footprint.</li>
 	</ul>
@@ -195,7 +205,7 @@ imm newevent = &eventPool mut Event::QuitEvent[]
 		process all objects sequentially in a cache-friendly way.</p>
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refregiondyn.html"><img alt="_" src="next.png" /></a>
+		<a href="refperm.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>
