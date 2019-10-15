@@ -98,7 +98,7 @@ imm found = loop
 		<a href="reftoken.html#lifetime">lifetime annotation</a> and then use that same
 		annotation on the <span class="pre">break</span> or <span class="pre">continue</span> statement.</p>
 <pre>
-each 'outer n in 1...5
+'outer: each n in 1...5
 	while obj.fireAShot()
 		continue 'outer if obj.impacted
 </pre>
