@@ -58,21 +58,18 @@ enumtrait Event
   enum u8     // explicit tag field to discriminate variants
   time Time   // All events are time-stamped
 
-// Mouse event type
-struct MouseEvent
-  _ Event     // Inherit from Event trait
+// Mouse event type, inheriting from Event
+struct MouseEvent : Event
   button u8
   x i32
   y i32
 
 // Keystroke event type
-struct KeyEvent
-  _ Event
+struct KeyEvent : Event
   key KeySym
 
 // Quit event type
-struct QuitEvent
-  _ Event
+struct QuitEvent : Event
 </pre>
 	<p>This example defines three variant event types
 		(for mouse-button clicks, keyboard changes, and quit requests),
@@ -164,20 +161,14 @@ struct QuitEvent
 		ensuring we can instantiate specific values of these types.</p>
 
 	<h4>Inheriting Traits</h4>
-	<p>A variant struct type may explicitly inherit from one or more traits
-		by specifying them as unnamed fields of the trait's type (e.g., <span class="pre">_ Event</span>).
-		No name is given, since we cannot work with such fields as an aggregate values anyway.
-		A trait's fields are incorporated into the struct at the indicated place,
-		as if individually specified there.
-		No <span class="pre">use *</span> is required to indicate inheritance, 
-		because traits are always completely inherited.</p>
-	<p>Even though a struct may inherit from multiple traits, there are restrictions:</p>
+	<p>A variant struct type explicitly inherits from a trait
+		by specifying it after the struct name and a colon.
+		A trait's fields are folded into the struct at the start,
+		as if individually specified there.</p>
+	<p>There are restrictions to trait inheritance:</p>
 	<ul>
-		<li>Only one trait may have a tag field. That tagged trait must be the first field in the variant type's struct.</li>
-		<li>Only one trait may be <span class="pre">enumtrait</span>.
-			The rest must be <span class="pre">trait</span>.</li>
+		<li>Only the base trait may have a tag field.</li>
 		<li>Every named field is only defined once, by one trait or the variant type.</li>
-		<li>Two different traits may not offer implementations of a method with the same name and signature.</li>
 	</ul>
 
 	<h4>Fields and Methods</h4>
@@ -197,7 +188,7 @@ event = KeyEvent[now, 'a']
 event = QuitEvent[now]
 </pre>
 	<p>If the variant type is based on an <span class="pre">enumtrait</span>,
-		the type of its values is the name of the trait 
+		the type of its values could be the name of the trait 
 		(e.g., <span class="pre">Event</span>). Common fields may be accessed in the usual way.
 		However, unique fields and methods are only accessible after 
 		<a href="refmatch.html">pattern matching</a>.</p>
