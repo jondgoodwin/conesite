@@ -107,7 +107,7 @@ each x in |{cnt = 12}| cnt > 0? Some(cnt /= 2) : null
   sum += x
 </pre>
 		<p>The value of sum at the end will be 10, as each successive call to the closure returns 6, 3, and 1.
-			After 1, it returns <span class="pre">none</span>, which stops iteration.</p>
+			After 1, it returns <span class="pre">null</span>, which stops iteration.</p>
 		<p>Because it is stateful, a closure is typically single use. It is created before it is needed, used to produce values lazily, 
 			and then discarded afterward. 
 			This is because, unless its state can be independently reset, it will only ever afterward say it is out of values.</p>
