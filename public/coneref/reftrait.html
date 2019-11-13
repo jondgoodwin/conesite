@@ -13,7 +13,7 @@
 
     <div class="text">
 
-	<p style="margin-left: 40px;"><i>Note: None of this is implemented.</i></p>
+	<p style="margin-left: 40px;"><i>All of this is implemented except embedded traits.</i></p>
 	
 	<p>Like <span class="pre">struct</span><span class="pre">, trait</span>
 		and <span class="pre">enumtrait</span>
@@ -49,10 +49,10 @@ trait Node
 		share fields in common or support same-named methods which are implemented
 		differently for each variant.
 		We accomplish this by defining each variant types as inheriting from
-		a common <span class="pre">trait</span> or <span class="pre">enumtrait</span>.
+		a common base <span class="pre">trait</span> or <span class="pre">enumtrait</span>.
 		For example:</p>
 <pre>
-// Common trait "base" for variant event types
+// Common base trait for variant event types
 // 'enumtrait' pads all variants to be the same size
 enumtrait Event
   enum u8     // explicit tag field to discriminate variants
@@ -73,7 +73,7 @@ struct QuitEvent : Event
 </pre>
 	<p>This example defines three variant event types
 		(for mouse-button clicks, keyboard changes, and quit requests),
-		all built on a common Event trait type base.
+		all built on a common Event base trait.
 		These event types share some fields in common, such as
 		<span class="pre">time</span>'s timestamp info.
 		Each event variant may also have its own specific fields.
@@ -154,21 +154,22 @@ struct QuitEvent : Event
 		A trait's method with an implementation is used as the default implementation
 		for a variant type, if that variant type does not override it with its own implementation.</p>
 
-	<h3>Variant Type</h3>
+	<h3>Variant Types from base traits</h3>
 	<p>Now let's examine the definition and use of concrete variant types
-		which inherit from the trait type. 
+		which inherit from a base trait type. 
 		These are defined using <span class="pre">struct</span>,
-		ensuring we can instantiate specific values of these types.</p>
+		thereby specific values of these variant types can be instantiated.</p>
 
-	<h4>Inheriting Traits</h4>
-	<p>A variant struct type explicitly inherits from a trait
+	<h4>Inheriting from a Base Trait</h4>
+	<p>A variant struct type explicitly inherits from a base trait
 		by specifying it after the struct name and a colon.
 		A trait's fields are folded into the struct at the start,
 		as if individually specified there.</p>
-	<p>There are restrictions to trait inheritance:</p>
+	<p>There are restrictions to base trait inheritance:</p>
 	<ul>
-		<li>Only the base trait may have a tag field.</li>
-		<li>Every named field is only defined once, by one trait or the variant type.</li>
+		<li>Only the base trait may specify a tag field (and only one of them).</li>
+		<li>Only the lowest base trait may be 'enumtrait' (same-size). All other traits are 'trait'.</li>
+		<li>The name of every field must be unique, whether inherited or part of the variant type.</li>
 	</ul>
 
 	<h4>Fields and Methods</h4>
@@ -204,7 +205,7 @@ match event
 		Common and unique fields and methods are accessed in the usual way.</p>
 	
 	<h4>Upcasting to a Trait Reference</h4>
-	<p>A trait-based basic reference may be created that points to any variant type's value.</p>
+	<p>A basic reference to a base trait may be safely coerced from a reference to any variant type's value.</p>
 <pre>
 imm refevent &amp;Event = &event
 </pre>
@@ -215,6 +216,29 @@ imm refevent &amp;Event = &event
 imm when = refevent.time
 </pre>
 	<p>Use pattern-matching to downcast it to its original variant type.</p>
+<pre>
+if imm butevent &MouseButton = refevent
+  // We can safely use butevent here as a reference to a event known to be a MouseButton event
+</pre>
+
+	<h3>Inheriting from a non-base trait</h3>
+	<p>A struct may inherit from multiple traits, but only one of them may be designated as the base trait.</p>
+<pre>
+struct Composite : BaseTrait
+	embed AnotherTrait
+	afield i32
+</pre>
+  <p>This struct inherits from two traits, BaseTrait and AnotherTrait.
+		However, only BaseTrait is used as a base trait.</p>
+	<p>A trait that is embedded (like AnotherTrait) is fully inherited in the same way as a base trait.
+		It includes all its fields as if defined in the struct.
+		Likewise, all its methods are also inherited (although they may be overridden by the struct's 
+		(or other inherited trait/struct) methods.</p>
+	<p>Unlike the base trait, embedded traits may not be same-sized nor may they define a tag field.
+		Also, one may not upcast the struct (or a basic reference to the struct) to any embedded trait.
+		This latter restriction is because there is no guarantee on where the embedded trait's fields
+		will be found in the struct, not to mention the restriction that trait values are never instantiated.
+		As will be seen later, it is possible to create a virtual reference to an embedded trait.</p>
 
 	
 	<h2 id="marker">Marker traits</h2>
