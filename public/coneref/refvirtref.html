@@ -130,10 +130,10 @@ mut virtref = &circle as &amp;&lt;Shape
 		This can be accomplished using pattern matching:</p>
 <pre>
 match shape
-  ~~Circle:
-    // 'shape' is now usable as having type &Circle
-  ~~Rectangle:
-    // 'shape' is now usable as having type &Rectangle
+  imm circle &&lt;Circle:
+    // circle is now usable as having type &Circle
+  im rect &lt;Rectangle:
+    // 'rect' is now usable as having type &Rectangle
   _:
     // some other unknown shape type
 </pre>

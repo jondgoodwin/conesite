@@ -195,9 +195,9 @@ event = QuitEvent[now]
 		<a href="refmatch.html">pattern matching</a>.</p>
 <pre>
 match event
-  ~~ mbutton = MouseButton:   mbutton.x
-  ~~ key = Keyboard:          i32[key.keysym]
-  ~~ Quit:                    0
+  imm mbutton MouseButton:   mbutton.x
+  imm key Keyboard:          i32[key.keysym]
+  is Quit:                   0
 </pre>
 	<p>If the variant type is based on <span class="pre">trait</span>,
 	  its type is the name of the variant type

@@ -13,7 +13,8 @@
 
     <div class="text">
 
-	<p style="margin-left: 40px;"><i>Note: None of this capability is currently implemented.</i></p>
+	<p style="margin-left: 40px;"><i>Note: A very basic match capability is implemented,
+		supporting value equality, bound pattern matching and 'else'.</i></p>
 
 	<p>As with <span class="pre">if</span>, pattern matching is about deciding
 	which code path to perform. 
@@ -133,7 +134,7 @@ match nbr
 	against, specifying match patterns for the value or type of 
 	particular substructural elements.
 	It also supports "destructuring", binding variables to these or other substructural elements.</p>
-	<p>Partial match patterns begin with the <span class="pre">~~</span> operator. 
+	<p>Partial match patterns begin with the <span class="pre">is</span> operator. 
 		Additional specifics of the pattern vary by type.</p>
 
 	<h3 id="array">Collection partial matches</h3>
@@ -141,16 +142,16 @@ match nbr
 		certain elements:</p>
 <pre>
 match name
-	~~ "Judy": judy     // Matches if name string begins with "Judy"
-	~~ "Frank": frank
+	is "Judy": judy     // Matches if name string begins with "Judy"
+	is "Frank": frank
 	_: noone
 </pre>
 	<p>Alternatively, one can specify matching patterns for the first few elements:</p>
 <pre>
 match numbers
-	~~ [1, _]: 1
-	~~ [_, 1]: 2
-	~~ [&lt;=0, &lt;=0]: 3
+	is [1, _]: 1
+	is [_, 1]: 2
+	is [&lt;=0, &lt;=0]: 3
 	_: 4
 </pre>
 
@@ -158,9 +159,9 @@ match numbers
 	<p>A matching pattern may be created for specific named fields:</p>
 <pre>
 match points
-  ~~ Point[0., _]: 1
-  ~~ Point[_, 0.]: 2
-  ~~ Point[&lt;0., &lt=0.]: 3
+  is Point[0., _]: 1
+  is Point[_, 0.]: 2
+  is Point[&lt;0., &lt=0.]: 3
   _: 4
 </pre>
 	<p>Any unspecified fields in a struct pattern are assumed to match.</p>
@@ -170,16 +171,16 @@ match points
 		binding to a variable:</p>
 <pre>
 match oddval
-	~~ intval = SomeInt:     intval
-	~~ point = PointStruct:  i32[point.x * point.y]
-	None:                    0
+	imm intval SomeInt:     intval
+	imm point PointStruct:  i32[point.x * point.y]
+	is None:                    0
 </pre>
 	<p>If desired, pattern matching and binding can also be applied to the internal value(s):</p>
 <pre>
 match oddval
-  ~~ intval = SomeInt[&lt;0]:   -intval
-  ~~ intval = SomeInt:       intval
-  ~~ PointStruct[x=_, y=_]:  i32[x * y]
+  imm intval = SomeInt[&lt;0]:   -intval
+  imm intval = SomeInt:       intval
+  is PointStruct[x=_, y=_]:  i32[x * y]
   None:                      0
 </pre>
 
