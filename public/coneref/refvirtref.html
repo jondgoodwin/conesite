@@ -26,21 +26,21 @@
 struct Rectangle
   height f32
   width f32
-  fn area(self &)
+  fn area(self &) f32
     height * width
-  fn perimeter(self &)
+  fn perimeter(self &) f32
     2. * (height + width)
 
 struct Circle
   r f32
-  fn area(self &)
+  fn area(self &) f32
     f32::pi * r * r
-  fn perimeter(self &)
+  fn perimeter(self &) f32
     2. * f32::pi * r
 
 trait Shape
-  fn area(self &)
-  fn perimeter(self &)
+  fn area(self &) f32
+  fn perimeter(self &) f32
 	
 fn doMath(shape &amp;&lt;Shape) f32, f32
   shape.area, shape.perimeter
