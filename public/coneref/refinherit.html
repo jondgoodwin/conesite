@@ -8,7 +8,7 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Inheritance</div>
+			<div id="sub">Delegated Inheritance</div>
 		</div>
 
     <div class="text">
@@ -18,7 +18,7 @@
 	<p>Inheritance makes it easy to declare
 		a new type that reuses (inherits) the fields or methods defined by some other type.</p>
 	<p>Cone's version of inheritance looks and behaves somewhat differently than
-		in other languages.
+		in other languages, which is why it is called delegated inheritance.
 		At its heart, Cone's inheritance is a composition-based approach that offers
 		convenient namespace "sugar" for automatically forwarding certain field or method access requests.
 		This makes customized type reuse easy to accomplish, where needed,
@@ -53,7 +53,11 @@ struct Car
 		<li>any access to <span class="pre">car.fuel</span>
 			is treated as equivalent to <span class="pre">car.engine.fuel</span>.</li>
 		<li><span class="pre">car.thrust(23.2)</span>
-			is treated as equivalent to <span class="pre">car.engine.thrust(23.2)</span></li>
+			is treated as equivalent to <span class="pre">car.engine.thrust(23.2)</span>
+			It is important to note that the thrust will be called with self being the
+			engine, and not the car. If one needs a thrust method that operates on car,
+			then don't have Car inherit it from engine. Implement it in Car and then explicitly
+			call engine's thrust as part of its logic, if desired.</li>
 	</ul>
 	<p>A type may inherit names from more than one field.</p>
 
@@ -89,7 +93,7 @@ struct SuperEngine
 		are equivalent and equally acceptable.</p>
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refmove.html"><img alt="_" src="next.png" /></a>
+		<a href="reftrait.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

@@ -1,0 +1,217 @@
+<html>
+  <head>
+	  <title>Trait-based Variants - Cone Reference</title>
+		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	  <link rel="stylesheet" type="text/css" href="standard.css" />
+	</head>
+  <body>
+		<div id="header">
+			<a href="/"><div id="title">Cone</div></a>
+			<div id="sub">Trait-based Variants</div>
+		</div>
+
+    <div class="text">
+
+	<p>Traits were introduced earlier in terms of their role as 
+		<a href="reftrait.html">"mixins"</a>.
+		Let's expand on the usefulness of traits by showing how
+		base traits may be used as the foundation for defining
+		more flexible variant types than are possible using <span class="pre">enum</span>.
+	</p>
+
+	<p>Although <span class="pre">enum</span> is sufficient for simple variant types,
+		we sometimes need more complex variant types that
+		share fields in common or support same-named methods which are implemented
+		differently for each variant.
+		We accomplish this by defining each variant types as inheriting from
+		a common base <span class="pre">trait</span> or <span class="pre">enumtrait</span>.
+		For example:</p>
+<pre>
+// Common base trait for variant event types
+// 'enumtrait' pads all variants to be the same size
+enumtrait Event
+  enum u8     // explicit tag field to discriminate variants
+  time Time   // All events are time-stamped
+
+// Mouse event type, inheriting from Event
+struct MouseEvent : Event
+  button u8
+  x i32
+  y i32
+
+// Keystroke event type
+struct KeyEvent : Event
+  key KeySym
+
+// Quit event type
+struct QuitEvent : Event
+</pre>
+	<p>This example defines three variant event types
+		(for mouse-button clicks, keyboard changes, and quit requests),
+		all built on a common Event base trait.
+		These event types share some fields in common, such as
+		<span class="pre">time</span>'s timestamp info.
+		Each event variant may also have its own specific fields.
+		All event values take up the same amount of memory.</p>
+	<p>A trait that is used as a base trait is in fact a mixin,
+		as if defined as such always at the start of some struct.
+		However, being a base trait brings more to the table
+		than just being a mixin.</p>
+
+	<h3>Trait type</h3>
+	<p>Let's focus first on the definition of the trait type.</p>
+
+	<h4>trait vs. enumtrait</h4>
+	<p>The only difference between <span class="pre">enumtrait</span> and <span class="pre">trait</span>
+		is that <span class="pre">enumtrait</span> ensures that all variant types are the same size.
+		(This is the same guarantee <span class="pre">enum</span> makes for its variants.)
+		Since <span class="pre">MouseEvent</span> is the largest variant type in the above example,
+		<span class="pre">Event</span>'s use of <span class="pre">enumtrait</span> ensures the size of
+		<span class="pre">KeyEvent</span> and <span class="pre">QuitEvent</span> are padded to be as large.
+		To successfully calculate this, <span class="pre">enumtrait</span> requires that all
+		variant types be defined in the same module as the trait.</p>
+	<p>If all variants have the same size, one may work with trait-typed values 
+		either as values (<span class="pre">Event</span>) 
+		or as references (<span class="pre">&Event</span>). 
+		When variants have different sizes, a trait type may only be used as a reference.
+		Being able to work with a trait type as a value offers some performance and other benefits:</p>
+	<ul>
+		<li>One variant type's value may be replaced (in place)
+			with a value of a different variant type.</li>
+		<li>The pool region may be used to more quickly allocate
+				space for any new value, regardless of the concrete variant type.</li>
+		<li>Access to field information is faster for values than when using references.</li>
+	</ul>
+	<p>When <span class="pre">trait</span> is used instead of <span class="pre">enumtrait</span>,
+		two key benefits accrue:</p>
+	<ul>
+		<li>Variant types may be defined in different modules than the trait type.</li>
+		<li>Memory waste may be less than with fixed-size variant types,
+			as each variant type only takes as much space as it requires.
+			This may matter when variant types vary greatly in size and are used in great numbers.</li>
+	</ul>
+
+	<h4>Tag field</h4>
+	<p>The <span class="pre">Event </span> trait above uses
+		<span class="pre">enum u8</span> to explicitly specify
+		that all its variant types will carry a tag field at this position and size.
+		(This is the same tag field that <span class="pre">enum</span>
+		implicitly defines for all its variants.)</p>
+	<p>The tag field's only use is to make pattern matching possible on a
+		variant type value (<span class="pre">Event</span>) 
+		or basic reference (<span class="pre">&Event</span>),
+		as the tag's integer value uniquely discriminates which variant type a value currently holds.
+		So, if no such pattern matching is expected 
+		(e.g., because virtual references will be used instead),
+		there is no need to define a tag field in the trait.</p>
+	<p>The primary benefit of having a tag field,
+		is that tag-based pattern matching will likely
+		perform better than virtual reference dispatch.
+		The presence of a tag field also means one can use a basic reference
+		to the trait type (<span class="pre">&Event</span>), rather than having to
+		use a more expensive virtual reference (<span class="pre">&amp;&lt;Event</span>).</p>
+	<p>The downsides of the tag field is the extra memory space it requires
+		and the restriction that all variant types
+		must be defined in the same module as the trait they inherit from.
+		This requirement ensures the compiler
+		can easily calculate exactly how many variants there are and
+		assign each one a different unique integer number.</p>
+	<p>Although it occupies space like other fields, it has no name because its contents are not
+		accessible nor changeable in the same way as other fields.
+		The tag field's content is implicitly and correctly initialized by the variant type's constructor.</p>
+	
+	<h4>Common Fields</h4>
+	<p>Because a base trait is a mixin, its fields are inherited by all its variants,
+		accessible just like any other field in the variant.
+		Because a tagged trait's common fields are located in the same place across all variants
+		(at the beginning),	pattern matching is never required to access them.</p>
+
+	<h4>Common Methods</h4>
+	<p>As with all mixins, base traits may define methods. 
+		These methods may have implementations, but they are not required to.
+		A trait's method without an implementation must be implemented by all variant types.
+		A trait's method with an implementation is used as the default implementation
+		for a variant type, if that variant type does not override it with its own implementation.</p>
+
+	<h3>Variant Types from base traits</h3>
+	<p>Now let's examine the definition and use of concrete variant types
+		which inherit from a base trait type. 
+		These are defined using <span class="pre">struct</span>,
+		thereby specific values of these variant types can be instantiated.</p>
+
+	<h4>Inheriting from a Base Trait</h4>
+	<p>A variant struct type explicitly inherits from a base trait
+		by specifying it after the struct name and a colon.
+		A trait's fields are folded into the struct at the start,
+		as if individually specified there.</p>
+	<p>There are restrictions to base trait inheritance:</p>
+	<ul>
+		<li>Only the base trait may specify a tag field (and only one of them).</li>
+		<li>Only the lowest base trait may be 'enumtrait' (same-size). All other traits are 'trait'.</li>
+		<li>The name of every field must be unique, whether inherited or part of the variant type.</li>
+	</ul>
+
+	<h4>Fields and Methods</h4>
+	<p>Each variant type may define its own unique fields. Similarly, it may define its own methods.
+		Every trait method without an implementation must be implemented by the variant type.
+		Any implemented trait method may be overridden by the variant type,
+		otherwise the default trait's method applies.</p>
+
+	<h4>Variant Type Values</h4>
+	<p>Since a variant type is a struct, one works with it as with most any struct.
+	A new value is created using a struct constructor specifying both the common fields and the
+	variant type's unique fields (any tag is automatically filled in with the correct integer):</p>
+<pre>
+// Notice that all constructors must provide a timestamp for the common time field
+mut event = MouseEvent[time: now, button: 0, x: 140, y: 170]
+event = KeyEvent[now, 'a']
+event = QuitEvent[now]
+</pre>
+	<p>If the variant type is based on an <span class="pre">enumtrait</span>,
+		the type of its values could be the name of the trait 
+		(e.g., <span class="pre">Event</span>). Common fields may be accessed in the usual way.
+		However, unique fields and methods are only accessible after 
+		<a href="refmatch.html">pattern matching</a>.</p>
+<pre>
+match event
+  imm mbutton MouseButton:   mbutton.x
+  imm key Keyboard:          i32[key.keysym]
+  is Quit:                   0
+</pre>
+	<p>If the variant type is based on <span class="pre">trait</span>,
+	  its type is the name of the variant type
+		(e.g., <span class="pre">QuitEvent</span>).
+		Common and unique fields and methods are accessed in the usual way.</p>
+	
+	<h4>Upcasting to a Trait Reference</h4>
+	<p>A basic reference to a base trait may be safely coerced from a reference to any variant type's value.</p>
+<pre>
+imm refevent &amp;Event = &event
+</pre>
+	<p>(Note: On the next page, we also show that a trait-based virtual reference may be created.)</p>
+	<p>A trait-based basic reference only has access to the trait's common fields
+		and any trait-based implemented methods never overwritten by any variant type.</p>
+<pre>
+imm when = refevent.time
+</pre>
+	<p>Note that a struct may be upcast by value or simple reference to its base trait,
+		and not to any other traits it may mix in.
+		However, we will later see that a struct may be upcast to any of its mixin traits
+		using a virtual reference.</p>
+
+	<h4>Downcasting</h4>
+	<p>Use pattern-matching to downcast an upcast value or reference to its original, specialized variant type.</p>
+<pre>
+if imm butevent &MouseButton = refevent
+  // We can safely use butevent here as a reference to a event known to be a MouseButton event
+</pre>
+
+
+	<p style="text-align: right; margin-top: 2em;">
+		<a href="refvirtref.html"><img alt="_" src="next.png" /></a>
+	</p>
+
+	</div>
+	</body>
+</html>
