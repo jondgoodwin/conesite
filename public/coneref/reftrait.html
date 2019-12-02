@@ -80,6 +80,19 @@ struct Node
 	  of a method, we call the trait's implementation a default method.</p>
 	<p>Importantly, if a trait mixin includes methods without an implementation, 
 		the struct must define and implement these methods.</p>
+
+	<h3>Self</h3>
+	<p>Traits, like structs, may specify <span class="pre">Self</span> as an alias
+		for the trait type itself. This is the default type used for the
+		<span class="pre">self</span> parameter. When a trait is mixed into a struct,
+		<span class="pre">Self</span> is understood to refer to that struct.
+		Where this behavior is not desired, one should use the trait's name
+		instead of <span class="pre">Self</span>.</p>
+	<p>Knowing when to choose <span class="pre">Self</span> vs. the trait's name
+		depends on what other roles the trait may play. Typically, <span class="pre">self</span>
+		on every method should use <span class="pre">Self</span> and everywhere else
+		(field types and other method parameters) should use the trait's name.
+		This makes the trait suitable for virtual references and generic bounds.</p>
 	
 	<h2 id="marker">Marker traits</h2>
 	<p>A marker trait defines no fields nor methods.
