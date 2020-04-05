@@ -30,14 +30,13 @@
 	match_stmt ::= 'match' exp ('using' exp)? ('into' var_list)? ('with' exp ('into' var_list)? block)+ ('else' block)?
 	while_stmt ::= 'while' logic_exp block
 	each_stmt  ::= 'each' (ident_token ':')? var_list 'in' (exp|'...') block
-	break_stmt ::= 'break' clause ';'
-	cont_stmt  ::= 'continue' clause ';'
-	return_stmt ::= 'return' this_exp? clause ';'
+	break_stmt ::= 'break' ';'
+	cont_stmt  ::= 'continue' ';'
+	return_stmt ::= 'return' this_exp? ';'
 	do_stmt ::= 'do' exp? block
-	exp_stmt   ::= this_exp clause ';'
+	exp_stmt   ::= this_exp ';'
 	
 	this_exp ::= exp (('using' exp)? block)?
-	clause ::= ('if' logic_exp | 'while' logic_exp | 'each' (ident_token ':')? var_list 'in' exp)*
 	var_list ::= perm_ident? ident_token value_type (',' perm_ident? ident_token value_type)*
 
 /* Type declarations */

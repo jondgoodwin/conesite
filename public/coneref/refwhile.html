@@ -32,17 +32,6 @@ fn fact(mut n i32) i32
 		the block's statements have been performed.
 		Whenever the condition evaluates as false, execution continues at the first statement after the while block.</p>
 
-	<h3>while suffix</h3>
-	<p>Alternatively, <span class="pre">while</span> (like <span class="pre">if</span>)
-		may be used as a control suffix after any statement.
-		The following logic is identical to the above.</p>
-<pre>
-fn fact(mut n i32) i32
-	mut return = 1
-	result *= n-- while n &gt; 1
-	return
-</pre>
-
 	<h3 id="break">break</h3>
 	<p><span class="pre">break</span> statements may be placed anywhere within a while block
 		to terminate the repetitive loop early.

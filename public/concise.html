@@ -124,20 +124,6 @@ with $.npcs["Frosty"]
 	Just like return inference, the last value in each block is treated as the computed value for that block.
 	Such consistency simplifies code refactoring and makes macro expansions more versatile.</p>
 	
-	<p><b>Control clauses</b></p>
-	<p>Control clauses (inspired by Ruby) make it possible to append to a statement expression
-	one or more <span class="pre">if</span>, <span class="pre">while</span> or <span class="pre">each</span> control clauses.
-	The earlier factorial example can be made even simpler this way:</p>
-<pre>
-fn fact(nbr u32)
-  return 1 if nbr&lt;=1
-  n*fact(n-1)
-</pre>
-	<p>Prudence is advised here, as sometimes use of control clauses can make code a bit harder to read,
-	especially if the code editor does not color highlight the control clause's keyword.
-	However, control clauses are often ideal for short statements, like return, break, continue or
-	brief expressions.</p>
-	
 	<p><b>Tuples</b></p>
 	<p>Tuples (ad hoc structs) greatly improve the convenience of working with multiple values simultaneously.
 	Implicit use of tuples avoids the code overhead involved with declaring the data structure

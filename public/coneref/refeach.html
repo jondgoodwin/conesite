@@ -36,16 +36,8 @@ fn fact(n i32) i32
 			<li>A block containing the logic to be performed on each iteration.</li>
 		</ul>
 	
-	<h2>Each clause, break and continue</h2>
-	<p><span class="pre">each</span> may be used as a statement suffix:</p>
-<pre>
-fn fact(n i32) i32
-  mut result = 1
-  result *= x each x in 2 ... n
-  result
-</pre>
-			
-	<p>Also, <span class="pre">break</span> and <span class="pre">continue</span> statements may be used within an 
+	<h2>break and continue</h2>
+	<p><span class="pre">break</span> and <span class="pre">continue</span> statements may be used within an 
 		<span class="pre">each</span> block to stop or re-start the loop.</p>
 
 	<h2>Iterators</h2>

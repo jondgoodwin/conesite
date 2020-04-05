@@ -32,24 +32,15 @@ fn abs(x i32) i32
 	to true whenever x is a negative number. When the conditional evaluates as true,
 	the subsequent block is performed, which converts x to its positive equivalent.
 	When the conditional is not true, the block after the
-	<span class="pre">else</span> is performed instead, which captures the value of x.</p>
+	<span class="pre">else</span> is performed instead, which captures the value of x.
+	The <span class="pre">else</span> clause is optional; it need not be specified if there
+	is no alternative action to perform when the condition is false.
+</p>
 	
 	<h2 id="if">if variations</h2>
 	<p>Before covering the logic of conditional expressions,
 	let's summarize various ways to use
 	<span class="pre">if</span>.</p>
-	
-	<h3>if as statement suffix</h3>
-	<p>The <span class="pre">else</span> clause is optional; it need not be specified if there
-	is no alternative action to perform when the condition is false.
-	Furthermore, if the block consists of just one statement,
-	then the <span class="pre">if</span> and condition can be written <b>after</b> the statement.
-	Using this capability, we can re-implement the above function more concisely:
-<pre>
-fn abs(x i32) i32
-  return -x if x &lt; 0
-  x
-</pre>
 	
 	<h3>if as expression</h3>
 	<p>As with blocks, <span class="pre">if</span> can be used as an expression.
