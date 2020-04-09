@@ -76,7 +76,7 @@ fn abs(x i32) i32
 
 	<h3>True vs. False</h3>
 	<p>A conditional expression evaluates to <span class="pre">true</span> or <span class="pre">false</span>.
-	The integer number <span class="pre">0</span>, the <span class="pre">null</span> pointer,
+	The integer number <span class="pre">0</span>, a <span class="pre">Null</span> value,
 	and <span class="pre">false</span> all evaluate to <span class="pre">false</span>.
 	All other values evaluate to <span class="pre">true</span>.
 	Thus:</p>
@@ -130,7 +130,7 @@ x &gt;= 2          // Returns true if x is greater than or equal to 2 (&gt;, &lt
 </pre>
 	<p>The logical operators work mostly how you would expect:</p>
 	<ul>
-	<li>As mentioned earlier, they treat 0, null and false as false. All other values are considered true.</li>
+	<li>As mentioned earlier, they treat 0, Null and false as false. All other values are considered true.</li>
 	<li>The boolean operators 'and' and 'or' will stop evaluating any time the answer is known for sure.
 	Thus, the .isEmpty method will never be performed in this expression:
 <pre>

@@ -72,12 +72,11 @@
 	pseudo ::= 'self' | 'this' | 'context' | 'selfmethod' | 'baseurl' | '...'
 	
 /* Literals and other tokens */
-	literal ::= float_token | integer_token | text_token | symbol_token | url_token | 'true' | 'false' | 'null'
+	literal ::= float_token | integer_token | text_token | symbol_token | 'true' | 'false'
 	float_token ::= (('0'-'9') ('0'-'9')*) '.' ('0'-'9')* (('e'|'E') ('-'|'+')? ('0'-'9')+)?
 	integer_token ::= (('0'-'9') ('0'-'9')*) | '0x' (('0'-'9')|('a'-'f')|('A'-'F'))+
 	text_token ::= '"' any_char '"'
 	symbol_token ::= "'" any_char "'"
-	url_token ::= "@" any_char (space | tab | lf | cr)
 
 	ident_token ::= '`' any_char* '`' | ('$' | '_' | alpha_char) (alpha_char | ('0'-'9') | '$' | '_')*
 </pre>

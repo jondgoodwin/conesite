@@ -89,17 +89,17 @@ each i, x in intslice
 		Because closures are stateful, they can generate a new value on every call.</p>
 	<p>In order for a closure to be suitable as an iterator, it must be able to signal when it is done producing values.
 		 It typically does this by returning a <a href="refoption.html">nullable value</a>,
-		 with the value of <span class="pre">null</span> signalling when it is done.</p>
+		 with the value of <span class="pre">Null</span> signalling when it is done.</p>
 	<p>In the following example, imagine a closure that starts off
 	holding the value 12, and halves (and returns) its value on each call. When the value gets to 0,
-	it returns <span class="pre">null</span> instead:</p>
+	it returns <span class="pre">Null</span> instead:</p>
 <pre>
 mut sum = 0
-each x in |{cnt = 12}| cnt > 0? Some(cnt /= 2) : null
+each x in |{cnt = 12}| if cnt > 0 {Some(cnt /= 2)} : {Null}
   sum += x
 </pre>
 		<p>The value of sum at the end will be 10, as each successive call to the closure returns 6, 3, and 1.
-			After 1, it returns <span class="pre">null</span>, which stops iteration.</p>
+			After 1, it returns <span class="pre">Null</span>, which stops iteration.</p>
 		<p>Because it is stateful, a closure is typically single use. It is created before it is needed, used to produce values lazily, 
 			and then discarded afterward. 
 			This is because, unless its state can be independently reset, it will only ever afterward say it is out of values.</p>
