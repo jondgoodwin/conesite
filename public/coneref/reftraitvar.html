@@ -25,12 +25,12 @@
 		share fields in common or support same-named methods which are implemented
 		differently for each variant.
 		We accomplish this by defining each variant types as inheriting from
-		a common base <span class="pre">trait</span> or <span class="pre">enumtrait</span>.
+		a common base <span class="pre">trait</span>.
 		For example:</p>
 <pre>
 // Common base trait for variant event types
-// 'enumtrait' pads all variants to be the same size
-enumtrait Event
+// '@samesize' pads all variants to be the same size
+trait @samesize Event
   enum u8     // explicit tag field to discriminate variants
   time Time   // All events are time-stamped
 
@@ -62,14 +62,15 @@ struct QuitEvent : Event
 	<h3>Trait type</h3>
 	<p>Let's focus first on the definition of the trait type.</p>
 
-	<h4>trait vs. enumtrait</h4>
-	<p>The only difference between <span class="pre">enumtrait</span> and <span class="pre">trait</span>
-		is that <span class="pre">enumtrait</span> ensures that all variant types are the same size.
+	<h4>@samesize</h4>
+	<p>Without <span class="pre">@samesize</span> every variant built from a trait may have
+		a different size. <span class="pre">@samesize</span> changes this to ensure all variants
+		take up exactly the same amount of space in memory.
 		(This is the same guarantee <span class="pre">enum</span> makes for its variants.)
 		Since <span class="pre">MouseEvent</span> is the largest variant type in the above example,
-		<span class="pre">Event</span>'s use of <span class="pre">enumtrait</span> ensures the size of
+		<span class="pre">Event</span>'s use of <span class="pre">@samesize</span> ensures the size of
 		<span class="pre">KeyEvent</span> and <span class="pre">QuitEvent</span> are padded to be as large.
-		To successfully calculate this, <span class="pre">enumtrait</span> requires that all
+		To successfully calculate this, a trait specifying <span class="pre">@samesize</span> requires that all
 		variant types be defined in the same module as the trait.</p>
 	<p>If all variants have the same size, one may work with trait-typed values 
 		either as values (<span class="pre">Event</span>) 
@@ -83,7 +84,7 @@ struct QuitEvent : Event
 				space for any new value, regardless of the concrete variant type.</li>
 		<li>Access to field information is faster for values than when using references.</li>
 	</ul>
-	<p>When <span class="pre">trait</span> is used instead of <span class="pre">enumtrait</span>,
+	<p>When <span class="pre">trait</span> does not specify <span class="pre">@samesize</span>,
 		two key benefits accrue:</p>
 	<ul>
 		<li>Variant types may be defined in different modules than the trait type.</li>
@@ -148,7 +149,7 @@ struct QuitEvent : Event
 	<p>There are restrictions to base trait inheritance:</p>
 	<ul>
 		<li>Only the base trait may specify a tag field (and only one of them).</li>
-		<li>Only the lowest base trait may be 'enumtrait' (same-size). All other traits are 'trait'.</li>
+		<li>Only the lowest base trait may be <span class="pre">@samesize</span>.</li>
 		<li>The name of every field must be unique, whether inherited or part of the variant type.</li>
 	</ul>
 
@@ -168,7 +169,7 @@ mut event = MouseEvent[time: now, button: 0, x: 140, y: 170]
 event = KeyEvent[now, 'a']
 event = QuitEvent[now]
 </pre>
-	<p>If the variant type is based on an <span class="pre">enumtrait</span>,
+	<p>If the variant types are based on a trait specifying <span class="pre">@samesize</span>,
 		the type of its values could be the name of the trait 
 		(e.g., <span class="pre">Event</span>). Common fields may be accessed in the usual way.
 		However, unique fields and methods are only accessible after 
