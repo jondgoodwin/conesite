@@ -28,27 +28,24 @@
 	that help keep Cone programs small and easy-to-understand:</p>
 	
 	<p><b>Significant indentation</b></p>
-	<p>By default, Cone supports <a href="coneref/reftoken.html#line">significant indentation</a>.
-	Rather than requiring curly braces { } to mark the begin and end of blocks,
-	as other systems programming languages do, Cone infers blocks according to variations in line indentation.
-	A new block starts when line indentation increases. When indentation is restored, the block ends.
-	Similarly, statement ending semi-colons are implicitly assumed to exist at the end of lines:</p>
+	<p>To make code more forgiving, statement-ending semicolons are often optional.
+		Likewise, curly braces can optionally be omitted.
+		The compiler makes use of <a href="coneref/reftoken.html#indent">significant indentation</a>
+		(in these situations only) to infer the end of multi-line statements and to delimit a block's statements.</p>
 <pre>
-fn fact(nbr u32)
-  if nbr&lt;=1
+fn fact(nbr u32):
+  if nbr&lt;=1:
     1
-  else
+  else:
     n*fact(n-1)
 </pre>
 	<p>This approach eliminates both the visual distraction and the need to type these punctuation characters.
 	Another benefit is that code takes up less space vertically, allowing more of the meat of the program
 	to be visible in a code editor. 
 	The resulting code often looks like a neat, clean, declarative outline.</p>
-	<p>Significant indentation is controversial.
-	Personal preferences and IDE tools vary. Some programmers prefer to write code that uses
-	curly braces and semi-colons. Cone easily supports this style as well.
-	When it notices the presence of curly braces, it automatically switches to free form mode
-	and thereafter expects explicit semicolons and closing braces.</p>
+	<p>These features are entirely optional. If a programmer dislikes significant indentation
+		and optional semicolons, then semi-colons and braces may be explicitly specified
+		where needed.</p>
 	
 	<p><b>With blocks</b></p>
 	<p>'with' blocks are one of Cone's more distinctive features.
