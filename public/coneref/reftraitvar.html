@@ -24,7 +24,7 @@
 		we sometimes need more complex variant types that
 		share fields in common or support same-named methods which are implemented
 		differently for each variant.
-		We accomplish this by defining each variant types as inheriting from
+		We accomplish this by defining each variant types as extending (inheriting from)
 		a common base <span class="pre">trait</span>.
 		For example:</p>
 <pre>
@@ -35,17 +35,17 @@ trait @samesize Event
   time Time   // All events are time-stamped
 
 // Mouse event type, inheriting from Event
-struct MouseEvent : Event
+struct MouseEvent extends Event
   button u8
   x i32
   y i32
 
 // Keystroke event type
-struct KeyEvent : Event
+struct KeyEvent extends Event
   key KeySym
 
 // Quit event type
-struct QuitEvent : Event
+struct QuitEvent extends Event
 </pre>
 	<p>This example defines three variant event types
 		(for mouse-button clicks, keyboard changes, and quit requests),
