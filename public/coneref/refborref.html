@@ -148,11 +148,12 @@ imm ref = &amp;mut a   // Creates a mutable borrowed reference to a's value
 		the original source becomes usable again:</p>
 <pre>
 imm uniref = &amp;rc 5
-do
+{
   imm bref1 &amp;mut i32 = uniref   // Coerce owning reference to a 'mut' borrowed reference
   imm bref2 = ref2              // Share with another borrowed reference
   *bref2 = *bref1 + 1
   *uniref = 6                   // Error, uniref is unusable during scope of borrowed 'bref1'
+}
 *uniref = 7                     // Allowed, since borrowed references have expired
 </pre>
 
@@ -199,12 +200,13 @@ each x in &mut list
 <pre>
 fn getval() i32
   mut ref &amp;i32
-  do
+  {
     imm a = 5
     ref = &amp;a
+	}
   *ref   // Oops!
 </pre>
-	<p>The scope of the variable <span class="pre">a</span> lasts only for the duration of the do block.
+	<p>The scope of the variable <span class="pre">a</span> lasts only for the duration of the inner block.
 	So when we are done executing that block, the variable <span class="pre">a</span> ceases to exist.
 	However, by copying the borrowed reference into <span class="pre">ref</span>, we are effectively
 	trying to extend its life beyond the scope it was created in and beyond the life of the value it points to. 

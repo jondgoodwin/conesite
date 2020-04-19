@@ -40,10 +40,11 @@ with Float.Pi/180
 </pre>
 		<p>The above example is short-hand for:</p>
 <pre>
-do
+{
   imm this = Float.Pi/180
   quarter = 90 * this  // Use 'this' to convert to radians
   acute = 10 * this	
+}
 </pre>
 	<p>Since <span class="pre">with</span> blocks can be nested within each other,
 		the value of <span class="pre">this</span> for any statement refers

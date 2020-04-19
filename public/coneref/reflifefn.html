@@ -75,9 +75,10 @@ fn dostuff(a: &i32, b: &'b i32) &i32, &'b i32
 fn caller(nbr i32) i32
   mut ref &amp;i32
   imm outer = 5
-  do
+  {
     imm inner = 10
     ref = refswitch(nbr, &outer, &inner)
+  }
   *ref // Is this safe???
 </pre>
 	<p>That final de-reference will not be safe if the called function looks like this:</p>
@@ -124,9 +125,10 @@ fn refswitch(nbr i32, ref1 &'a i32, ref2 &i32) &i32
 fn tryit()
   imm i = 5
   mut a = &amp;i
-  do
+  {
     imm b = 10
-    refstore(&amp;mut a, &amp;b) // is this ok?
+		refstore(&amp;mut a, &amp;b) // is this ok?
+	}
 </pre>
 	<p>That's not going to work if it calls this function:</p>
 <pre>

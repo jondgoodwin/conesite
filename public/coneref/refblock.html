@@ -34,12 +34,13 @@
 	You can tell which statements are part of the same block,
 	as they are indented more than the statements that come before and after the block.
 	This indentation typically consists of spaces, although tabs are supported if used consistently:</p>
-	<p>Let's illustrate this with the most basic kind of block, the <span class="pre">do</span> block:</p>
+	<p>Let's illustrate this with the most basic kind of block:</p>
 <pre>
 fn addPlusOne(a i32, b i32) i32
   ++a
-  do
+  {
     ++b
+	}
   --a
   a + b
 </pre>
@@ -48,10 +49,6 @@ fn addPlusOne(a i32, b i32) i32
 	the function's main block. This particular example is a bit contrived,
 	as there is no good reason for us to use an interior block here,
 	since the function would work the same if those statements were placed in the main block.</p>
-	<p>Note that the <span class="pre">do</span> keyword need not be specified if explicit curly
-	braces are used to delimit the basic block.
-	(The reason we need the <span class="pre">do</span> with significant indentation
-	is because the block will be considered part of the preceding statement.</p>
 <pre>
 fn addPlusOne(a i32, b i32) i32 {
   ++a;
@@ -83,9 +80,10 @@ fn addPlusOne(a i32, b i32) i32 {
 <pre>
 fn addPlusOne(a i32, b i32) i32
   mut result = 0;
-  do
+  {
     mut sum = a + b
-	result = sum
+  }
+  result = sum
   ++result
 </pre>
 	<p>The block where a variable is defined is considered to be its lexical scope.
