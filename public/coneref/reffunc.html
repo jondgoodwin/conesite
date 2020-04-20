@@ -23,7 +23,7 @@
 	<p>Let's start with a simple example of a function definition and its use:</p>
 <pre>
 // Define the 'square' function
-fn square(a f32) f32
+fn square(a f32) f32:
 	return a*a
 
 // Use square to calculate the area of a circle	
@@ -49,7 +49,7 @@ area = Float.pi * square(r)
 	They must match in both number and type:</p>
 <pre>
 // Define a method that returns the addition of its two parameters
-fn add(a i32, b i32) i32
+fn add(a i32, b i32) i32:
 	return a+b
 
 add(2,3)  // returns 5, since a is set to 2 and b to 3
@@ -67,7 +67,7 @@ add(2.0, 4.0)  // ERROR! add() needs integers, not floating point numbers
 	no effect on the caller since the parameter's value is a copy of the caller's value.
 	Changes to one value do not affect the other.</p>
 <pre>
-fn weird(a i32, mut b i32)
+fn weird(a i32, mut b i32):
 	a = 34    // ERROR! a is immutable and may not be changed
 	b = 4     // b may be changed since it is declared 'mut'
 
@@ -81,7 +81,7 @@ weird(5, number)
 	The default value is what we want the parameter to have if the caller provides no value for it.
 	The default value can only be a literal value.</p>
 <pre>
-fn next(nbr i32, incr i32 = 1) i32
+fn next(nbr i32, incr i32 = 1) i32:
 	return nbr + incr
 
 next(5,2) // returns 7
@@ -108,7 +108,7 @@ next()    // ERROR! no default value for nbr
 		When the function is finished and returns to its caller, 
 		its local variable space is automatically freed from the stack.</p>
 <pre>
-fn summult(a f32, b f32) f32
+fn summult(a f32, b f32) f32:
 	imm sum = a + b    // local variable declaration
 	imm mult = a * b   // local variable declaration
 	return sum / mult
@@ -123,8 +123,8 @@ fn summult(a f32, b f32) f32
 	the comma-separated values specified after <span class="pre">return</span> are returned to the caller.
 	The number and types of all return values must match the return types declared on the function's signature.</p>
 <pre>
-fn ceil(x i32) i32, i32
-	if x > 6
+fn ceil(x i32) i32, i32:
+	if x > 6:
 		return x, 6
 	return x, x
 
@@ -142,8 +142,8 @@ a,b = ceil(3)       // returns 3,3
 	<li>if it is an expression whose types match, it is treated as if <span class="pre">return</span> 
 	were specified before the expression:
 <pre>
-fn ceil(x i32) i32, i32
-	if x > 6
+fn ceil(x i32) i32, i32:
+	if x > 6:
 		return x, 6
 	x, x   // implicit return
 </pre></li>
@@ -152,17 +152,17 @@ fn ceil(x i32) i32, i32
 	returns the last statement's expression in each of its distinct blocks (this is handled recursively). 
 	All paths (including a required <span class="pre">else</span> block) must return valid values.</li>
 <pre>
-fn ceil(x i32) i32, i32
-	if x > 6
+fn ceil(x i32) i32, i32:
+	if x > 6:
 		x, 6   // implicit return
-	else
+	else:
 		x, x   // implicit return
 </pre></li>
 	<li>A final <a href="refwith.html"><span class="pre">with</span></a> block returns the value of 
 	<span class="pre">this</span>.</li>
 <pre>
-fn newthing() Thing
-	with thing    // implicitly returns thing
+fn newthing() Thing:
+	with thing:    // implicitly returns thing
 		.name = "Doofus"
 		.color = "brown"
 </pre>
@@ -173,9 +173,10 @@ fn newthing() Thing
 	<h3 id="recursive">Recursive Functions</h3>
 	<p>A function may call itself recursively:</p>
 <pre>
-fn factorial(x i32, prod i32 = 1)
-	return prod if x&lt;=1
-	factorial(x-1, prod*x)
+fn factorial(x i32, prod i32 = 1):
+  if x&lt;=1:
+    return prod 
+  factorial(x-1, prod*x)
 </pre>
 	<p>If the function returns a single value calculated by any function, 
 		this <i>may</i> be "tail-call" optimized.
@@ -196,10 +197,12 @@ fn factorial(x i32, prod i32 = 1)
 	<p>Functions complying with these constraints
 		should be marked as <span class="pre">pure</span>.</p>
 <pre>
-pure fn factorial(n i32) i32
-  return 1 if x&lt;=1
-  mut result = 1
-  result *= n while n-- > 1
+pure fn factorial(n i32) i32:
+  if x&lt;=1:
+    return 1 
+	mut result = 1
+	while n-- > 1:
+    result *= n
   result
 </pre>
 	<p>A key benefit for marking functions <span class="pre">pure</span>:

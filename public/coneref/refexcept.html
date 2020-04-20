@@ -35,10 +35,10 @@
 		back to the function that called it.
 		Instead of returning the expected value, it throws an exception value.</p>
 <pre>
-fn factorial(n i32) i32 throws Bool
-  throw false if n &lt;= 0
+fn factorial(n i32) i32 throws Bool:
+  if n &lt;= 0: throw false 
   mut result = 1
-  while n
+  while n:
     result *= n--
   result
 </pre>
@@ -57,7 +57,7 @@ fn factorial(n i32) i32 throws Bool
 	<p>Use the <span class="pre">||</span> operator to establish
 		a default value in the event of a thrown exception.</p>
 <pre>
-fn calc(n i32) i32
+fn calc(n i32) i32:
   factorial(n) || 0
 </pre>
 	<p>If <span class="pre">factorial</span> throws an exception,
@@ -69,7 +69,7 @@ fn calc(n i32) i32
 	<p>Use the <span class="pre">?</span> operator following any call 
 		to an exception-throwing function.</p>
 <pre>
-fn calc(n i32) i32
+fn calc(n i32) i32:
   factorial(n)? + 10
 </pre>
 	<p>This checks whether the function call succeeds
@@ -82,7 +82,7 @@ fn calc(n i32) i32
 	<p>Another approach involves
 		re-throwing the exception to the next caller up the call stack.</p>
 <pre>
-fn calc(n i32) i32 throws Bool
+fn calc(n i32) i32 throws Bool:
   factorial(n)? + 10
 </pre>
 	<p>Even though this function still does not specify an exception handler,
@@ -101,10 +101,10 @@ fn calc(n i32) i32 throws Bool
 		<span class="pre">try</span>, but need not be
 		immediately afterwards.</p>
 <pre>
-fn calc(n i32) i32
+fn calc(n i32) i32:
   factorial(n)? + 10
 	
-  catch
+  catch:
     0
 </pre>
 	<p>Should the call to <span class="pre">factorial</span>
@@ -115,10 +115,10 @@ fn calc(n i32) i32
 	<p>Alternatively, we could handle it by throwing an
 		exception of a different type or value.</p>
 <pre>
-fn calc(n i32) i32 throws i32
+fn calc(n i32) i32 throws i32:
   factorial(n)? + 10
 	
-  catch
+  catch:
     throw 0
 </pre>
 	<p>If we need more information about the exception,
@@ -127,13 +127,13 @@ fn calc(n i32) i32 throws i32
 		This binds to the exception value, so that it may be interrogated:
 	</p>
 <pre>
-fn calc(n i32) i32 throws i32
+fn calc(n i32) i32 throws i32:
   factorial(n)? + 10
 
-  catch err
-    if err
+  catch err:
+    if err:
       panic
-    else
+    else:
       throw 0
 </pre>
 	<p>This handler will trigger a <span class="pre">panic</span>
@@ -168,12 +168,12 @@ requires idx &lt; bound
 		These provide a visibly strengthened contract that governs use of the
 		function. If these conditions fail, a panic is triggered.</p>
 <pre>
-fn factorial(n i32) i32 \
-  requires n &gt; 0        \
-  ensures result &gt; 0
+fn factorial(n i32) i32
+  requires n &gt; 0
+  ensures result &gt; 0:
 
   mut result = 1
-  while n
+  while n:
     result *= n--
   result
 </pre>

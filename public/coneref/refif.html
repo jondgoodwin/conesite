@@ -18,11 +18,11 @@
 	Consider:</p>
 
 <pre>
-fn abs(x i32) i32
+fn abs(x i32) i32:
   mut result i32;
-  if x &lt; 0
+  if x &lt; 0:
     result = -x
-  else
+  else:
     result = x
   result
 </pre>
@@ -46,10 +46,10 @@ fn abs(x i32) i32
 	<p>As with blocks, <span class="pre">if</span> can be used as an expression.
 	This (along with implicit return) provides us with another way to write this function:</p>
 <pre>
-fn abs(x i32) i32
-  if x &lt; 0
+fn abs(x i32) i32:
+  if x &lt; 0:
     -x
-  else
+  else:
     x
 </pre>
 
@@ -59,12 +59,12 @@ fn abs(x i32) i32
 	is preceded with <span class="pre">elif</span> (short for "else if").
 	For example:</p>
 <pre>
-fn abs(x i32) i32
-  if x &lt; 0
+fn abs(x i32) i32:
+  if x &lt; 0:
     -x
-  elif x == 0
+  elif x == 0:
     0
-  else
+  else:
     x
 </pre>
 
@@ -85,11 +85,11 @@ fn abs(x i32) i32
 a += 1 if 0   // since 0 evaluates to false
 
 // This statement will always execute
-a += 1 if "hello"
+if "hello": a += 1 
 </pre>
 	<p>This applies to the (first) value returned by a function or method call:</p>
 <pre>
-a += 1 if a.isOdd
+if a.isOdd: a += 1 
 </pre>
 	
 	<h3 id="compare">Equivalence</h3>

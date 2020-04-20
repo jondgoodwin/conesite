@@ -18,13 +18,13 @@
 	such as this one which calculates the value of pi:</p>
 	
 <pre>
-fn main()
+fn main():
   imm pi = calcpi(10)
 
 // Calculate pi using arc-sine fractional sequence.
 // 'nterms' is the number of fractional terms used to estimate pi
 // https://en.wikipedia.org/wiki/Approximations_of_%CF%80#Arcsine
-fn calcpi(mut nterms = 10) f64
+fn calcpi(mut nterms = 10) f64:
   return 0d if nterms &lt;= 0
   
   // Initialize working values
@@ -35,7 +35,7 @@ fn calcpi(mut nterms = 10) f64
   mut twos = 2d
   mut term = 0d
   
-  while --nterms
+  while --nterms:
     // Calc a new fraction and add to result
     top *= seed
     bot *= seed + 1d

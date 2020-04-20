@@ -8,7 +8,7 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">With Blocks</div>
+			<div id="sub">With Blocks and this</div>
 		</div>
 
     <div class="text">
@@ -34,7 +34,7 @@
 		the evaluated value of that expression.</p>
 <pre>
 // Calculate the value of 'this' (0.174533)
-with Float.Pi/180
+with Float.Pi/180:
 	quarter = 90 * this  // Use 'this' to convert to radians
 	acute = 10 * this
 </pre>
@@ -62,9 +62,9 @@ with Float.Pi/180
 		taking advantage of this shortcut:</p>
 <pre>
 // Normalize point to unit length
-with point
+with point:
   imm len = (.x * .x + .y * .y).sqrt
-  if len > 0
+  if len > 0:
     .x /= len
     .y /= len
 </pre>
@@ -84,7 +84,7 @@ with point
 	<h2>'.[]' indexing</h2>
 	<p>'.[]' may be used to access or modify some element of a collection:</p>
 <pre>
-with myScene.numbers
+with myScene.numbers:
   .[4] = 1.6      // Equivalent to: myScene.numbers[4] = 1.6
   .[6] = 1.9
   .sort       // Sort the list of numbers
@@ -115,7 +115,7 @@ with myScene.numbers &lt;- [
 </pre>
 
 		<p style="text-align: right; margin-top: 2em;">
-			<a href="refif.html"><img alt="_" src="next.png" /></a>
+			<a href="reffunc.html"><img alt="_" src="next.png" /></a>
 		</p>
 		
 	</div>

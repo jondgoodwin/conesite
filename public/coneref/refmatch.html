@@ -22,8 +22,8 @@
 	The code block associated with the first matching pattern is performed.</p>
 	<p>Let's illustrate this with a simple (but mathematically unusual) example:</p>
 <pre>
-fn power(n i32, pow i32) i32
-  match pow
+fn power(n i32, pow i32) i32:
+  match pow:
     0: 1
     1: n
     2: n * n
@@ -58,7 +58,7 @@ fn power(n i32, pow i32) i32
 	This can be a constant value (as above) or any expression that evaluates to some value,
 	for example:</p>
 <pre>
-match val
+match val:
   anotherval.len:  4
   _:               0
 </pre>
@@ -70,7 +70,7 @@ match val
 	(including <span class="pre">!=</span>).
 	The left hand value is not specified, as it is understood to be the match value:</p>
 <pre>
-match n
+match n:
   <0: -1
   >0:  1
   _:   0
@@ -82,7 +82,7 @@ match n
 	<span class="pre">..</span> or <span class="pre">...</span> range operator
 	between two expressions:</p>
 <pre>
-match n
+match n:
   0 ..  3: 1   // matches 0, 1, or 2 (but not 3)
   3 ... 6: 2   // matches 3, 4, 5 or 6 inclusively
 </pre>
@@ -96,7 +96,7 @@ match n
 	<p>It is possible to list more than one possible pattern to match,
 	using <span class="pre">or</span> between each pattern:</p>
 <pre>
-match n
+match n:
   2 or 3 or 5 or 7:  2
   -6 or -1...1 or 6: 1
   _:                 0
@@ -109,7 +109,7 @@ match n
 	If a tuple is specified on the match, then all match patterns must be specified as tuples.
 	For a tuple to match, all values must match individually:</p>
 <pre>
-match key,value
+match key,value:
   0, _:  0
   _, 0:  1
   _, _:  2
@@ -120,7 +120,7 @@ match key,value
 	The condition expression after the 'if' must evaluate to true in order for the
 	match to take place.</p>
 <pre>
-match nbr
+match nbr:
   4 if cnt &gt; 0: 0  // matches only if nbr==4 and cnt&gt;0
   4:            1  // matches when nbr==4 and cnt&lt;=0
   _:            2  // matches when nbr != 4
@@ -141,14 +141,14 @@ match nbr
 	<p>The simplest partial match checks whether an array (or array reference) begins with
 		certain elements:</p>
 <pre>
-match name
+match name:
 	is "Judy": judy     // Matches if name string begins with "Judy"
 	is "Frank": frank
 	_: noone
 </pre>
 	<p>Alternatively, one can specify matching patterns for the first few elements:</p>
 <pre>
-match numbers
+match numbers:
 	is [1, _]: 1
 	is [_, 1]: 2
 	is [&lt;=0, &lt;=0]: 3
@@ -158,7 +158,7 @@ match numbers
 	<h3 id="struct">Struct partial matches</h3>
 	<p>A matching pattern may be created for specific named fields:</p>
 <pre>
-match points
+match points:
   is Point[0., _]: 1
   is Point[_, 0.]: 2
   is Point[&lt;0., &lt=0.]: 3
@@ -170,14 +170,14 @@ match points
 	<p>An variant pattern typically just matches against each option's variant type,
 		binding to a variable:</p>
 <pre>
-match oddval
+match oddval:
 	imm intval SomeInt:     intval
 	imm point PointStruct:  i32[point.x * point.y]
 	is None:                    0
 </pre>
 	<p>If desired, pattern matching and binding can also be applied to the internal value(s):</p>
 <pre>
-match oddval
+match oddval:
   imm intval = SomeInt[&lt;0]:   -intval
   imm intval = SomeInt:       intval
   is PointStruct[x=_, y=_]:  i32[x * y]
@@ -194,7 +194,7 @@ match oddval
 	The matchee value is implicitly included as part of the call
 	(essentially, the first parameter for a function and the second for a method call):</p>
 <pre>
-match n
+match n:
   using isPrime(): 0  // invokes isPrime(n)
   using isOdd():   1  // invokes isOdd(n)
   _:               2

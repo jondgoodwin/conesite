@@ -8,12 +8,15 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Blocks and Local Context</div>
+			<div id="sub">Blocks and Statements</div>
 		</div>
 
     <div class="text">
 
-	<p>Blocks offer a versatile, easy-to-apprehend way to structure logic.
+		<p>A <a href="refblock.html"><b>block</b></a> is the basic unit for structured control flow.
+			It holds a ordered collection of statements that are executed in order, starting with the first statement.
+			It may also accumulate its own temporary, local state.</p>
+		<p>Blocks offer a versatile, easy-to-apprehend way to structure logic.
 	  Their well-defined single point of entry and exit establishes clear
 	  boundaries around control flow as well as the local context it manages.
 	  Versatility comes from being able to nest different kinds of block easily within each other.
@@ -36,7 +39,7 @@
 	This indentation typically consists of spaces, although tabs are supported if used consistently:</p>
 	<p>Let's illustrate this with the most basic kind of block:</p>
 <pre>
-fn addPlusOne(a i32, b i32) i32
+fn addPlusOne(a i32, b i32) i32:
   ++a
   {
     ++b
@@ -78,7 +81,7 @@ fn addPlusOne(a i32, b i32) i32 {
 		local variables being declared and used in both the function's block
 		and the interior block.</p>
 <pre>
-fn addPlusOne(a i32, b i32) i32
+fn addPlusOne(a i32, b i32) i32:
   mut result = 0;
   {
     mut sum = a + b
@@ -116,9 +119,10 @@ fn addPlusOne(a i32, b i32) i32
 	(much like implicit returns for functions):</p>
 <pre>
 // Using a block as an expression
-a =
+a = {
     3.14
-    6      // a's value will become 6
+		6      // a's value will become 6
+}
 </pre>
 
 		<p style="text-align: right; margin-top: 2em;">

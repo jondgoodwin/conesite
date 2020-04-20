@@ -16,9 +16,9 @@
 	<p>Use <span class="pre">while</span> to repetitively perform the same logic over and over again
 		so long as a specified condition is true. For example:</p>
 <pre>
-fn fact(mut n i32) i32
+fn fact(mut n i32) i32:
   mut result = 1
-  while n &gt; 1
+  while n &gt; 1:
     result *= n
     --n
   result
@@ -37,10 +37,10 @@ fn fact(mut n i32) i32
 		to terminate the repetitive loop early.
 		We can code the factorial function yet another way using 'break':</p>
 <pre>
-fn fact(mut n i32) i32
+fn fact(mut n i32) i32:
   mut result = 1
-  while true
-    break if n &lt; 2
+  while true:
+	  if n &lt; 2: break 
     result *= n--
   result
 </pre>
@@ -55,10 +55,10 @@ fn fact(mut n i32) i32
 		re-evaluating the conditional expression.
 		Effectively, <span class="pre">continue</span> ignores all subsequent statements in the loop's block.</p>
 <pre>
-fn countOdd(n i32) i32
+fn countOdd(n i32) i32:
   mut result = 0
-  while n &gt; 0
-    continue if n-- % 2 == 0
+  while n &gt; 0:
+    if n-- % 2 == 0: continue 
     ++result
   result
 </pre>
@@ -71,9 +71,9 @@ fn countOdd(n i32) i32
 		will be required to signal when the loop needs to terminate,.</p>
 	<p>These <span class="pre">break</span> statements may specify a value to be returned from the loop.</p>
 <pre>
-imm found = loop
-  break -1 if idx > maxidx
-  break idx if matches(idx)
+imm found = loop:
+  if idx > maxidx: break -1 
+  if matches(idx): break idx
   ++idx
 </pre>
 	<p>If this feature is used, all <span class="pre">break</span> statements in the loop
@@ -85,9 +85,9 @@ imm found = loop
 		<a href="reftoken.html#lifetime">lifetime annotation</a> and then use that same
 		annotation on the <span class="pre">break</span> or <span class="pre">continue</span> statement.</p>
 <pre>
-'outer: each n in 1...5
-	while obj.fireAShot()
-		continue 'outer if obj.impacted
+'outer: each n in 1...5:
+	while obj.fireAShot():
+		if obj.impacted: continue 'outer
 </pre>
 
 
