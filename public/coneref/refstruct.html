@@ -18,7 +18,7 @@
 			and can be individually accessed using the field's name.</p>
 	<p>Let's illustrate by declaring a new struct type:</p>
 <pre>
-struct Complex
+struct Complex:
   real f32
   imag f32
 </pre>
@@ -39,7 +39,7 @@ mut comp2 = Complex[real: 0.0, imag: 1.0]
 		we need to declare it, giving it a name and specifying its fields:</p>
 	</p>
 <pre>
-struct Point
+struct Point:
     x f32 = 0.
     y f32 = 0.
 </pre>
@@ -103,11 +103,11 @@ imm pt3 = Point[]                // Uses x,y's declared default values of 0.
 	<h2>Copying</h2>
 	<p>Like numbers, struct values may be passed around between variables and functions:</p>
 <pre>
-fn main()
+fn main():
 	imm pt1 = Point[]
 	pt1 = change(pt1)
 
-fn change(mut pt Point)
+fn change(mut pt Point):
 	pt = Point[1., 2.]
 	pt
 </pre>

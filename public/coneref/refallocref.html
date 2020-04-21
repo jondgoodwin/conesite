@@ -132,7 +132,7 @@ imm val = *ref  // val is now 3
 	</p>
 <pre>
 // Do ref1 and ref2 point to the same value?
-if ref1 == ref2
+if ref1 == ref2:
 		// do some stuff
 </pre>
 	<p>It is also possible to compare whether one reference is "greater" than another.
@@ -157,11 +157,11 @@ if ref1 == ref2
 		<span class="pre">Point</span>, that method must be defined within the collection
 		of methods for the <span class="pre">Point</span> type:</p>
 <pre>
-struct Point
+struct Point:
   // .. other Point methods here
 
   // method that accepts a reference to a Point
-  fn normalize(self &rc mut Point)
+  fn normalize(self &rc mut Point):
     imm len = self.len
     x /= len
     y /= len
@@ -204,7 +204,7 @@ imm ref4 ?&amp;rc imm i32		 // nullable reference to an integer
 	</p>
 <pre>
 // This condition is true only if maybePoint is not null ...
-if maybePoint
+if maybePoint:
   imm point = *maybePoint // ... allowing us to obtain its value
 imm point2 = *maybePoint    // **ERROR** We don't know if maybePoint is null here
 </pre>

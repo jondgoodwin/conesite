@@ -64,10 +64,10 @@ imm spaces = [100; ' ']
     <p>Like numeric values, array values may be passed around between variables and functions:</p>
 <pre>
 imm hello = "Hello"
-fn main()
+fn main():
   mut dessert = jello(hello)
 
-fn jello(mut saying [5] u8)
+fn jello(mut saying [5] u8):
   saying = "jello"
   saying
 </pre>
@@ -128,7 +128,7 @@ imm four = nbrs[$-2]
 imm numbers = [3.5, 4.0, 5.5, 3.0]
 average = 0.0
 mut i = 0
-while i &lt; numbers.len
+while i &lt; numbers.len:
   average += numbers[i++]
 average /= numbers.len      // == 4.0
 </pre>
@@ -136,7 +136,7 @@ average /= numbers.len      // == 4.0
 <pre>
 imm numbers = [3.5, 4.0, 5.5, 3.0]
 average = 0.0
-each nbr in numbers
+each nbr in numbers:
     average += nbr
 average /= numbers.len      // == 4.0
 </pre>
@@ -187,7 +187,7 @@ numbers[1 .. 3] = 2
         the element's type must support the <span class="pre">==</span> method.</p>
 <pre>
 imm somebody = "John"
-if somebody == "Jane"
+if somebody == "Jane":
   ....
 </pre>
     <p>Comparing for order (e.g., &lt;) is also handled by comparing the two arrays element-by-element,

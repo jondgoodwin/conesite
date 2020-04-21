@@ -97,14 +97,14 @@ imm signbit = Bool[trust {pi as u64} >> 63]
 		<span class="pre">trust</span> is the programmers way to
 		tell the compiler not to worry here:</p>
 <pre>
-union Value
+union Value:
   nbr usize
   ref &usize
 	
-fn getInt(v Value) usize trust
-  if (v.nbr & 3 == 0)
+fn getInt(v Value) usize trust:
+  if (v.nbr & 3 == 0):
     *v.ref
-  else
+  else:
     v.nbr>>2
 </pre>
 	<p>As this example shows, the entire function block can be marked as trustworthy.</p>

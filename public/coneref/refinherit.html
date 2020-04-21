@@ -39,7 +39,7 @@ struct Engine
 	<p>Now, let's create a new <span class="pre">Car</span> type that includes, 
 		and inherits from, an <span class="pre">Engine</span>:</p>
 <pre>
-struct Car
+struct Car:
   engine Engine use fuel, thrust
   body   SportyLook
   wheels RimWheels
@@ -76,7 +76,7 @@ struct Car
 		For example:
 	</p>
 <pre>
-struct SuperEngine
+struct SuperEngine:
   engine Engine use *
   fn power(on Bool) { ... }
 </pre>

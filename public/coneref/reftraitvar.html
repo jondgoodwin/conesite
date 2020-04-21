@@ -30,22 +30,22 @@
 <pre>
 // Common base trait for variant event types
 // '@samesize' pads all variants to be the same size
-trait @samesize Event
+trait @samesize Event:
   enum u8     // explicit tag field to discriminate variants
   time Time   // All events are time-stamped
 
 // Mouse event type, inheriting from Event
-struct MouseEvent extends Event
+struct MouseEvent extends Event:
   button u8
   x i32
   y i32
 
 // Keystroke event type
-struct KeyEvent extends Event
+struct KeyEvent extends Event:
   key KeySym
 
 // Quit event type
-struct QuitEvent extends Event
+struct QuitEvent extends Event:
 </pre>
 	<p>This example defines three variant event types
 		(for mouse-button clicks, keyboard changes, and quit requests),
@@ -175,7 +175,7 @@ event = QuitEvent[now]
 		However, unique fields and methods are only accessible after 
 		<a href="refmatch.html">pattern matching</a>.</p>
 <pre>
-match event
+match event:
   imm mbutton MouseButton:   mbutton.x
   imm key Keyboard:          i32[key.keysym]
   is Quit:                   0
@@ -204,7 +204,7 @@ imm when = refevent.time
 	<h4>Downcasting</h4>
 	<p>Use pattern-matching to downcast an upcast value or reference to its original, specialized variant type.</p>
 <pre>
-if imm butevent &MouseButton = refevent
+if imm butevent &MouseButton = refevent:
   // We can safely use butevent here as a reference to a event known to be a MouseButton event
 </pre>
 

@@ -72,7 +72,7 @@ fn dostuff(a: &i32, b: &'b i32) &i32, &'b i32
 		as parameters, lifetime annotations might be needed.
 		Let's illustrate with a simple example:</p>
 <pre>
-fn caller(nbr i32) i32
+fn caller(nbr i32) i32:
   mut ref &amp;i32
   imm outer = 5
   {
@@ -83,10 +83,10 @@ fn caller(nbr i32) i32
 </pre>
 	<p>That final de-reference will not be safe if the called function looks like this:</p>
 <pre>
-fn refswitch(nbr i32, ref1 &i32, ref2 &i32) &i32
-  if nbr &lt; 0
+fn refswitch(nbr i32, ref1 &i32, ref2 &i32) &i32:
+  if nbr &lt; 0:
     ref1
-  else
+  else:
     ref2
 </pre>
 	<p>The problem is that <span class="pre">caller</span> has no idea whether
@@ -101,13 +101,13 @@ fn refswitch(nbr i32, ref1 &i32, ref2 &i32) &i32
 		<span class="pre">'a</span>),
 		then <span class="pre">caller</span>'s logic is safe:</p>
 <pre>
-fn refswitch(nbr i32, ref1 &i32, ref2 &'a i32) &i32
+fn refswitch(nbr i32, ref1 &i32, ref2 &'a i32) &i32:
   ref1
 </pre>
 	<p>If the signature shows the returned reference originates
 		from ref2, <span class="pre">caller</span> once again triggers a compiler error:</p>
 <pre>
-fn refswitch(nbr i32, ref1 &'a i32, ref2 &i32) &i32
+fn refswitch(nbr i32, ref1 &'a i32, ref2 &i32) &i32:
   ref2
 </pre>
 	<p>The lesson here is pretty simple: If a function returns a borrowed reference,
@@ -122,7 +122,7 @@ fn refswitch(nbr i32, ref1 &'a i32, ref2 &i32) &i32
 		at least one being mutable, lifetime annotations might be needed.
 		Consider:</p>
 <pre>
-fn tryit()
+fn tryit():
   imm i = 5
   mut a = &amp;i
   {
@@ -132,7 +132,7 @@ fn tryit()
 </pre>
 	<p>That's not going to work if it calls this function:</p>
 <pre>
-fn refstore(refmut &amp;mut &amp;i32, refval &amp;i32)
+fn refstore(refmut &amp;mut &amp;i32, refval &amp;i32):
   *refmut = refval  // Oh my!
 </pre>
 	<p>What's the problem?
@@ -154,7 +154,7 @@ fn refstore(refmut &amp;mut &amp;i32, refval &amp;i32)
 		function promise it won't store one reference inside the other,
 		by marking their lifetimes as independent:</p>
 <pre>
-fn refstore(refmut &amp;mut &amp;i32, refval &amp;'b i32)
+fn refstore(refmut &amp;mut &amp;i32, refval &amp;'b i32):
   **refmut = *refval
 </pre>
 	<p>The lesson here is once again simple:
@@ -167,7 +167,7 @@ fn refstore(refmut &amp;mut &amp;i32, refval &amp;'b i32)
 		we must also constrain the lifetimes of any data structures that
 		contain borrowed references as fields. Consider:</p>		
 <pre>
-struct Wrapper
+struct Wrapper:
   refa &'a u32
   refb &'b u32
 </pre>
@@ -176,11 +176,11 @@ struct Wrapper
 		The lifetime of this value will be constrained by whichever ends up as the
 		shorter of the two lifetimes:</p>
 <pre>
-fn process()
+fn process():
   imm val = 5
   makewrap(&val)
 
-fn makewrap(valref &i32) Wrapper
+fn makewrap(valref &i32) Wrapper:
   imm val = 10
   Wrapper[valref, &val]  // oops
 </pre>
@@ -195,15 +195,15 @@ fn makewrap(valref &i32) Wrapper
 		apply to functions that receive or return values
 		which have borrowed references within them as fields.</p>
 <pre>
-fn process()
+fn process():
   imm val = 5
   makewrap(&val)
 	
-fn makewrap(valref &i32) &i32
+fn makewrap(valref &i32) &i32:
   imm val = 10
   getref(Wrapper[valref, &val])
 	
-fn getref(wrap: Wrapper&lt;'a, 'b&gt;) &'a i32
+fn getref(wrap: Wrapper&lt;'a, 'b&gt;) &'a i32:
   wrap.refa
 </pre>
 	<p><span class="pre">getref</span> shows

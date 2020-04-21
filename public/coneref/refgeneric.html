@@ -34,7 +34,7 @@
 		just adding a list of type names it is generic over.
 		For example, this simple generic function returns the larger of two values:</p>
 <pre>
-fn max[T](a T, b T) T
+fn max[T](a T, b T) T:
   if a > b {a} else {b}
 </pre>
 	<p>The use of square brackets after the function name indicate this is a generic
@@ -68,7 +68,7 @@ imm val1 = max(4, 6)
 	<p>For example, one can define something like the built-in Option type
 		using a generic enum:</p>
 <pre>
-enum Option[T]
+enum Option[T]:
   Some T
   Null
 </pre>
@@ -93,7 +93,7 @@ mut afloat Option[f32]
 	<p>A generic struct may be declared in the same way.
 		This generic type defines a resizeable collection:</p>
 <pre>
-struct Vec[T]
+struct Vec[T]:
 	used usize
 	arr &[]so T
 </pre>
@@ -110,7 +110,7 @@ mut pointers Vec[&so Node]
 	<h2>Multiple Types</h2>
 	<p>A generic type (or function) can substitute more than one type:</p>
 <pre>
-enum Result[T,E]
+enum Result[T,E]:
   Ok T
   Err E
 </pre>
@@ -131,10 +131,10 @@ int openFile Result[FileHandle, IoError]
 	<p>The simplest form of generic constraint is to specify a Supertype
 		when declaring the generic types:</p>
 <pre>
-trait Comparable
+trait Comparable:
 	fn `&gt;`(a Self, b Self) Bool
 	
-fn max[T Comparable](a T, b T) T
+fn max[T Comparable](a T, b T) T:
   if a > b {a} else {b}
 </pre>
 	<p>The trait <span class="pre">Comparable</span> applies to
@@ -150,7 +150,7 @@ fn max[T Comparable](a T, b T) T
 		generic variable using <span class="pre">+</span>.
 		This ensures the supertype complies with all of their requirements:</p>
 <pre>
-fn some[T Comparable + Float](a T)
+fn some[T Comparable + Float](a T):
   ...
 </pre>
 	
@@ -160,7 +160,7 @@ fn some[T Comparable + Float](a T)
 		These constraints should be expressed as part of a
 		<span class="pre">where</span> clause just before the start of the block.</p>
 <pre>
-struct Xyz[T, Y] where T &lt; Y && Option[T]: Node
+struct Xyz[T, Y] where T &lt; Y && Option[T] is Node
 </pre>
 	<p>This expresses the criteria that T is a supertype of Y 
 		and that a nullable T is a valid Node.</p>

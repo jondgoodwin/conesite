@@ -22,7 +22,7 @@
 	<p>Enums hold a single value whose type could be one of several variations.
 		For example:</p>
 <pre>
-enum Number
+enum Number:
 	Integer i32
 	Float   f32
 </pre>
@@ -58,10 +58,10 @@ enum Number
 		</ul>
 	<p>This declaration specifies three variant types:</p>
 <pre>
-enum OddEnum
+enum OddEnum:
 	None          // No value for this variant
 	SomeInt i32   // Value is an integer
-	PointStruct   // Value is a struct holding two floats
+	PointStruct:  // Value is a struct holding two floats
 		x f32
 		y f32
 </pre>
@@ -70,7 +70,7 @@ enum OddEnum
 		Just leave out type information:
 	</p>
 <pre>
-enum Colors
+enum Colors:
 	Red   = 0xFF0000
 	Green = 0x00FF00
 	Blue  = 0x0000FF
@@ -103,7 +103,7 @@ oddval = OddEnum::PointStruct[x: 4., y: 8.]
 			As a brief peek into the versatile power of partial pattern matching,
 			consider this example:</p>
 <pre>
-match oddval
+match oddval:
 	imm intval SomeInt:     intval
 	imm point PointStruct:  i32[point.x * point.y]
 	is None:                0
@@ -117,7 +117,7 @@ match oddval
 		<p>One may also match an enum value against a single variant using an
 			<span class="pre">if</span> statement:</p>
 <pre>
-sum += intval if imm SomeInt = oddval
+if imm SomeInt = oddval: sum += intval
 </pre>
 	<p><b>Note:</b>If an enum value is being matched against a variant that has no value
 		(e.g., <span value="pre">none</span> above), the equivalence operator 

@@ -36,7 +36,7 @@
 		<p>On the previous page, the <span class="pre">Point</span> type example
 		took advamtage of this by implementing the subtraction method:</p>
 <pre>
-fn `-`(pt2) Point
+fn `-`(pt2) Point:
 	Point[pt2.x - x, pt2.y - y]
 </pre>
 	<p><b>Note:</b> Whenever a name includes non-alphanumeric (or underscore) characters,
@@ -48,7 +48,7 @@ fn `-`(pt2) Point
 		The difference between the negation method and the subtraction method is that
 		the former needs only the self parameter:</p>
 <pre>
-fn `-`() Point
+fn `-`() Point:
   Point[-x, -y]
 </pre>
 	
@@ -94,9 +94,9 @@ fn `-`() Point
 		Such methods are designated by preceding <span class="pre">fn</span> with <span class="pre">set</span>.
 		For example:</p>
 <pre>
-struct Counter
+struct Counter:
   _count u32 = 0
-  set fn count(cnt u32)
+  set fn count(cnt u32):
     _count = cnt / 2
 </pre>
 	<p>As this example demonstrates, a <span class="pre">set</span> method typically alters
@@ -119,15 +119,15 @@ cnt.count = 6       // Note: the parentheses can be omitted
  	<p>Implementing a getter and setter is as easy as defining a
 		a regular and <span class="pre">set</span> method of the same name:</p>
 <pre>
-struct Counter
+struct Counter:
 	_count u32 = 0
 
   // a getter
-  fn counter() u32
+  fn counter() u32:
     _count++
 
   // a setter
-  set fn count(cnt u32)
+  set fn count(cnt u32):
     _count = cnt
 </pre>
 	<p>And here we use them:</p>
@@ -182,9 +182,9 @@ x.counter // 10
 		The closure <span class="pre">|n i32 {cnt = 0}| cnt += n</span>
 		is roughly equivalent to:</p>
 <pre>
-struct _cntstr
+struct _cntstr:
   _cnt = 0
-  fn `()`(n i32)
+  fn `()`(n i32):
     _cnt += n
 
 mut counter = _cntstr[]

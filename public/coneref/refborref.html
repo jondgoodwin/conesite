@@ -41,7 +41,7 @@
 		This works equally well on any global, local or parameter variable:</p>
 <pre>
 imm glovar = 2
-fn func(parm i32)
+fn func(parm i32):
 	mut localvar = 3
 	imm ref1 = &amp;glovar    // ref1's type: &i32
 	imm ref2 = &amp;parm      // ref2's type: &i32
@@ -69,10 +69,10 @@ imm borref = &*allocref    // Borrow from allocref
 		So long as the value type (and permission) match, the borrow is performed automatically.</p>
 <pre>
 // This function accepts a borrowed reference
-fn incr(nbr &amp;i32)
+fn incr(nbr &amp;i32):
   *nbr + 1
 
-fn main()
+fn main():
   imm allocref = &amp;rc 1   // An owning reference pointing to an allocated value of 1
   incr(allocref)         // Coerces the rc reference to a borrowed reference
 </pre>
@@ -167,9 +167,9 @@ imm uniref = &amp;rc 5
 		the source variable is made inaccessible for the lifetime of the borrowed reference
 		in order to preserve that guarantee:</p>
 <pre>
-fn freeze(n i32)
+fn freeze(n i32):
   uni uniref = &one 3       // has permission uni
-  if n &gt; 1
+  if n &gt; 1:
     imm borref = &*uniref   // borrowing makes uniref inaccessible in this block 
     imm m = *uniref         // oops! uniref is frozen and may not be accessed
   *uniref                   // Safe, because the borrow has expired.
@@ -186,7 +186,7 @@ fn freeze(n i32)
 		pattern matching by using a borrowed reference with the required permission as the source:</p>
 <pre>
 // increment every number in list
-each x in &mut list
+each x in &mut list:
   ++*x   // x is a mutable reference
 </pre>
 
@@ -198,7 +198,7 @@ each x in &mut list
 
 	<p>This example demonstrates the importance of this restriction:</p>
 <pre>
-fn getval() i32
+fn getval() i32:
   mut ref &amp;i32
   {
     imm a = 5

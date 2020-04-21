@@ -103,12 +103,12 @@
 		This happens during assignments, function calls and returns.
 		For example:</p>
 <pre>
-fn doStuff ()
+fn doStuff ():
   imm bigint u32 = 101u8        // Coerce a u8 to u32
   mut matrix = &so Mat4[]       // Allocate a matrix
   imm float = mat4det(matrix)?  // Coerce &so uni Mat4 to ?&Mat4
 
-fn mat4det(mat &Mat4) f32 throws DivByZero
+fn mat4det(mat &Mat4) f32 throws DivByZero:
   // ...
   return 1.0                     // Coerce f32 to Result&lt;&gt;
 </pre>

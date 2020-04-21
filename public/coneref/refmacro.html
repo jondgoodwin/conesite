@@ -16,13 +16,13 @@
 	<p>Macros are similar to generic functions. They generate code inline wherever they are used.</p>
 <pre>
 // A macro that evaluates to the largest value
-macro max[a, b]
+macro max[a, b]:
 	imm aa = a
 	imm bb = b
 	if aa > bb {aa} else {bb}
 	
 // Now use it
-fn tester(x i32, y i32)
+fn tester(x i32, y i32):
   imm maxnbr = max(x, y)
 </pre>
 	<p>Wherever the macro is used, its call site is effectively replaced with

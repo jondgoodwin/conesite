@@ -112,7 +112,7 @@ imm x = maybePoint?.dist()
 		without having to constantly reaffirm it is not Null.
 		This is surprisingly easy to accomplish:</p>
 <pre>
-if maybePoint
+if maybePoint:
 	imm x = maybePoint.x
 	imm y = maybePoint.y
 	imm dist = maybePoint.dist
@@ -126,12 +126,12 @@ if maybePoint
 	<p>As an extension of this principle, if the conditional expression follows such a check with additional
 		conditions after the <span class="pre">and</span> operator, the shadow variable may also be used in the remaining condition:</p>
 <pre>
-if maybeInt and maybeInt &lt; 10
+if maybeInt and maybeInt &lt; 10:
   scale *= maybeInt
 </pre>
 	<p>A conditional can also check for the Null value:</p>
 <pre>
-if !maybeRef
+if !maybeRef:
   // do some error recovery actions
 </pre>
 	<p>The block is performed when maybeRef is Null. No shadow variable is created for maybeRef at the top of the block,
@@ -142,9 +142,9 @@ if !maybeRef
 		just make use of straightforward pattern matching:</p>
 
 <pre>
-if imm integer = Some[maybeInt]
+if imm integer = Some[maybeInt]:
 	scale *= integer
-else
+else:
 	// Some recovery stuff
 </pre>
 	<p>When maybeInt is not Null, its value is unwrapped and copied into the variable named <span class="pre">integer</span>,

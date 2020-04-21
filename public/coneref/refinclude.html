@@ -27,14 +27,14 @@
 	as if were part of the current source file's module.
 	For example, suppose we had a source file called 'useme.cone':
 <pre>
-fn inc(a i32) i32
+fn inc(a i32) i32:
   a+1
 </pre>
 		<p>Another source file can now use its contents:</p>
 <pre>
 include useme
 
-fn timesnext(a i32)
+fn timesnext(a i32):
   a * inc(a) // uses a function defined by 'useme.cone'
 </pre>
 	<p>Since the names declared inside any included file(s) are treated
@@ -94,7 +94,7 @@ import opengl
 <pre>
 import opengl
 
-fn setColor(col Color)
+fn setColor(col Color):
   opengl::setColor(col)
 </pre>
 	<p><span class="pre">opengl::SetColor</span> references the <span class="pre">setColor</span>
@@ -119,21 +119,21 @@ fn setColor(col Color)
 <pre>
 import math3d Point3, Mat3
 
-fn move(pos &amp;Point3, delta Point3)
+fn move(pos &amp;Point3, delta Point3):
   pos += delta
 </pre>
 	<p>Use <span class="pre">as</span> to provide an alias for a name that is already in use:</p>
 <pre>
 import math3d Point3 as Point
 
-fn move(pos &amp;Point, delta Point)
+fn move(pos &amp;Point, delta Point):
   pos += delta
 </pre>
 	<p>Or one can fold in all public names from the package using <span class="pre">*</span>:</p>
 <pre>
 import math3d *
 
-fn move(pos &amp;Point3, delta Point3)
+fn move(pos &amp;Point3, delta Point3):
   pos += delta
 </pre>
 

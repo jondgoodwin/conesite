@@ -17,7 +17,7 @@
 		defines a new type composed of named fields and methods.
 		For example:</p>
 <pre>
-trait Id
+trait Id:
   id u32
   fn print()  // No implementation provided
 </pre>
@@ -50,14 +50,14 @@ trait Id
 	<h3>Mixing in Fields</h3>
 	<p>Suppose we have a trait that defines some fields:</p>
 <pre>
-trait LexerInfo
+trait LexerInfo:
   line i32
   col i32
 </pre>
 	<p>A struct may include these fields as part of its definition
 		by using <span class="pre">mixin</span>:</p>
 <pre>
-struct Node
+struct Node:
   type u8
   mixin LexerInfo
   count i32

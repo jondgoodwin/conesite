@@ -37,7 +37,7 @@
 	</ul>
 	<p>Here is a simple initializer:</p>
 <pre>
-fn init(self &new)
+fn init(self &new):
   *self = Self[x: 1., y: 1., z: 1.]
 </pre>
 	<p>An initializer is a method, but it has a few differences from typical methods:</p>
@@ -89,7 +89,7 @@ imm gcref = &amp;gc mut Point()  // x,y,z of the new Point value are 1.0
 <p>A clone method is essentially an initializer whose second parameter
 	is a value or another borrowed reference to the value we want to copy:</p>
 <pre>
-fn clone(self &new, from &)
+fn clone(self &new, from &):
   *self = Self[x: from.x, y: from.y, z: from.z]
 </pre>
 	<p>Whenever copies are automatically made (e.g., assignment or function calls),
@@ -105,7 +105,7 @@ fn clone(self &new, from &)
 		before the value's memory is reclaimed.</p>
 	<p>Here's a finalizer:</p>
 <pre>
-fn final(self &uni)
+fn final(self &uni):
   file.close
 </pre>
 	<p>Key to a finalizer definition:</p>

@@ -23,24 +23,24 @@
 		Instead, methods are defined in the same block as the data structure declarations.</p>
 	<p>This example defines several methods as part of the <span class="pre">Point</span> declaration:</p>
 <pre>
-struct Point
+struct Point:
   x f32
   y f32
 		
   // Calculate distance between two points
-  fn distance(pt2) f32
+  fn distance(pt2) f32:
     (self-pt2).len
 
   // Subtract two points
-  fn `-`(pt2) Point
+  fn `-`(pt2) Point:
     Point[pt2.x - x, pt2.y - y]
 
   // Calculate length of point
-  fn len() f32
+  fn len() f32:
     _lensq().sqrt // _lensq() is equivalent to self._lensq()
 	
   // A private method
-  fn _lensq() f32
+  fn _lensq() f32:
 		x*x + y*y
 </pre>
 	<p>There's a lot to unpack here, which we will get to soon.
@@ -59,8 +59,8 @@ imm dist = from.distance(to)     // == 5.0. Pythagoras would be proud
 		 type. For example:
 		</p>
 <pre>
-extend i32
-	fn double() Self
+extend i32:
+	fn double() Self:
 	  self+self
 </pre>
 

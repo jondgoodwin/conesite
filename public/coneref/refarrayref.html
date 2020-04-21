@@ -191,12 +191,12 @@ arrref[1 .. 3] = 2
     <p>The <span class="pre">each</span> loop may iterate over an array reference's elements:</p>
 <pre>
 mut sum = 0
-each x in intslice
+each x in intslice:
     sum += x
 </pre>
     <p>Iteration can also obtain the index number for each value:</p>
 <pre>
-each i, x in intslice
+each i, x in intslice:
     newslice[i] = x
 </pre>
 
@@ -205,7 +205,7 @@ each i, x in intslice
         even if one is a borrowed reference and the other an owning reference.
         This comparison checks for equality of both the starting pointer and the element count.</p>
 <pre>
-if ownref == borref
+if ownref == borref:
    ....
 </pre>
     <p>Comparing for order (e.g., &lt;) is not possible directly.
