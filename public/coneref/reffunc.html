@@ -16,7 +16,7 @@
 	<p style="margin-left: 40px;"><i>Note: All of this capability is implemented
 		except pure functions.</i></p>
 
-	<p>The previous page showed how to call functions as part of an expression.
+	<p>Earlier, we showed how to call functions as part of an expression.
 	Now it is time to show how to declare and implement functions.
 	In fact, all logic (including expressions) must be defined as part of the implementation
 	of a function (or method).</p>
@@ -39,7 +39,7 @@ area = Float.pi * square(r)
 	<li><b>return type(s)</b> which follows the parentheses (f32 in this example).</li>
 	</ul>
 	<li>The function's <a href="#stmtblk">implementation block</a> follows the signature.
-	The block contains indented statement(s) that represent the logic to be performed by the function.</li>
+	The block contains statement(s) that represent the logic to be performed by the function.</li>
 	</ul>
 	 
 	<h3 id="parms">Parameter Variables</h3>
@@ -57,7 +57,7 @@ add(2)    // ERROR! add() needs exactly two values, not one or three
 add(2.0, 4.0)  // ERROR! add() needs integers, not floating point numbers
 </pre>
 
-	<p>Parameters are variables, usable within the function.
+	<p>Parameters are local variables, usable within the function.
 	The function's signature effectively declares the parameter variables in the same format as any variable declaration.
 	In the example above, the permission is not specified and therefore
 	<span class="pre">imm</span> is assumed.
@@ -90,19 +90,14 @@ next()    // ERROR! no default value for nbr
 </pre>
 
 	<h2 id="stmtblk">Implementation Block</h2>
-	<p>The function's implementation block is represented by a sequence of indented statements
-		that perform the function's logic.
-		Generally, each statement is performed in order.</p>
-	<p>Most statements are just expressions.
-	A statement could also be a local variable declaration,
-	some nested <a href="refblock.html">block</a>, or one of a set of special statements
-	(e.g., 'return').</p>
+	<p>The function's implementation block is like any regular block,
+		consisting of a ordered sequence of statements
+		that perform the function's logic.</p>
 
-	<h3 id="local">Local Variable Declarations</h3>
-	<p>Any variable declared wihin a function (including its parameters) has a 
-		scope that is <i><a href="refterm.html#scope">local</a></i> to that function.
-		It cannot be referenced or used outside of that scope.</p>
-<p>Local variables provide a working state for the function.
+	<h3>Local variables</h3>
+	<p>All local variables declared within the function's block
+		(including the function's parameters) provide a
+		temporary working state for the function.
 		Every time a function is called, space is allocated on the execution stack
 		for all its declared local variables.
 		When the function is finished and returns to its caller, 
@@ -158,7 +153,7 @@ fn ceil(x i32) i32, i32:
 	else:
 		x, x   // implicit return
 </pre></li>
-	<li>A final <a href="refwith.html"><span class="pre">with</span></a> block returns the value of 
+	<li>A final <a href="refblock.html#with"><span class="pre">with</span></a> block returns the value of 
 	<span class="pre">this</span>.</li>
 <pre>
 fn newthing() Thing:
@@ -200,8 +195,8 @@ fn factorial(x i32, prod i32 = 1):
 pure fn factorial(n i32) i32:
   if x&lt;=1:
     return 1 
-	mut result = 1
-	while n-- > 1:
+  mut result = 1
+  while n-- > 1:
     result *= n
   result
 </pre>
