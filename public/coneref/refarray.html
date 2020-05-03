@@ -21,11 +21,13 @@
         <p>Let's illustrate with an example:
     </p>
 <pre>
-imm numbers [3] f32 = [3.1, 4.1, 5.92]
+imm numbers [3; f32] = [3.1, 4.1, 5.92]
 </pre>
     <p>Here, <span class="pre">numbers</span> is an array containing three floating-point numbers as its elements.
-      As the redundant type specification <span class="pre">[3] f32</span> indicates, the length of the array is 3 
-      and the type of its elements is <span class="pre">f32</span>.</p>
+      As the redundant type specification <span class="pre">[3; f32]</span> indicates, the length of the array is 3 
+      and the type of its elements is <span class="pre">f32</span>.
+      A multi-dimensional array may also be defined: <span class="pre">[4,4; f32]</span>.
+    </p>
     <p>An array can only exist as either a global or a local, stack-allocated value. 
         Its length must be specified using an integer literal, making it fixed and unchangeable.
         If variable-sized or heap-allocated arrays are needed, use
@@ -67,7 +69,7 @@ imm hello = "Hello"
 fn main():
   mut dessert = jello(hello)
 
-fn jello(mut saying [5] u8):
+fn jello(mut saying [5; u8]):
   saying = "jello"
   saying
 </pre>
