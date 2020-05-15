@@ -592,7 +592,7 @@
             if (code !== null) {
                 session.setValue(code);
             } else {
-                session.setValue("// Your program goes here...\nextern fn print(str *u8)\n\nfn main()\n  print(\"Hello world!\")\n");
+                session.setValue("// Hello, World!\nextern fn print(str *u8)\n\nfn main():\n  print(\"Hello world!\")\n");
             }
         }
 
