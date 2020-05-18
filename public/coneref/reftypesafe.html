@@ -31,7 +31,7 @@
 		Cone supports three such capabilities:</p>
 	<ul>
 		<li><b>Coercion</b>,
-			which implicitly and safely maps a subtype-based value to its semantic equivalent in a supertype.</li>
+			which implicitly and safely converts a value to some other expected type (usually a supertype).</li>
 		<li><b>Conversion</b>,
 			which explicitly constructs the closest "equivalent" value in another type.
 			This mapping is imperfect, as some (or all) of the meaning of the original value could be lost.</li>
@@ -77,8 +77,7 @@
 			Similarly, most permissions are a subtype of <span class="pre">uni</span>.</li>
 		<li>A smaller number type is a subtype of a larger version of the same type
 			(e.g., <span class="pre">u8</span> is a subtype of <span class="pre">u32</span>).</li>
-		<li>A struct is a subtype of any trait it conforms to.
-			More will be said about <a href="reftrait.html">traits</a> and subtyping later.</li>
+		<li>A struct is a subtype of any <a href="reftrait.html">trait</a> it conforms to.</li>
 	</ul>
 	<p>An important characteristic of subtyping relationships is that
 		it is trivially safe to transform a <span class="pre">Subtype</span> value
@@ -92,8 +91,8 @@
 		<span class="pre">Subtype</span> value when the reverse transformation is applied.</p>
 		
 	<h2 id="coercion">Implicit Coercion</h2>
-	<p>We call it coercion when transforming a subtype value into
-		its equivalent base value.
+	<p>We call it coercion when implicitly converting a value into
+		an expected type (usually a supertype).
 		Coercion is the one safe exception to the strict typing rule described earlier,
 		given that the type of a value and its receiver are not strictly the same.</p>
 	<p>Since coercion is always safe, Cone performs it implicitly
@@ -119,13 +118,20 @@ fn mat4det(mat &Mat4) f32 throws DivByZero:
 		In the case of coercing an owning reference to a borrowed reference,
 		it triggers appropriate borrowing mechanics on the source variable.
 		Similarly, when coercing a non-copy value, move semantics apply.</p>
-	<p>If an expression requires, it is possible to explicit request coercion.
+	<p>If an expression requires, it is possible to explicitly request coercion.
 		For non-reference types, use the appropriate constructor
 		(as described below for conversion).
 		For references, use the <span class="pre">as</span> operator:</p>
 <pre>
 imm newref = oldref as &Point  // Explicitly coerce to a borrowed reference
 </pre>
+
+	<h3>Implicit Coercion to Bool</h3>
+	<p>In addition to supertype coercions, Cone supports the automatic coercion
+		of some value to Bool, so long as the value's type implements the
+		<span class="pre">isTrue</span> method. This is implemented by the number
+		and pointer types. A number is true if it is not zero. A pointer is true
+		if it is not null.</p>
 
 	<h3>Implicit Coercion of 'self'</h3>
 		<p>Cone offers a very different form of coercion when dealing with method calls 
