@@ -168,8 +168,22 @@ x.counter // 10
 		Dictionaries, for example, often use strings as the index.</p>
 
 	<h3>&lt;- Append Operator</h3>
-	<p>A collection may implement the <span class="pre">&lt-</span> operator
-		for adding an element or a slice's elements to the end of a collection.</p>
+	<p>Some types may implement one or more overloaded methods for "&lt;-", to "append"
+		values to a receiver. This can be useful for a variety of purposes:</p>
+	<ul>
+		<li>Appending elements to the end of some collection, queue or string.</li>
+		<li>Serializing data to an output stream, such as the console.</li>
+		<li>Sending data to another thread/actor/machine via a channel</li>
+	</ul>
+	<p>It is not necessary that all values appended to the receiver be data
+		that is accumulated by the receiver. Some values could be understood 
+		to be instructional directives that alter the behavior of the receiver
+		on the fly. For example, a directive could offer formatting, rendering or structuring instructions.	</p>
+	<p>As a convenience, if a tuple appears after the append operator, this is transformed into multiple
+		distinct append statements:</p>
+<pre>
+print &lt;- "Hello ", user   // equivalent to: print &lt;- "Hello "; print &lt;- user
+</pre>
 		
 	<h2>() "Function call" Operator</h2>
 	<p>It is actually possible to "call" an object as if it were a function.
