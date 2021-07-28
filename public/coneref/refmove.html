@@ -15,7 +15,7 @@
 
 	<p style="margin-left: 40px;"><i>Note: None of this has been implemented.</i></p>
 	
-	<p>Values are usually copied as they flow from 
+	<p>Values are copied as they flow from 
 		variable-to-variable or function-to-function.
 		Changes made to a copy won't affect the original value.</p>
 <pre>
@@ -24,10 +24,10 @@ mut b = a  // b holds a copy of a's value
 b += 1     // b's value is changed to 4
 a          // is still 3
 </pre>
-	<p>Sometimes, however, we have values that we can't or shouldn't copy.
-		Uncopyable values can be useful:</p>
+	<p>Sometimes, however, we have values for which we don't want multiple copies of the value to 
+		exist at the same time. Such "non-copyable" values can be useful:</p>
 		<ul>
-		<li>When the value depends on some other stateful resource(s) such that creating a copy
+		<li>When the value depends on a stateful resource(s), where the existence of a copy of this value
 			would confuse how we interact with the resource(s).
 			For example, imagine the value is a handle to a just-opened file
 			and we make a copy of that handle as another value.
@@ -40,46 +40,44 @@ a          // is still 3
 			If an allocated value never needs to be copied,
 			single-owner offers performance and determinacy advantages over
 			reference-counting and tracing GC.</li>
-		<li>When we want to transfer mutable data (including graphs)
+		<li>When we want to transfer mutable data (including complex data graphs)
 			from one thread to another, without requiring
 			the use of performance-degrading locks or atomics.</li>
 		</ul>
-	<p>This page explains what makes a value copyable or not,
-		and then describes how move semantics allow
-		an uncopyable value to move from one part of a program to another.</p>
+	<p>To provide safe support for such "non-copyable" values, Cone supports <b>move semantics</b>.
+	   Move semantics supports the idea that a non-copyable value can be moved from one place to another in a code's logic.
+	   However, once it moves, the key restriction is that it may no longer be accessed from its old location.
+	   This restriction ensures there is only ever one copy of the value in existence.</p>
+	<p>This page explains how Cone decides whether a value is handled with copy vs. move semantics,
+		and then describes the logic restrictions that move semantics imposes on non-copyable values.</p>
 		
 	<h2>Move vs. Copy Types</h2>
-	<p>Whether a value is copyable or not	is largely determined by the value's type.
-		The compiler uses heuristics to infer whether or not a type's values are copyable,
-		based on examining the fields and methods it implements:</p>
+	<p>Whether a value is handled by move vs. copy semantics is determined by its type.
+		The compiler uses heuristics to infer whether a type's values are move vs. copy:</p>
 	<ol>
-		<li>If the <a href="refinitdrop.html#clone">clone</a> method is implemented,
-			the type's values may be copied.
-			Since the compiler automatically uses the clone method (when implemented)
+		<li>If the type implements an initializer method that essentially enables the creation of a copy,
+			the type's values have copy semantics.
+			Since the compiler automatically uses this cloning method (when implemented)
 			to make all copies of values of this type, these values are clearly copyable.</li>
 		<li>If the <a href="refinitdrop.html#finalizer">final</a> method is implemented,
-			the type's values may not be copied.
+			the type's values have move semantics.
 			If the type requires a finalizer to clean up dependencies,
 			chances are excellent that creating copies will open the door to safety issues.</li>
-		<li>If <i>any</i> of the type's fields cannot be copied,
-			the type's values may not be copied.
-			This makes sense: if part of a value cannot be copied, the whole value certainly cannot be either.
+		<li>If <i>any</i> of the type's fields have move semantics,
+			the type's values have move semantics.
+			This is because if part of a value cannot be copied, the whole value certainly cannot be either.
 			</li>
 		<li>If any of the type's fields are references to other data structures,
-			the type's values may not be copied.
+			the type's values have move semantics.
 			This is because it is not immediately obvious how to automatically and safely
 			create copies of this type's values.</li>
-		<li>If none of the above apply, the type's values may be copied.</li>
+		<li>If none of the above apply, the type's values have copy semantics.</li>
 	</ol>
 
 	<h2>Move Semantics</h2>
 	<p>Even when we want to prohibit the copying of these values,
 		we still want to be able to move such values around from variable-to-variable
-		or function-to-function.
-		This capability is called <b>move semantics</b>, which differs from the copy
-		semantics we have worked with so far.
-		Non-copyable values use move semantics.
-		Copyable values use copy semantics.</p>
+		or function-to-function.</p>
 	<p>Moving values around looks just like copying,
 		but adds restrictions to ensure multiple copies of the value are never made.
 		These restrictions, if not well understood, 

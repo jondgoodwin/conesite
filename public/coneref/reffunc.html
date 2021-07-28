@@ -229,6 +229,17 @@ pure fn factorial(n i32) i32:
 	</ul>
 	<p>Only a strongly pure functions can be safely memo-ized.</p>
 	
+	<h2>Inline functions</h2>
+	<p>A function can be marked as "inline". For example:
+<pre>
+fn incr(x i32) inline:
+  x+1
+</pre>
+	<p>Any time another piece of code calls an inlined function or method, the called function's logic is
+	actually generated within the caller's logic. For small inlined functions, this can offer a significant
+	performance advantage, not only because it eliminates the overhead of call/return, but more importantly
+	because it is very instruction-cache friendly.</p>
+	<p><b>Note:</b> It is impossible to borrow a reference to an inlined function.</p>
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refclosure.html"><img alt="_" src="next.png" /></a>
 	</p>
