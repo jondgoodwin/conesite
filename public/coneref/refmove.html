@@ -17,14 +17,14 @@
 	
 	<p>Values are copied as they flow from 
 		variable-to-variable or function-to-function.
-		Changes made to a copy won't affect the original value.</p>
+		Changes made to a copy don't affect the original value.</p>
 <pre>
 imm a = 3
 mut b = a  // b holds a copy of a's value
 b += 1     // b's value is changed to 4
 a          // is still 3
 </pre>
-	<p>Sometimes, however, we have values for which we don't want multiple copies of the value to 
+	<p>Sometimes, however, we have values for which we don't want multiple copies to 
 		exist at the same time. Such "non-copyable" values can be useful:</p>
 		<ul>
 		<li>When the value depends on a stateful resource(s), where the existence of a copy of this value
@@ -45,15 +45,14 @@ a          // is still 3
 			the use of performance-degrading locks or atomics.</li>
 		</ul>
 	<p>To provide safe support for such "non-copyable" values, Cone supports <b>move semantics</b>.
-	   Move semantics supports the idea that a non-copyable value can be moved from one place to another in a code's logic.
-	   However, once it moves, the key restriction is that it may no longer be accessed from its old location.
+	   Move semantics enable non-copyable values to be moved from one place to another in a code's logic.
+	   However, once the value moves, it may no longer be accessed from its old location.
 	   This restriction ensures there is only ever one copy of the value in existence.</p>
-	<p>This page explains how Cone decides whether a value is handled with copy vs. move semantics,
-		and then describes the logic restrictions that move semantics imposes on non-copyable values.</p>
 		
 	<h2>Move vs. Copy Types</h2>
 	<p>Whether a value is handled by move vs. copy semantics is determined by its type.
-		The compiler uses heuristics to infer whether a type's values are move vs. copy:</p>
+		In general, Cone treats most types as having copy semantics, unless it detects some reason
+		why move semantics restrictions are needed. Here are the rules:</p>
 	<ol>
 		<li>If the type implements an initializer method that essentially enables the creation of a copy,
 			the type's values have copy semantics.
@@ -71,10 +70,11 @@ a          // is still 3
 			the type's values have move semantics.
 			This is because it is not immediately obvious how to automatically and safely
 			create copies of this type's values.</li>
+		<li>If the type is marked as having move semantics, that's what it gets.</li>
 		<li>If none of the above apply, the type's values have copy semantics.</li>
 	</ol>
 
-	<h2>Move Semantics</h2>
+	<h2>Move Capabilities and Restrictions</h2>
 	<p>Even when we want to prohibit the copying of these values,
 		we still want to be able to move such values around from variable-to-variable
 		or function-to-function.</p>
@@ -129,7 +129,7 @@ callfn(socket)        // **ERROR**. socket is deactivated
 </pre>
 	<p>Doing this on a copyable value has no effect.</p>
 	
-	<h3 id="swap">Field/Element Moves and Swaps</h3>
+	<h3>Field/Element Moves</h3>
 	<p>If we want to move a non-copyable value out of a struct or array,
 		things get more complicated, as other values are now potentially affected
 		by such a move:</p>
@@ -141,7 +141,10 @@ callfn(socket)        // **ERROR**. socket is deactivated
 			in an array.</li>
 	</ul>
 	<p>These are significant limitations on the use of non-copyable values in structs and arrays.
-		However, these limitations can be ameliorated by using the swap operator:</p>
+		However, these limitations can be ameliorated by using either the swap or left-assignment operator:</p>
+
+	<h3 id="swap">Swap Operator</h3>
+	<p>The swap operator may be used on copy or move values:</p>
 <pre>
 struct Connection:
   s Socket
@@ -152,7 +155,7 @@ conn.s &lt;=&gt; x
 // conn now contains the new socket and x contains the old one
 </pre>
 	<p>Swapping offers a helpful way to get around restrictive moves.
-	  One can temporarily extract a 'move' value out of a field or array element by swapping
+	One can temporarily extract a 'move' value out of a field or array element by swapping
 		it with some arbitrary type-compatible value.
 		After making use of the extracted value, simply swap it back in.</p>
 	<p>The reason why this works is that we end up with no copies of either value
@@ -160,15 +163,15 @@ conn.s &lt;=&gt; x
 		(even if it is only a dummy value).
 		That ensures that the original source stays safe to use.</p>
 	
-	<h3>Assignment</h3>
+	<h3>Left-Assignment</h3>
 	<p>Assignment is an expression whose value (for copy semantics) 
-		is a copy of the value of the right-hand expression. 
-		With a move-only value, however,
-		the value of the assignment expression is the value previously stored in
-		the left-hand (lval) memory location.</p>
+		is a copy of the value of the right-hand expression.
+		With move-only semantics, it can be very helpful to have the value of the
+		assignment expression be the value previously stored in the left-hand (lval) memory location.
+		To obtain this result, use the left-assignment operator (<span class="pre">:=</span>).</p>
 <pre>
 mut conn = Connection[Socket(), 10]
-mut x = conn.s = Socket()
+mut x = conn.s := Socket()
 // conn now contains the new socket and x contains the old one
 </pre>
 		
