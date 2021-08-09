@@ -37,7 +37,7 @@ imm nbrref = &rc imm 5  // the 'rc' region counts references
 		<li><b>Runtime footprint.</b> Some strategies are easily implemented with little code.
 		Others may require the presence of large, complex runtime logic.</li>
 	</ul>
-	<p>Cone offers a wide selection of regions
+	<p>Cone offers a wide selection of library-implemented regions,
 		because no one strategy handles all these criteria well.
 		This power of choice ensures each allocated object can select
 		the optimal region that best serves the way the program needs that object to behave.</p>
@@ -205,7 +205,7 @@ imm newevent = &eventPool mut Event::QuitEvent[]
 		process all objects sequentially in a cache-friendly way.</p>
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refperm.html"><img alt="_" src="next.png" /></a>
+		<a href="refpermlock.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

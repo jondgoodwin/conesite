@@ -16,29 +16,15 @@
 	<p style="margin-left: 40px;"><i>Note: Much of this capability is implemented
 			except for error handling on bad allocations.</i></p>
 	
-	<p>Imagine that a program's memory is conceptually partitioned into regions,
-			each with its own strategy for allocating and reclaiming memory for values.
-			Every program value is wholly located within and governed by its owning region.</p>
-	<p>By way of illustration (even though we have not said so until now), the memory space for every
-		variable's value is automatically allocated in one of these regions:</p>
-	<ul>
-		<li><b>Global region</b>.
-			All global variable values are stored at fixed locations in the global region.</li>
-		<li><b>Execution Stack regions</b>.
-			Local variable values are allocated and de-allocated in LIFO order from a stack region
-			as execution unfolds.
-			Each execution thread has its own stack region.</li>
-	</ul>
-	<p>These are not the only kinds of regions supported by Cone.
-		A broad range of region strategies may be used to dynamically allocate space for new values,
-		such as <span class="pre">&amp;rc</span> (reference counting), <span class="pre">&amp;gc</span> (tracing GC),
-		<span class="pre">&amp;ar</span> (arena) and <span class="pre">&amp;so</span> (single owner).
-		The next page describes and evaluates different region strategies in more detail.</p>
-	<p>Before we get to that, let's focus first on owning references,
-		the handles we use to work with values dynamically allocated by regions.
-		All owning references point to some valid, allocated value.
-		This page describes how owning references are created and used.</p>
-
+	<p>When you allocate a new value within a region, you get back an owning reference that points to the new object.
+		For some regions, multiple alias copies may be created which are also owning references.
+		For safety reasons, a region's automatic memory management strategy ensures that the
+		object's memory is freed only when when the last owning reference to the object expires.
+		This timing ensures that an owning reference is always safe to de-reference
+		and that an object will only be freed once.</li>
+	
+	<p>This page describes how owning references are created and used.</p>
+	
 	<h2>Creating Owning References</h2>
 	<p>Let's ask a region to allocate a new value and give us back an owning reference:</p>
 <pre>
@@ -51,16 +37,16 @@ imm nbrref = &amp;rc imm 4
 			In this case, the value is allocated in the <span class="pre">rc</span> region.</li>
 		<li><b><a href="refperm.html">Permission</a></b>.
 			This governs what you may do with the reference.
-			<span class="pre">imm</span> allows one to see the reference's value, but not change it.
-			(<b>Note:</b> <span class="pre">uni</span> is assumed for an owning reference
-			when no permission is specified.)
+			It can be a <a href="refperm.html">static</a> or <a href="refpermlock.html">lock</a> permission.
+			<span class="pre">uni</span> is assumed for an owning reference
+			when no permission is specified.
 		</li>
 		<li><b>Initial Value</b>.
 			A copy of this value is stored in the newly allocated memory location.
 			In this case, it is the integer 4.</li>
 	</ul>
 	<p>What we get back from this allocation is an owning reference, 
-		which this example stores	in the variable <span class="pre">nbrref</span>.
+		which this example stores in the variable <span class="pre">nbrref</span>.
 		The inferred type of this reference looks similar to the allocation:
 		<span class="pre">&amp;rc imm i32</span>.
 		This type signature includes the type of the initial value as the reference's value type.</p>
@@ -99,118 +85,6 @@ imm nbrref2 = nbrref        // nbrref2 and nbrref point to same value
 		the region will automatically invoke the value's 
 		<a href="refinitdrop.html">finalizer</a>, if it has been defined.</p>
 
-	<h2 id="ops">Reference Operations</h2>
-	<p>The de-referencing and comparison operators may be directly applied to references.</p>
-
-	<h3>De-referencing</h3>
-	<p>The most common use of references is to access and work with the value it points to.
-		Accessing this value is called de-referencing.
-  	To explicitly de-reference, use the <span class="pre">*</span> operator.
-		Within expressions, dereferencing retrieves the value the reference points to.
-		Used to the left of an assignment operator, dereferencing changes that value.</p>
-<pre>
-imm ref = &amp;rc mut 3
-imm val = *ref  // val is now 3
-*ref = 4        // ref now points to the value of 4
-</pre>
-	<p>De-referencing is only permitted if the reference's permission allows it.
-		Certain permissions, such as <span class="pre">opaq</span> and the locked permissions,
-		disallow de-referencing.</p>
-	<p>Similarly, de-referencing to obtain a value is prohibited
-		if <a href="refmove.html">move semantics</a> apply. This would happen
-		if the reference uses the <span class="pre">uni</span> permission or
-		points to a value of a non-copyable type.
-		This prohibition is because we likely have no way to comprehensively deactivate
-		the source of this value.
-		To get around this limitation and extract the value anyway,
-		<a href="refmove.html#swap">swap</a> the value the reference points to
-		with some other valid value.</p>
-
-	<h3>Comparison</h3>
-	<p>Two references may be compared for equality, even if they do not have the same type signature.
-		What this test determines is whether both references point to the same value:
-	</p>
-<pre>
-// Do ref1 and ref2 point to the same value?
-if ref1 == ref2:
-		// do some stuff
-</pre>
-	<p>It is also possible to compare whether one reference is "greater" than another.
-		This compares their respective memory addresses.
-		This might only be meaningful if both refer to somewhere within the same object.</p>
-
-	<h2 id="handle">Reference Handling</h2>
-	<p>References are values. As such, they can be stored and passed around a program.
-		Whether such transfers are simple copies or moves depends on the reference's permission
-		(move semantics apply to all references having the <a href="refmove.html">uni</a> permission).
-		Reference transfers also check reference type information to ensure everyone is in agreement
-		about what you can do with any passed-around reference.</p>
-	<p>Even though references are typed values,
-		they do sometimes get some special treatment to make them more convenient to use,
-		particularly to enable them to act as stand-ins for the values they point to.</p>
-
-	<h3>Reference Method Definitions</h3>
-	<p>Methods may be defined that accept references as the type for <span class="pre">self</span>.
-		However, importantly, such methods must be defined as part of the
-		<b>value type's</b> collection of methods.
-		Thus, if we want to define a method that works on a reference to a
-		<span class="pre">Point</span>, that method must be defined within the collection
-		of methods for the <span class="pre">Point</span> type:</p>
-<pre>
-struct Point:
-  // .. other Point methods here
-
-  // method that accepts a reference to a Point
-  fn normalize(self &rc mut Point):
-    imm len = self.len
-    x /= len
-    y /= len
-    z /= len
-</pre>
-
-	<h3>Implicit De-referencing</h3>
-	<p>Since a reference is generally understood to be a stand-in for the value it references,
-		de-referencing often happens implicitly.
-	  For example, when the dot operator is applied to a reference to access a field, 
-		the reference is automatically de-referenced:</p>
-<pre>
-imm ref = &amp;rc mut Point[1f, 2f, 3f]
-imm y = ref.y // equivalent to: (*ref).y
-</pre>
-	<p>Automatic de-referencing might also happen when applying
-		a method to a reference. For example:</p>
-<pre>
-imm ref = &amp;rc mut -4.
-imm pos = ref.abs    // pos is 4. Equivalent to: (*ref).abs
-imm sum = ref + 4.   // sum is 0. Equivalent to *ref1 + 4.
-</pre>
-	<p>With methods, the decision on whether or not to implicitly de-reference
-		depends on what is supported by implemented methods.
-		If an existing method can accept the reference as a reference, it is used.
-		If not, the reference is de-referenced before applying the method.</p>
-				
-	<h3>Nullable References</h3>
-	<p>References only ever point to valid values.
-		However, it is possible to explicitly declare and use nullable references,
-		much like any other <a href="refoption.html">nullable value</a>.</p>
-<pre>
-imm ref4 ?&amp;rc imm i32		 // nullable reference to an integer
-</pre>
-	<p>In addition to pointing to a valid value, a nullable reference
-		may also have the value <span class="pre">Null</span>,
-		which means the reference does not point to any valid value.
-	  To ensure safety, access to a nullable reference's value is only possible if
-		the code first ensures the reference does not have the value of <span class="pre">Null</span>:
-	</p>
-<pre>
-// This condition is true only if maybePoint is not null ...
-if maybePoint:
-  imm point = *maybePoint // ... allowing us to obtain its value
-imm point2 = *maybePoint    // **ERROR** We don't know if maybePoint is null here
-</pre>
-	<p><b>Note:</b> A special optimization ensures that nullable references are the same size
-		as regular references.</p>
-
 	<h3>Memory Allocation Errors</h3>
 	<p>Although unlikely, it is still possible for memory allocation requests to fail.
 		This typically happens when not enough contiguous, free memory exists to
@@ -225,6 +99,14 @@ imm point2 = *maybePoint    // **ERROR** We don't know if maybePoint is null her
 			may be applied in an attempt to recover from this problem.</li>
 	</ul>
 	
+	<h2>Using a Reference</h2>
+	<p>By and large, region-managed references may be used in all the same ways as borrowed references.
+	They may be
+			<a href="refborrowref.html#ops">dereferenced, compared</a>, and
+			<a href="refborrowref.html#handle">handled</a>
+			in the same way as owning references.
+		</p>
+
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refregionglo.html"><img alt="_" src="next.png" /></a>
 	</p>
