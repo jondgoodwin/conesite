@@ -48,8 +48,8 @@ imm nbrref = &rc imm 5  // the 'rc' region counts references
 		The focus is to describe the mechanism used by each of these region strategies
 		and assess how they compare on the above criteria.
 		In reality, each of these region strategies may be implemented by multiple concrete regions
-		that vary somewhat in how they work (e.g., &amp;rc might only work within a single thread,
-		whereas &amp;arc might allow multiple threads to share references to the same object).</p>
+		that vary somewhat in how they work (e.g., +rc might only work within a single thread,
+		whereas +arc might allow multiple threads to share references to the same object).</p>
 
 	<h2>rc - Reference Counting</h2>
 	<p>As the name suggests, the <span class="pre">rc</span> region keeps a running
@@ -190,7 +190,7 @@ imm newevent = &eventPool mut Event::QuitEvent[]
 			strategy other than arenas.</li>
 		<li>Memory efficiency. Pools are very good at reusing reclaimed memory.</li>
 		<li>Responsiveness and determinism varies according to the reference freeing mechanism:
-			<span class="pre">&amp;SoPool</span> and <span class="pre">RcPool</span>
+			<span class="pre">SoPool</span> and <span class="pre">RcPool</span>
 			will do pretty well.</li>
 		<li>Minimal runtime footprint.</li>
 	</ul>

@@ -53,14 +53,14 @@ imm dynarr2 = *dynarr1
     <li><b>Replicate an element</b>. 
         Specify a count in square brackets followed by the initial value for all elements:
 <pre>
-imm dynarr3 = &amp;gc [4; 0.]   // newarr's type:  &amp;[]gc f32
+imm dynarr3 = +[]gc [4; 0.]   // newarr's type:  +[]gc f32
 </pre>
        <p>Both the count and the value may be expressions.</p>         
     </li>
     <li><b>Use an expression</b>. 
         Specify an expression that calculates each element's initial value:
 <pre>
-imm dynarr4 = &amp;rc [4; n: n*n]
+imm dynarr4 = +[]rc [4; n: n*n]
 </pre>
     <p>The expression will be called for each element, with n incrementing upwards from 0.
         The expression's returned value becomes the element's initial value and type.</p>

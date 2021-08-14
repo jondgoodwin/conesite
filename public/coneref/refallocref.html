@@ -28,9 +28,9 @@
 	<h2>Creating Owning References</h2>
 	<p>Let's ask a region to allocate a new value and give us back an owning reference:</p>
 <pre>
-imm nbrref = &amp;rc imm 4
+imm nbrref = +rc-imm 4
 </pre>
-	<p>This uses the ampersand operator to dynamically allocate and initialize a new value,
+	<p>This uses the plus operator to dynamically allocate and initialize a new value,
 		specifying:</p>
 	<ul>
 		<li><a href="refregionglo.html"><b>Region</b></a> which allocates the value and manages its lifetime.
@@ -48,12 +48,12 @@ imm nbrref = &amp;rc imm 4
 	<p>What we get back from this allocation is an owning reference, 
 		which this example stores in the variable <span class="pre">nbrref</span>.
 		The inferred type of this reference looks similar to the allocation:
-		<span class="pre">&amp;rc imm i32</span>.
+		<span class="pre">+rc-imm i32</span>.
 		This type signature includes the type of the initial value as the reference's value type.</p>
 	<p>A type's constructor or <a href="refinitdrop.html">initializer</a> may be specified
 		as the initial value.</p>
 <pre>
-imm gcref = &amp;gc mut Point3[1f, 2f, 3f]  // Allocate a new Point3 value using a constructor
+imm gcref = +gc-mut Point3[1f, 2f, 3f]  // Allocate a new Point3 value using a constructor
 </pre>
 				
 	<h3>Creating Multiple References to the Same Value</h3>
@@ -61,7 +61,7 @@ imm gcref = &amp;gc mut Point3[1f, 2f, 3f]  // Allocate a new Point3 value using
 		Additional owning references to that value may then be created
 		by copying an existing reference via assignment or function calls:</p>
 <pre>
-imm nbrref = &amp;rc imm 4
+imm nbrref = +rc-imm 4
 imm nbrref2 = nbrref        // nbrref2 and nbrref point to same value
 </pre>
 

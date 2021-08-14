@@ -160,7 +160,7 @@ ref4 = &amp;mut x   // ok
 		However, once the lifetime of the borrowed reference expires,
 		the original source becomes usable again:</p>
 <pre>
-imm uniref = &amp;rc 5
+imm uniref = +rc 5
 {
   imm bref1 &amp;mut i32 = uniref   // Coerce owning reference to a 'mut' borrowed reference
   imm bref2 = ref2              // Share with another borrowed reference
@@ -178,19 +178,72 @@ imm uniref = &amp;rc 5
 		The original <span class="pre">uni</span> reference is consumed (because of move semantics),
 		leaving us with a new sharable reference, from which copies can be made.</p>		
 <pre>
-imm ref = &amp;rc 5                 // Allocate new value, return 'uni' reference
+imm ref = +rc 5                 // Allocate new value, return 'uni' reference
 imm newref1 &amp;mut i32 = ref      // Move reference to newref with 'mut' permission
 imm newref2 &amp;mut i32 = newref1  // Two 'mut' references to the same object
 *newref2 = *newref1             // Either reference may be used (but not ref any longer)
 </pre>
 	<p>The transition of an region-managed reference
-		from <span class="pre">uni</span> to a shared permission reference is a one way trip.
+		from <span class="pre">uni</span> to a shared permission reference is normally a one way trip.
 		Once this transition has happened,
 		you cannot safely transition a <span class="pre">mut</span> reference back to a
 		<span class="pre">uni</span> reference (or even to an <span class="pre">imm</span> reference).
 		The reference is now "frozen" to the restrictions of its new permission:
 		As <span class="pre">mut</span>, it can never be shared across threads.
 		As <span class="pre">imm</span>, it can never be altered.</p>
+		
+	<h2>Permission Recovery</h3>
+	<p>Permission transitions are not actually always a one-way trip. Under certain circumstances,
+	it is possible to safely recover "lost" permissions.
+	
+	<ul>
+	<li><b>Borrowed reference recovery.</b>
+		Borrowing a reference temporarily transitions to a new permission. 
+		When the borrowed reference expires, the original permission on the source reference is restored.
+		So, a <span class="pre">uni</span> can be borrowed as <span class="pre">mut</span> or <span class="pre">imm</span>.
+		When the borrowed references expire, you once again again have the original <span class="pre">uni</span> reference.
+		Similarly, one can borrow as <span class="pre">const</span> and get back the original reference's permission later.</li>
+	<li><b>Pure method calls</b>
+		Sometimes it is polymorphically convenient to be able to call a method on an object where we have
+		a <span class="pre">uni</span> reference, and we don't want the calling function to lose the object to the
+		called method due to move semantics and we don't want to borrow.
+		This is possible to do if the called method is pure, and no other arguments to the method call
+		have <span class="pre">mut</span> or <span class="pre">const</span> references.</li>
+	<li><b>Recovery blocks</b>
+		With this feature, described below, it is possible to unwind a some permission transition that happens inside
+		the block for any value returned by the block.</li>
+	</ul>
+
+	<h3 id="recover">Recover Blocks</h3>
+	<p>The <span class="pre">recover</span> block is a helpful way to transition a permission backwards.
+		Any mutable permission can be recovered as any permission.
+		Similarly, any readonly permission can be recovered as any read-only permission or opaque.
+		This is useful for many situations:</p>
+	<ul>
+	<li>Create some shared, mutable object inside the block and receive it back as a <span class="pre">uni</span> reference.</li>
+	<li>Create a cyclic immutable data structure. Inside the block, create a shared, mutable data structure
+		and then recover it as <span class="pre">imm</span>.</li>
+	<li>Temporarily transition <span class="pre">uni</span> to <span class="pre">mut</span>, 
+		perform complex mutable operations on it and return it as <span class="pre">uni</span> again.</li>
+	<li>Extract a mutable field from a <span class="pre">uni</span> and return it as an <span class="pre">uni</span>.</li>
+	</ul>
+	<p>This example demonstrates the third scenario:</p>
+<pre>
+recover:
+  imm ref1 = uniref as &amp;mut i32
+  imm ref2 = ref1
+  *ref1 = 5
+  ref2 as &amp;uni i32
+</pre>
+	<p>The recover block imposes several restrictions in order to ensure the reverse transition is safe:</p>
+	<ul>
+	<li>You have no access to any <span class="pre">mut</span>, <span class="pre">const</span> or lock permission
+		reference/object outside the recover block, whether local or global.</li>
+	<li>Any functions you call must be pure.</li>
+	</ul>
+	<p>These restrictions exist to stop unsafe references from leaking out of the
+		<span class="pre">recover</span> block. Given that created reference aliases expire within the block,
+		we know any returned reference is unique.</p> 
 
 	<h2>When struct fields are references</h2>
 	<p>There is a symbiotic, two-way relationship between the attributes of a composite type (like a struct)
@@ -245,7 +298,7 @@ fn handleCar(car &amp;Car):
 		to another thread, if this could result in <span class="pre">mut</span> references to the
 		same Person sprinkled across several threads.</p>
 		
-	<h3 id="recover">Externally-isolated graphs and recover block</h3>
+	<h3>Externally-isolated graphs</h3>
 	<p>Wouldn't it be nice if we could somehow guarantee that when we moved car from one thread
 		to another, that all mutable references to owner would travel with it?
 		If we could guarantee this, it would be safe to perform the move.</p>
@@ -256,16 +309,11 @@ fn handleCar(car &amp;Car):
 		Within the graph could be multiple references to the same node, but none of them
 		originate from outside the boundary line.</p>
 	<p>To accomplish this, and have visibility into shared references inside the graph,
-		use the <span class="pre">recover</span> block.</p>
-<pre>
-recover:
-  TBD
-</pre>
-	<p>The recover block imposes several restrictions in order to ensure it is safe:</p>
-	<ul>
-	<li>You have no access to any mutable reference/object outside the recover block, whether local or global.</li>
-	<li>Any functions you perform must be pure</li>
-	</ul>
+		use the <span class="pre">recover</span> block as described above.
+		Transition the original <span class="pre">uni</span> reference to <span class="pre">mut</span>
+		inside the block. Now, we can see and mutate all shared, mutable nodes, 
+		including reading or extracting values from them. When done, the block
+		can safely return the original reference as <span class="pre">uni</span>.</p>
 	
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="reflifefn.html"><img alt="_" src="next.png" /></a>

@@ -94,7 +94,7 @@ fn incr(nbr &amp;i32):
   *nbr + 1
 
 fn main():
-  imm allocref = &amp;rc 1   // An owning reference pointing to an allocated value of 1
+  imm allocref = +so 1   // An owning reference pointing to an allocated value of 1
   incr(allocref)         // Coerces the rc reference to a borrowed reference
 </pre>
 	<p>Because <i>any</i> reference may be safely coerced to a borrowed reference,
