@@ -17,7 +17,7 @@
 	
 	<p>To allocate a new value, we ask a region to get it done:</p>
 <pre>
-imm nbrref = &rc imm 5  // the 'rc' region counts references
+imm nbrref = +rc-imm 5  // the 'rc' region counts references
 </pre>
 	<p>There are many kinds of regions, each using a different strategy for allocating memory
 		and then later safely reclaiming that memory after an object has no references that point to it.
@@ -43,7 +43,7 @@ imm nbrref = &rc imm 5  // the 'rc' region counts references
 		the optimal region that best serves the way the program needs that object to behave.</p>
 	<p>This page does not list every possible region that can be used by a Cone program,
 		as new ones can be defined within the language itself.
-		Instead, this page summarizes the five distinct, commonly-used region strategies
+		Instead, this page summarizes the five popular region strategies
 		used to allocate new objects pointed at by an owning reference.
 		The focus is to describe the mechanism used by each of these region strategies
 		and assess how they compare on the above criteria.
@@ -51,72 +51,30 @@ imm nbrref = &rc imm 5  // the 'rc' region counts references
 		that vary somewhat in how they work (e.g., +rc might only work within a single thread,
 		whereas +arc might allow multiple threads to share references to the same object).</p>
 
-	<h2>rc - Reference Counting</h2>
-	<p>As the name suggests, the <span class="pre">rc</span> region keeps a running
-		counter of the number of references to each allocated object.
-		When the object is first allocated, its counter starts at 1.
-		Every time a copy is made of an rc owning reference, the counter is incremented.
-		Whenever an owning reference goes out of scope, the counter is decremented.
-		When the counter reaches 0, the object is reclaimed.</p>
-	<p><span class="pre">rc</span> is a good choice if you are looking for:</p>
-	<ul>
-		<li>Memory utilization for non-cyclic data structures.</li>
-		<li>Determinism, as reclamation happens immediately after the last reference expires.</li>
-		<li>Runtime footprint, as the mechanism is very simple.</li>
-	</ul>
-	<p>The biggest shortcomings are:</p>
-	<ul>
-		<li>Throughput is typically the worst, due to expensive allocation and free algorithms,
-			and frequent cache-damaging reference counts updates.</li>
-		<li>Memory leaks due to cyclic reference counts that keep unused data islands alive forever.</li>
-	</ul>
-	<p>To prevent cycle-based memory leaks, one can use 
-		<a href="refweakref.html">weak references</a> to make any cycle breakable.
-		A weak reference may be obtained from any owning reference:</p>
-<pre>
-childnode.parent = parentnoderef.weak
-</pre>
-
-	<h2>gc - Tracing Garbage Collection</h2>
-	<p>The <span class="pre">gc</span> region captures metadata about every object it allocates,
-		including detailed information about its references to other allocated objects.
-		Periodically, runtime logic associated with the <span class="pre">gc</span> region
-		will trace out all references reachable from a root set of objects (including execution stacks).
-	  Any allocated value that cannot be traced from the root is considered unreachable,
-		and therefore is safe to automatically finalize and free.</p>
-	<p><span class="pre">gc</span> is a good choice if you are looking for:</p>
-	<ul>
-		<li>Data structure flexibility, supporting all kinds of data in the same way.</li>
-		<li>Better throughput than <span class="pre">rc</span> 
-			(though slower than other regions due to its regular mark-and-sweep bookkeeping costs).</li>
-		<li>Stable memory use over long runtimes.</li>
-	</ul>
-	<p>The biggest shortcomings are:</p>
-	<ul>
-			<li>Poor responsiveness, due to unpredictable stop-the-world lag spikes.</li>
-			<li>Poor determinism, as there can be a sizeable lag between last use and free.</li>
-			<li>Large and complex runtime footprint, resulting from the need for sophisticated
-				and tunable incremental, generational, and multi-threading algorithms for optimizing performance.</li>
-			<li>Memory greedy, as optimal performance can require 4-6x more memory than the amount used.</li>
-	</ul>
-		
-	<h2>so - Single Owner</h2>
-	<p>The single-owner (<span class="pre">so</span>) region 
-		is unusual and possibly unfamiliar (as only a few languages support it).
-		Its mechanism, strengths and weaknesses derive from a very simple constraint:
+	<h2>Single Owner</h2>
+	<p>The single-owner region strategy's 
+		mechanism, strengths and weaknesses derive from a very simple constraint:
 		there is only ever one owning reference to an object it allocates.
 		That reference may be passed around from function to function or from thread to thread,
 		but it does so using <a href="refmove.html">move mechanics</a> 
 		to ensure no copy of the reference is ever made.
 		Because there is only one reference to the object,
-	  the memory for that value can be automatically finalized and freed when the reference expires.</p>
-	<p><span class="pre">so</span> is a good choice if you are looking for:</p>
+	    the memory for that value can be automatically finalized and freed when the reference expires.</p>
+	<p>Here is the simple definition of a single-owner region:</p>
+<pre>
+region @move so:      // @move ensures move semantics on references, i.e. no aliasing
+    fn alloc(size usize):
+	    malloc(size)  // May use any general-purpose memory allocator
+	fn free():
+	    free()
+</pre>
+	<p>Single owner is a good choice if you are looking for:</p>
 	<ul>
-		<li>Throughput that is better than <span class="pre">gc</span> and <span class="pre">rc</span>
-			(as there is no runtime bookkeeping cost). It will be worse than arenas, however.</li>
+		<li>Better throughput garbage-collected or ref-counted region strategies
+			(as there is no runtime bookkeeping cost). Throughput will likely be worse than arenas.</li>
 		<li>Determinism, as reclamation happens immediately after the last reference expires.
-			Indeed, single owner is one of the few region strategies that allow the program to decide
-			exactly when the object is to be explicitly destroyed, and even support exception
+			Indeed, single owner is the only region strategy that allows the programmer to decide
+			exactly when the object is to be explicitly destroyed and to support exception
 			handling in the event of an unsuccessful destruction.</li>
 		<li>Efficient use of memory.</li>
 		<li>Negligible runtime footprint.</li>
@@ -135,15 +93,81 @@ childnode.parent = parentnoderef.weak
 				These are considered temporary, because the lifetime of those borrowed references
 				is constrained to the scope they were created in.</li>
 	</ul>
-	<p><b>Note:</b> An 'own' owning reference only accepts the 'uni' or 'imm' permissions.</p>
 
-	<h2>ar - Arena</h2>
-	<p>The <span class="pre">ar</span> region begins life 
-		pre-allocating a large (and growable) region of memory
+	<h2>Reference Counting</h2>
+	<p>As the name suggests, the <span class="pre">rc</span> region keeps a running
+		counter of the number of references to each allocated object.
+		When the object is first allocated, its counter starts at 1.
+		Every time a copy is made of an rc owning reference, the counter is incremented.
+		Whenever an owning reference goes out of scope, the counter is decremented.
+		When the counter reaches 0, the object is reclaimed.</p>
+	<p>Here is the simple definition of a reference counting region, where aliasing happens automatically:</p>
+<pre>
+region rc:
+    cnt u32
+    fn alloc(size usize):
+	    malloc(size)
+	fn init():
+	    cnt = 1
+	fn alias():
+	    ++cnt
+	fn dealias():
+	    if (--cnt == 0)
+		  free()
+	fn free():
+	    free()
+</pre>
+	<p>Variations on this algorithm may be built to support multi-threaded use (with atomics) and
+		leverage move semantics and explicit aliasing (to improve throughput).</p>
+	<p>Reference counting is a good choice if you are looking for:</p>
+	<ul>
+		<li>Memory utilization for non-cyclic data structures.</li>
+		<li>Semi-determinism, as reclamation happens immediately after the last reference expires.</li>
+		<li>Runtime footprint, as the mechanism is very simple.</li>
+	</ul>
+	<p>The biggest shortcomings are:</p>
+	<ul>
+		<li>Throughput is typically the worst, due to expensive allocation and free algorithms,
+			and frequent cache-damaging reference counts updates.</li>
+		<li>Memory leaks due to cyclic reference counts that keep unused data islands alive forever.</li>
+	</ul>
+	<p>To prevent cycle-based memory leaks, one can use a variation that supports
+		<a href="refweakref.html">weak references</a> to make any cycle breakable.
+		A weak reference may be obtained from any owning reference:</p>
+<pre>
+childnode.parent = parentnoderef.weak
+</pre>
+
+	<h2>Tracing Garbage Collection</h2>
+	<p>A tracing GC region captures metadata about every object it allocates,
+		including detailed information about its references to other allocated objects.
+		Periodically, the region's runtime garbage collector 
+		will trace out all references reachable from a root set of objects (including execution stacks).
+	  Any allocated value that cannot be traced from the root is considered unreachable,
+		and therefore is safe to automatically finalize and free.</p>
+	<p>Tracing GC is a good choice if you are looking for:</p>
+	<ul>
+		<li>Data structure flexibility, supporting all kinds of data in the same way.</li>
+		<li>Better throughput than <span class="pre">rc</span> 
+			(though slower than other regions due to its regular mark-and-sweep bookkeeping costs).</li>
+		<li>Stable memory use over long runtimes.</li>
+	</ul>
+	<p>The biggest shortcomings are:</p>
+	<ul>
+			<li>Poor responsiveness, due to unpredictable stop-the-world lag spikes.</li>
+			<li>Poor determinism, as there can be a sizeable lag between last use and free.</li>
+			<li>Large and complex runtime footprint, resulting from the need for sophisticated
+				and tunable incremental, generational, and multi-threading algorithms for optimizing performance.</li>
+			<li>Memory greedy, as optimal performance can require 4-6x more memory than the amount used.</li>
+	</ul>
+		
+	<h2>Arena</h2>
+	<p>An arena region begins life 
+		pre-allocating a large (and growable) slab of memory. This is the arena.
 	  Every new allocation takes a bite out of this arena using a fast bump pointer.
 		Allocations are never individually freed.
 		The entire arena is freed as a single event when the program ends.</p>
-	<p><span class="pre">ar</span> is a good choice if you are looking for:</p>
+	<p>Arena region is a good choice if you are looking for:</p>
 	<ul>
 		<li>Blazing-fast throughput. Bump pointer allocation is much faster than malloc.
 			Even better, there are no free nor runtime bookkeeping costs.</li>
@@ -156,10 +180,10 @@ childnode.parent = parentnoderef.weak
 		<li>Memory use grows without bounds, due to individual objects never being freed.</li>
 		<li>Awful determinism for finalizers, as objects are only finalized when the program ends.</li>
 	</ul>
-	<p>The <span class="pre">ar</span> region is a surprisingly good fit for a 
+	<p>An arena region is a surprisingly good fit for a 
 		limited-lifetime program that allocates a lot of small objects but
 		wants optimal performance. 
-		This would apply well to many command-line tools, including compilers.</p>
+		This applies well to many command-line tools, including compilers.</p>
 
 	<h2>Pool</h3>
 	<p>The mechanism for pools derives from this constraint:

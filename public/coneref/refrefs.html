@@ -14,38 +14,33 @@
     <div class="text">
 
 	<p>In addition to borrowed-references, Cone also supports region-managed references.
-		Region-managed references are like borrowed references in that they are
-		pointers to values. They also support permissions: both static and lock.</p>
-	<p>The difference is every region-managed reference belongs to a memory region which manages
-		the ways its values are allocated and freed. By contrast, a borrowed reference does not care
-		which memory region holds the values it points to.</p>
+		Region-managed references are also pointers to values and are constrained by permissions,
+		both static and lock.</p>
+	<p>The key difference is that every region-managed reference belongs to a memory region in the heap which manages
+		the ways its values are allocated and freed. This is in contrast to a borrowed reference,
+		which has no idea which memory region holds the value it points to.</p>
 
 	<h2>What is a Region?</h2>
-	<p>Imagine that a program's memory is conceptually partitioned into regions,
-			each with its own strategy for allocating and reclaiming memory for values.
-			Every program value is wholly located within and governed by its owning region.</p>
-	<p>By way of illustration (even though we have not said so until now), the memory space for every
-		variable's value is automatically allocated in one of these regions:</p>
+	<p>Until now, the values we have worked with have all been stored in global and local variables:</p>
 	<ul>
-		<li><b>Global region</b>.
-			All global variable values are stored at fixed locations in the global region.</li>
-		<li><b>Execution Stack regions</b>.
-			Local variable values are allocated and de-allocated in LIFO order from a stack region
-			as execution unfolds.
-			Each execution thread has its own stack region.</li>
+		<li>All global variable values are stored at fixed memory locations, established by the linker.</li>
+		<li>Local variable values are allocated and de-allocated within an execution stack in LIFO order.
+			Each execution thread has its own stack.</li>
 	</ul>
-	<p>In addition to these built-in regions, we also need the ability to dynamically allocate heap memory
-		for objects that are not convenient to hold on the stack.
-		This is what Cone's regions accomplish: every region provides the ability to dynamically
-		allocate new object values within its memory region and then safely free allocated objects
-		when it is no longer needed.</p>
+	<p>When we want to dynamically allocate memory for a value during runtime that we need to survive beyond
+		the scope it is allocated in, neither global and local variables can handle this requirement.
+		This is when we need to make use of the "heap", the large amount of free memory available to use
+		outside of what has been reserved for global variables, code and any stacks.</p>
+	<p>Unusual among languages, Cone conceptually partitions the heap into regions.
+			Each region has its own strategy for allocating and automatically reclaiming memory that holds values.
+			Every program value on the heap is wholly located within and governed by its owning region.</p>
 	<p>The reason Cone supports multiple regions is because there
 		is no one perfect strategy for allocating and automatically freeing memory.
 		Each strategy (e.g., tracing GC, ref-counting, single-owner, pools or arenas) carries
 		different trade-offs in terms of throughput, latency/responsiveness, memory use and leakage, 
 		data structure flexibility, and programmer convenience.</p>
 	<p>Instead of restricting a program to the limitations of only one memory management strategy,
-		as most languages do, Cone dynamically partitions memory into <b>regions</b>,
+		as most languages do, Cone dynamically partitions memory into regions,
 		each with its own approach to memory allocation and collection.
 		For every new data object, Cone allows the programmer to specify, at allocation time,
 		which region the object belongs to,
@@ -62,8 +57,7 @@
 		This timing ensures that an owning reference is always safe to de-reference
 		and that an object will only be freed once.</li>
 	<li><b><a href="refweakref.html">Weak references</a></b>.
-		A weak reference points to an object that may or may not still exist in the region's memory
-		(unlike an owning reference that guarantees the object it points to is still alive).
+		A weak reference points to an object that may or may not still exist in the region's memory.
 		Before we can de-reference a weak reference, we first need to confirm it still exists.</li>
 
 		<p style="text-align: right; margin-top: 2em;">
