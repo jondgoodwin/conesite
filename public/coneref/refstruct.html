@@ -145,13 +145,24 @@ pt.y = pt.x
 	</p>
 
 	<h2 id="opaque">Opaque Types</h2>
-	<p>A struct declared with no fields is called an <b>opaque type</b>.
-		It is typically used when we want to be able to point to data whose structure is a mystery
-		(built built and managed by some external system).
-		Since its content and size is unknown, one cannot create a new value of this type,
-		pass such a value around, or directly access its fields.
-		However, it is possible to pass around a reference to an opaque-typed value
-		which some external function has created, as well as invoke any methods defined for it.</p>
+	<p>Sometimes it is valuable to work with types where we have no idea about the size or layout
+		of any values of that type. This is useful when interfacing with some external system
+		which knows the layout and size of the type's data, but is reluctant to share (or we don't really care).</p>
+	<p>We call such types <b>opaque</b>, because we cannot directly view their contents.
+		Declaring an opaque type is easy:</p>
+<pre>
+struct @opaque SocketHandle
+   // don't specify any fields as part of the type
+   // Methods may be defined.
+</pre>
+	<p>As one might expect, it is illegal for a variable or field to specify an opaque type.
+		An opaque value cannot be created or passed around. We cannot access its fields.
+		We cannot even determine its size.</p>
+	<p>Where opaque types are used is when pointed-at by references or pointers.
+		Such references can be obtained, passed around, and stored, like any reference.
+		We can call methods on a pointed-at value of an opaque type 
+		(typically implemented by the external system that knows the data layout and can work with such values).
+		However, we may not use pointer de-referencing to read or mutate the pointed-at value.</p>
 
 	<p style="text-align: right; margin-top: 2em;">
 		<a href="refmethod.html"><img alt="_" src="next.png" /></a>

@@ -63,9 +63,9 @@ imm nbrref = +rc-imm 5  // the 'rc' region counts references
 	<p>Here is the simple definition of a single-owner region:</p>
 <pre>
 region @move so:      // @move ensures move semantics on references, i.e. no aliasing
-    fn alloc(size usize):
+    fn alloc(size usize) Option[*u8]:
 	    malloc(size)  // May use any general-purpose memory allocator
-	fn free():
+	fn free(self &amp;uni rc):
 	    free()
 </pre>
 	<p>Single owner is a good choice if you are looking for:</p>
@@ -105,16 +105,16 @@ region @move so:      // @move ensures move semantics on references, i.e. no ali
 <pre>
 region rc:
     cnt u32
-    fn alloc(size usize):
+    fn alloc(size usize) Option[*u8]:
 	    malloc(size)
-	fn init():
+	fn init(self &amp;uni rc):
 	    cnt = 1
-	fn alias():
+	fn alias(self &amp;uni rc):
 	    ++cnt
-	fn dealias():
+	fn dealias(self &amp;uni rc):
 	    if (--cnt == 0)
 		  free()
-	fn free():
+	fn free(self &amp;uni rc):
 	    free()
 </pre>
 	<p>Variations on this algorithm may be built to support multi-threaded use (with atomics) and

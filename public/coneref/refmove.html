@@ -54,6 +54,12 @@ a          // is still 3
 		In general, Cone treats most types as having copy semantics, unless it detects some reason
 		why move semantics restrictions are needed. Here are the rules:</p>
 	<ol>
+		<li>If the type declares that it uses move semantics, then it does. This is as simple as
+			adding the <span class="pre">@move</span> attribute on the type declaration:
+<pre>
+struct @move Handle:
+   id i32
+</pre></li>
 		<li>If the type implements an initializer method that essentially enables the creation of a copy,
 			the type's values have copy semantics.
 			Since the compiler automatically uses this cloning method (when implemented)
