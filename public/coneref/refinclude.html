@@ -13,7 +13,7 @@
 
     <div class="text">
 
-	<p style="margin-left: 40px;"><i>Note: Only include is implemented to some degree.</i></p>
+	<p style="margin-left: 40px;"><i>Name folding for import is unfinished.</i></p>
 	
 	<p>After a program's source code gets big enough, 
 		it may become easier to work with when partitioned across multiple files.
@@ -117,21 +117,21 @@ fn setColor(col Color):
 	<p>To fold in just a few specific names, list them on the
 		<span class="pre">import</span> command, separated by commas:</p>
 <pre>
-import math3d Point3, Mat3
+import math3d::Point3, Mat3
 
 fn move(pos &amp;Point3, delta Point3):
   pos += delta
 </pre>
 	<p>Use <span class="pre">as</span> to provide an alias for a name that is already in use:</p>
 <pre>
-import math3d Point3 as Point
+import math3d::Point3 as Point
 
 fn move(pos &amp;Point, delta Point):
   pos += delta
 </pre>
 	<p>Or one can fold in all public names from the package using <span class="pre">*</span>:</p>
 <pre>
-import math3d *
+import math3d::*
 
 fn move(pos &amp;Point3, delta Point3):
   pos += delta
