@@ -75,22 +75,18 @@ fn abs(x i32) i32:
 	Let's walk through the possibilities, beginning with the basics.</p>
 
 	<h3>True vs. False</h3>
-	<p>A conditional expression evaluates to <span class="pre">true</span> or <span class="pre">false</span>.
-	The integer number <span class="pre">0</span>, a <span class="pre">Null</span> value,
-	and <span class="pre">false</span> all evaluate to <span class="pre">false</span>.
-	All other values evaluate to <span class="pre">true</span>.
-	Thus:</p>
+	<p>A conditional expression must evaluate to <span class="pre">true</span> or <span class="pre">false</span>.
+	If it does not, an attempt is made to find and use the value type's <span>isTrue</span> method.
+	Several types (but not all) support this method. For example:
+	<ul>
+	<li>Integers. isTrue evaluates 0 as false, and all other integer values as true.
 <pre>
-// This statement will never execute
-a += 1 if 0   // since 0 evaluates to false
-
-// This statement will always execute
-if "hello": a += 1 
-</pre>
-	<p>This applies to the (first) value returned by a function or method call:</p>
-<pre>
-if a.isOdd: a += 1 
-</pre>
+if 0:
+  a += 1  // This statement will never execute, because 0 evaluates to false
+</pre></li>
+	<li>Floats. isTrue evaluates 0 and -0 as false, and all other values as true.</li>
+	<li>Option type. isTrue evaluates Null values as false and all Some values as true.</li>
+	</ul>
 	
 	<h3 id="compare">Equivalence</h3>
 	<p>With most values, we can compare whether they are the same by using an equivalence operator.
