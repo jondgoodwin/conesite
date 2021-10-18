@@ -18,14 +18,18 @@
 	such as this one which calculates the value of pi:</p>
 	
 <pre>
+import stdio::*
+
 fn main():
   imm pi = calcpi(10)
+	print <- "\u03C0=", calcpi(10), "\n" // <-- Change 10 to 2 for less accurate pi
 
 // Calculate pi using arc-sine fractional sequence.
 // 'nterms' is the number of fractional terms used to estimate pi
 // https://en.wikipedia.org/wiki/Approximations_of_%CF%80#Arcsine
 fn calcpi(mut nterms = 10) f64:
-  return 0d if nterms &lt;= 0
+	if nterms &lt;= 0:
+    return 0d
   
   // Initialize working values
   mut result = 0.5d
