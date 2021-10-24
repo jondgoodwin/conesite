@@ -24,10 +24,10 @@
 <pre>
 fn power(n i32, pow i32) i32:
   match pow:
-    0: 1
-    1: n
-    2: n * n
-    _: -1
+    ==0: 1
+    ==1: n
+    ==2: n * n
+    else: -1
 </pre>
 	<p>This example calculates its value differently based on the value of pow.
 	If pow is zero, we return 1. If pow is 1, we return n.
@@ -39,10 +39,10 @@ fn power(n i32, pow i32) i32:
 	This expression's evaluated value is what patterns are matched with.
 	If desired, an assignment expression can be used here to capture
 	this matchee value for later use in matched code blocks.</li>
-	<li>Any number of pattern blocks may follow. Each is comprised of a pattern
-	followed by either a block or else a colon and a expression.
-	If any pattern matches, the evaluated value of its block or expression is the match's value</li>
-	<li>Using the <span class="pre">_</span> pattern will always match any value.
+	<li>Any number of pattern blocks may follow. Each is comprised of a match pattern
+	followed by a block.
+	When a match pattern matches, the evaluated value of its block is the match's value</li>
+	<li>Using the <span class="pre">else</span> pattern will always match any value.
 	If specified, it should be the last pattern used.</li>
 	</ul>
 	<p>A versatile range of patterns are supported, 
@@ -59,8 +59,8 @@ fn power(n i32, pow i32) i32:
 	for example:</p>
 <pre>
 match val:
-  anotherval.len:  4
-  _:               0
+  ==anotherval.len:  4
+  else:               0
 </pre>
 	<p>The type of the pattern value must match the type of the matchee value.
 	An equivalence match is performed between these values as if using the '==' operator.</p>
@@ -73,7 +73,7 @@ match val:
 match n:
   <0: -1
   >0:  1
-  _:   0
+  else:   0
 </pre>
 
 	<h3>Range pattern</h3>
@@ -99,7 +99,7 @@ match n:
 match n:
   2 or 3 or 5 or 7:  2
   -6 or -1...1 or 6: 1
-  _:                 0
+  else:              0
 </pre>
 	
 	<h3>Tuples</h3>
@@ -112,7 +112,7 @@ match n:
 match key,value:
   0, _:  0
   _, 0:  1
-  _, _:  2
+  else:  2
 </pre>
 
 	<h3>if Guards</h3>
@@ -121,9 +121,9 @@ match key,value:
 	match to take place.</p>
 <pre>
 match nbr:
-  4 if cnt &gt; 0: 0  // matches only if nbr==4 and cnt&gt;0
-  4:            1  // matches when nbr==4 and cnt&lt;=0
-  _:            2  // matches when nbr != 4
+  ==4 if cnt &gt; 0: 0  // matches only if nbr==4 and cnt&gt;0
+  ==4:            1  // matches when nbr==4 and cnt&lt;=0
+  else:           2  // matches when nbr != 4
 </pre>
 
 	
@@ -144,7 +144,7 @@ match nbr:
 match name:
 	is "Judy": judy     // Matches if name string begins with "Judy"
 	is "Frank": frank
-	_: noone
+	else: noone
 </pre>
 	<p>Alternatively, one can specify matching patterns for the first few elements:</p>
 <pre>
@@ -152,7 +152,7 @@ match numbers:
 	is [1, _]: 1
 	is [_, 1]: 2
 	is [&lt;=0, &lt;=0]: 3
-	_: 4
+	else: 4
 </pre>
 
 	<h3 id="struct">Struct partial matches</h3>
@@ -162,7 +162,7 @@ match points:
   is Point[0., _]: 1
   is Point[_, 0.]: 2
   is Point[&lt;0., &lt=0.]: 3
-  _: 4
+  else: 4
 </pre>
 	<p>Any unspecified fields in a struct pattern are assumed to match.</p>
 
@@ -197,7 +197,7 @@ match oddval:
 match n:
   using isPrime(): 0  // invokes isPrime(n)
   using isOdd():   1  // invokes isOdd(n)
-  _:               2
+  else:            2
 </pre>
 	<p>This technique can be quite powerful, 
 	as it makes it possible to support a broad range of complex
