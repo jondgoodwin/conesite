@@ -71,8 +71,9 @@ match val:
   The left hand value is not specified, as it is understood to be the match value:</p>
 <pre>
 match n:
-  case <0: -1 case>0: 1
-  else:               0
+  case &lt;0: -1
+  case &gt;0:  1
+  else:     0
 </pre>
 
   <h3>Range pattern</h3>
@@ -170,9 +171,9 @@ match points:
     binding to a variable:</p>
 <pre>
 match oddval:
-  imm intval SomeInt:     intval
-  imm point PointStruct:  i32[point.x * point.y]
-  is None:                    0
+  case imm intval SomeInt:     intval
+  case imm point PointStruct:  i32[point.x * point.y]
+  case is None:                    0
 </pre>
   <p>If desired, pattern matching and binding can also be applied to the internal value(s):</p>
 <pre>
@@ -208,7 +209,7 @@ match n:
   <p><b>Note:</b> A first class pattern can also be applied to any arbitrary value as part of
   an <span class="pre">if</span> statement:</p>
 <pre>
-++nbr if isOdd(n)
+if isOdd(n): ++nbr
 </pre>
     
     <p style="text-align: right; margin-top: 2em;">
