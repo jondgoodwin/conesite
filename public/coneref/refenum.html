@@ -14,125 +14,38 @@
     <div class="text">
 	<p style="margin-left: 40px;"><i>Note: None of this capability is currently implemented.</i></p>
 
-	<p>From a type perspective, the structure of a struct or array value is quite fixed.
-	This is restrictive when we need values whose structure can vary based on runtime logic.
-	This is what enum addresses.
-	It allows a value's type structure to vary as signalled by its captured "tag".</p>
-
-	<p>Enums hold a single value whose type could be one of several variations.
-		For example:</p>
+	<p>enum is used to declare a collection of symbols that are mapped to integer values.</p>
 <pre>
-enum Number:
-	Integer i32
-	Float   f32
+enum PhoneType:
+	Home,
+	Work,
+	Mobile
 </pre>
-	<p>This defines a new enum type called <span class="pre">Number</span>
-		which holds a single numeric value.
-		That value <i>could</i> be an integer or a floating-point number, but not both.
-		Unlike with structs, <span class="pre">Integer</span> and <span class="pre">Float</span> 
-		are not separate fields stored in different locations.
-			They are instead two possible overlays on a single memory location.</p>
-		<p>Under the covers, enum values also hold a hidden field called the "tag".
-		In this example, the tag indicates whether the value currently holds an integer
-		(tag field = 0) or a floating-point number (tag field = 1).
-	</p>
-	
-	<h3>Declaration</h3>
-	<p>As the example shows, an enum type declaration resembles a struct declaration.
-		It begins by giving a name to this new, custom-defined type.
-	  The variant types options are listed within, each specifying the option's:</p>
-	<ul>
-		<li><b>Name.</b>
-			As the option name represents a type, it is typically capitalized.
-			Names should not begin with (or be) an underscore.
-		  A name may be the same as the name of the type specified for this variant.</li>
-		<li><b>Type.</b>
-			This is the type of any value of this option.
-			A type need not be specified when this option is not attached to a value.
-			Alternative, the specified may be a set of fields enclosed in curly braces.
-			This is understood to mean the type is a struct that includes the defined fields.</li>
-		<li><b>Tag Value.</b>
-			Normally, a number is automatically assigned to each variant for the tag,
-			starting with 0 and incrementing upwards on each option.
-			This tag number may be explicitly indicated, if desired.</li>
-		</ul>
-	<p>This declaration specifies three variant types:</p>
-<pre>
-enum OddEnum:
-	None          // No value for this variant
-	SomeInt i32   // Value is an integer
-	PointStruct:  // Value is a struct holding two floats
-		x f32
-		y f32
-</pre>
-	<p><b>Note:</b>
-		enums can be used to associate names to constant numbers.
-		Just leave out type information:
-	</p>
+	<p>These symbols are automatically mapped to unsigned integer values:  Home to 0, Work to 1, and Mobile to 2.
+		Use of a name is qualified by its enum name:  <span class="pre">PhoneType::mobile</span>.</p>
+	<p>It is possible to explicitly specify the numbers the symbols map to:
 <pre>
 enum Colors:
-	Red   = 0xFF0000
-	Green = 0x00FF00
+	Red   = 0xFF0000,
+	Green = 0x00FF00,
 	Blue  = 0x0000FF
 </pre>
-
-		<h3>Methods</h3>
-		<p>An <span class="pre">enum</span> type may define methods.
-			These methods may be invoked on any variant value.
-			Each method would typically use pattern matching to customize
-			its behavior based on which variant type the value holds.</p>
+	<p>Even though these symbols map to integer values they are not aliases of one of the defined integer types
+		(e.g., <span class="pre">u8</span>). They are a distinct type.
+		Although numeric, they have no pre-defined arithmetic methods attached to them, so you cannot add,
+		subtract, multiply or divide enumerated values.</p>
 
 		<h3>Initialization</h3>
-		<p>An enum initial value is built using the enum constructor:</p>
+		<p>An enum initial value is just its qualified name:</p>
 <pre>
-mut oddval = OddEnum::None
-oddval = OddEnum::SomeInt[34]
-oddval = OddEnum::PointStruct[x: 4., y: 8.]
+phone.phonetype = PhoneType::Mobile
 </pre>
-
-		<h3>Copying</h3>
-		<p>An enum value may be passed around, by copy, just like any other value.
-			This is possible because all variant values of a specific enum type are the same size.
-			The enum type's size is effectively the size of its largest variant type
-			plus the size of its hidden tag field.
-		</p>
-
-		<h3>Value Access</h3>
-		<p>To safely gain access to the differently-typed value enclosed with an enum value,
-			we must use <a href="refmatch.html">pattern matching</a>.
-			As a brief peek into the versatile power of partial pattern matching,
-			consider this example:</p>
-<pre>
-match oddval:
-	imm intval SomeInt:     intval
-	imm point PointStruct:  i32[point.x * point.y]
-	is None:                0
-</pre>
-		<p>The <span class="pre">match</span> statement allows us to determine which type of data
-			this <span class="pre">OddEnum</span> value holds.
-			If it is an integer, it will match on the first option and (as part of the match) copy that integer into
-			a new variable called <span class="pre">intval</span>.
-			For this variant, the logic indicates that the match expression should evaluate to this integer's value.
-			And so it goes for matching against any of the other variants.</p>
-		<p>One may also match an enum value against a single variant using an
-			<span class="pre">if</span> statement:</p>
-<pre>
-if imm SomeInt = oddval: sum += intval
-</pre>
-	<p><b>Note:</b>If an enum value is being matched against a variant that has no value
-		(e.g., <span value="pre">none</span> above), the equivalence operator 
-		<span class="pre">== </span> may be used
-		instead of the partial match operator <span class="pre">is</span>, if desired.</p>
-	</p>
 
 	<h3>Comparing</h3>
-	<p>An enum value may only be compared for equivalence (and not order).
-		The equivalence check compares the tag fields first.
-		If they are equal, the appropriately-typed interior values are compared
-		using the <span class="pre">==</span> method.</p>
+	<p>An enum value may only be compared for equivalence (and not order).</p>
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="reftraitvar.html"><img alt="_" src="next.png" /></a>
+		<a href="refnumber.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

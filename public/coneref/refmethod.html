@@ -64,6 +64,11 @@ extend i32:
 	  self+self
 </pre>
 
+		<p>A <span class="pre">union</span> type may define methods.
+			These methods may be invoked on any variant value.
+			Each method would typically use pattern matching to customize
+			its behavior based on which variant type the value holds.</p>
+			
 	<h2>Method definition</h2>
 	<p>A method definition looks (and behaves) like a function definition: It has a name, named parameter(s),
 		return value type(s), and a statement body. 

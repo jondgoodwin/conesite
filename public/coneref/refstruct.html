@@ -14,8 +14,8 @@
     <div class="text">
 
 	<p>A struct holds one or more named values (fields), each with its own type.
-			The struct's fields are located together in memory
-			and can be individually accessed using the field's name.</p>
+			The struct's fields are located together in memory.
+			A field's value can be individually accessed using the field's name.</p>
 	<p>Let's illustrate by declaring a new struct type:</p>
 <pre>
 struct Complex:
@@ -23,7 +23,8 @@ struct Complex:
   imag f32
 </pre>
 	<p>This defines a new struct type called <span class="pre">Complex</span> that holds two fields of data.
-		The fields named <span class="pre">real</span> are both 32-bit floating point numbers.</p>
+		The fields named <span class="pre">real</span> and <span class="pre">imag</span> 
+		are both 32-bit floating point numbers.</p>
 	<p>Variables can be declared and initialized using this new type, each with its own values in these two fields:</p>
 <pre>
 imm comp1 = Complex[real: 3.2, imag: 0.0]
@@ -154,13 +155,7 @@ pt.y = pt.x
 	<p>The most significant restriction is that it is not possible to allocate a zero-sized value on the heap,
 	which means you cannot create an owning reference to a value of an empty struct.</p>
 
-	<h2 id="void">void and nil</h2>
-	<p>The language's pre-defined <span class="pre">void</span> type is defined internally as an empty struct.
-		There is only one possible value for a variable or field of <span class="pre">void</span> type:
-		<span class="pre">nil</span>.</p>
-	<p>Any <span class="pre">return</span> or <span class="pre">break</span>
-		statement that specifies no expression value is effectively returning a value of
-		<span class="pre">nil</span>.</p>
+	<p>The language's pre-defined <a href="refvoid.html"><span class="pre">void</span></a> type is defined internally as an empty struct.
 	
 	<h2 id="opaque">Opaque Types</h2>
 	<p>Sometimes it is valuable to work with types where we have no idea about the size or layout
@@ -183,7 +178,7 @@ struct @opaque SocketHandle
 		However, we may not use pointer de-referencing to read or mutate the pointed-at value.</p>
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refmethod.html"><img alt="_" src="next.png" /></a>
+		<a href="refarray.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>
