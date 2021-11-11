@@ -105,10 +105,10 @@ imm pt3 = Point[]                // Uses x,y's declared default values of 0.
 	<p>Like numbers, struct values may be passed around between variables and functions:</p>
 <pre>
 fn main():
-	imm pt1 = Point[]
+	mut pt1 = Point[]
 	pt1 = change(pt1)
 
-fn change(mut pt Point):
+fn change(mut pt Point) Point:
 	pt = Point[1., 2.]
 	pt
 </pre>
