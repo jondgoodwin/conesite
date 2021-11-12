@@ -18,10 +18,7 @@
 		For example (as mentioned <a href="refexpr.html#method">earlier</a>), 
 		<span class="pre">`+`</span> is one of several methods defined for the <span class="pre">i32</span> type.
 		It adds two integers together and returns the result.</p>
-	<p>Methods are pre-defined for the number types.
-		However, for some custom-declared types, such as structs or enums, no default methods are provided.
-		Instead, methods are defined in the same block as the data structure declarations.</p>
-	<p>This example defines several methods as part of the <span class="pre">Point</span> declaration:</p>
+	<p>This example defines several methods as part of the <span class="pre">Point</span> struct declaration:</p>
 <pre>
 struct Point:
   x f32
@@ -52,22 +49,19 @@ imm from = Point[x: 1., y: 1.]
 imm to   = Point[x: 4., y: 5.]
 imm dist = from.distance(to)     // == 5.0. Pythagoras would be proud
 </pre>
-	<p>Methods may be defined for named types, such as structs, enums, integers, and floating point.
-		However, methods may not be defined for the array types, as they are unnamed.
-		This restriction is easily remedied by wrapping an array in a named struct.</p>
-	<p>In addition, the <span class="pre">extend</span> command may be used to add methods to an existing
-		 type. For example:
-		</p>
+	<p>Methods may be added to any named type declaration (e.g., struct, union, enum, number type), but
+		not directly to any structural type (e.g., tuple, array, reference).
+		To apply methods to a structural type, wrap the structural type as a
+		field in a struct, and then add methods to that struct.</p>
+	<p>A <span class="pre">union</span> type's methods should be defined before the first struct variant.
+		These methods apply to all variants, but can only access the union's common fields.</p>
+	<p>It is also possible for additional methods to be defined later than in the type declaration.
+		The <span class="pre">extend</span> keyword adds methods to an existing type. For example:</p>
 <pre>
 extend i32:
 	fn double() Self:
 	  self+self
 </pre>
-
-		<p>A <span class="pre">union</span> type may define methods.
-			These methods may be invoked on any variant value.
-			Each method would typically use pattern matching to customize
-			its behavior based on which variant type the value holds.</p>
 			
 	<h2>Method definition</h2>
 	<p>A method definition looks (and behaves) like a function definition: It has a name, named parameter(s),
