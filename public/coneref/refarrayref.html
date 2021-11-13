@@ -23,16 +23,16 @@
     <h2>Creation</h2>
     <p>Let's allocate a new dynamic array:</p>
 <pre>
-imm nameref = &rc "Jan"
+imm nameref = +[]rc "Jan"
 </pre>
-    <p>This should look familar. We use the ampersand operator and specify a region
-        (<span class="pre">rc</span>) to allocate a new dynamic array.
+    <p>This should look familar. We use the <span class="pre">+[]</span> array allocator operator 
+		followed by the region (<span class="pre">rc</span>) used to allocate a new dynamic array.
         Its contents hold a copy of the 3-byte array given by the string literal above.
         The allocation returns an owning <i>array</i> reference that points to this value.
         Unlike regular references that point to a single value of a type,
         array references point to multiple values of the same type.</p>
     <p>The type signature of an array reference reflects this difference.
-        The type signature of <span class="pre">nameref</span> is <span class="pre">&[]rc u8</span>.
+        The type signature of <span class="pre">nameref</span> is <span class="pre">&amp;[]rc u8</span>.
         Like a static array, array references use square brackets 
         to indicate the reference points to a dynamic array of bytes.
         No number is enclosed in the brackets
@@ -43,7 +43,7 @@ imm nameref = &rc "Jan"
     <ul>
     <li><b>Copy another array</b>. Specify the array to copy from as part of the allocation:
 <pre>
-imm dynarr1 = &so [1,2,3]
+imm dynarr1 = +[]so [1,2,3]
 </pre>
     <p>The array to copy from can also be a de-referenced array reference:</p>
 <pre>
@@ -53,7 +53,7 @@ imm dynarr2 = *dynarr1
     <li><b>Replicate an element</b>. 
         Specify a count in square brackets followed by the initial value for all elements:
 <pre>
-imm dynarr3 = +[]gc [4; 0.]   // newarr's type:  +[]gc f32
+imm dynarr3 = +[]gc [4; 0.]   // newarr's type:  &amp;[]gc f32
 </pre>
        <p>Both the count and the value may be expressions.</p>         
     </li>
@@ -102,7 +102,7 @@ dynarr2.len = 2
         It may be borrowed from any array or array reference in the usual way:</p>
 <pre>
 imm nbrSlice = &amp;[1, 2, 3]
-imm textSlice = &amp;"Karen"
+imm textSlice = &amp;"Padma"
 imm dynSlice = &amp;*dynarr2   // from a owning array reference
 </pre>
     <p>These slices effectively point to all elements of the source's array.</p>
@@ -233,7 +233,7 @@ imm len = array.len     // The number of elements
 
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="reftypemanage.html"><img alt="_" src="next.png" /></a>
+		<a href="reftrait.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>
