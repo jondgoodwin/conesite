@@ -1,6 +1,6 @@
 <html>
   <head>
-	  <title>Traits and Mixins - Cone Reference</title>
+	  <title>Traits - Cone Reference</title>
 		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 	  <link rel="stylesheet" type="text/css" href="standard.css" />
@@ -8,102 +8,49 @@
   <body>
 		<div id="header">
 			<a href="/"><div id="title">Cone</div></a>
-			<div id="sub">Trait and Mixins</div>
+			<div id="sub">Traits</div>
 		</div>
 
     <div class="text">
 
-	<p>Like <span class="pre">struct</span>, <span class="pre">trait</span>
-		defines a new type composed of named fields and methods.
+	<p>Similar to <span class="pre">struct</span>, the definition for a <span class="pre">trait</span>
+		type specifies named methods (and, possibly, fields).
 		For example:</p>
 <pre>
 trait Id:
   id u32
-  fn print()  // No implementation provided
+  fn print()
 </pre>
-	<p>Traits differ from structs in two important ways:</p>
+	<p>However, trait types accomplish a very different purpose than struct types.
+		Instead of specifying the complete field layout and behavior of concrete data,
+		trait types abstractly specify a common pattern of shared behavior (methods)
+		and state (fields) across multiple concrete types. By this understanding, the Id trait above expresses the idea that
+		there are other types out there which define a print method (that accepts no arguments
+		and return no values) as well as an unsigned integer field named id.</p>
+	<p>Because traits abstract over other types, their use differs from concrete types (like structs) in two important ways:</p>
 	<ul>
-		<li>It is not possible to use a constructor of this type
-			(e.g., <span class="pre">imm node = Id[12]</span> is illegal).</li>
-		<li>A trait may define methods that have no implementation logic,
-			as the <span class="pre">print</span> method demonstrates.</li>
+		<li>One cannot explicitly create a value whose type is a trait. Thus, it is not possible to use a constructor of this type
+			(e.g., <span class="pre">imm node = Id[12]</span> is illegal). Instead, you create a concrete-type value,
+			and then you view that concrete value through the lens of a compatible trait.</li>
+		<li>A trait usually specifies methods that have no implementation logic,
+			as the <span class="pre">print</span> method above demonstrates.
+			When a method is called on a trait-based value, it will automatically substitute in the 
+			method implementation logic defined by the concrete value's type.</li>
 	</ul>
-	<p>Traits are versatile, facilitating many useful roles:
+	<p>Traits make possible several valuable kinds of polymorphism, particularly:
 	<ul>
-		<li><a href="reftrait.html"><b>Mixins</b></a>, where the trait's default methods and/or fields
-			may be added to some other struct or trait type.</li>
-		<li><a href="reftraitvar.html"><b>Trait-based variants</b></a>, enabling definition of
-			variant structs that share some base trait's common fields and methods.</li>
+		<li><a href="reftraitvar.html"><b>Trait-based variants</b></a>, which enable definition of
+			multiple variant structs that share some base trait's common fields and methods.</li>
 		<li><a href="refvirtref.html"><b>Virtual reference interface</b></a>,
-			enabling method use and field access on values whose
-			type is decided at runtime.</li>
-		<li><a href="refconstraint.html"><b>Generic constraints</b></a>, to restrict the types
-			a generic type or function can safely support, when instantiated.</li>
+			enabling the use of methods (and fields) on values whose
+			concrete type can only be determined at runtime.</li>
+		<li><a href="refconstraint.html"><b>Generic constraints</b></a>, which can be use to restrict
+			which parametric types can be successfully substituted in to instantiate (monomorphize) a generic type.</li>
 	</ul>
 
-	<h2>Traits as mixins</h2>
-	<p>This page focuses on the mixin role of traits.
-		This is effectively a different form of inheritance than field-based delegated inheritance.
-		When a trait is used as a mixin by some other struct or trait, 
-		its fields and methods are added to that type as if part of the type.</p>
-
-	<h3>Mixing in Fields</h3>
-	<p>Suppose we have a trait that defines some fields:</p>
-<pre>
-trait LexerInfo:
-  line i32
-  col i32
-</pre>
-	<p>A struct may include these fields as part of its definition
-		by using <span class="pre">mixin</span>:</p>
-<pre>
-struct Node:
-  type u8
-  mixin LexerInfo
-  count i32
-</pre>
-	<p>The end result is that the Node struct ends up with four fields,
-		with 'line' and 'col' located in between 'type' and 'count'.
-		'line' and 'col' are accessible the same way as 'type' and 'count',
-		just as if they were explicitly declared by Node.
-		No two fields may share the same name, no matter where they come from.</p>
-	<p>A struct may mix in multiple traits.
-		Similarly, trait definitions may mix in one or more traits.</p>
-
-	<h3>Mixing in Default Methods</h3>
-	<p>In addition to its fields, a struct will also mix in the trait's methods.
-		However, the mechanism here is slightly different.
-		Any method implemented by a trait mixin will only be inherited by the struct
-		if it has not already been implemented by the struct.
-		This is done by matching the number and types of all method parameter types.
-		Because the struct can effectively override the mixin trait's implementation
-	  of a method, we call the trait's implementation a default method.</p>
-	<p>Importantly, if a trait mixin includes methods without an implementation, 
-		the struct must define and implement these methods.</p>
-
-	<h3>Self</h3>
-	<p>Traits, like structs, may specify <span class="pre">Self</span> as an alias
-		for the trait type itself. This is the default type used for the
-		<span class="pre">self</span> parameter. When a trait is mixed into a struct,
-		<span class="pre">Self</span> is understood to refer to that struct.
-		Where this behavior is not desired, one should use the trait's name
-		instead of <span class="pre">Self</span>.</p>
-	<p>Knowing when to choose <span class="pre">Self</span> vs. the trait's name
-		depends on what other roles the trait may play. Typically, <span class="pre">self</span>
-		on every method should use <span class="pre">Self</span> and everywhere else
-		(field types and other method parameters) should use the trait's name.
-		This makes the trait suitable for virtual references and generic bounds.</p>
-	
-	<h2 id="marker">Marker traits</h2>
-	<p>A marker trait defines no fields nor methods.
-		Its value comes from other trait or struct types inheriting it.
-		Its use then becomes a testable attribute of that type (e.g., by generics), 
-		allowing one to distinguish between types that support
-		a certain behavior and those that don't.</p>
-	
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refmove.html"><img alt="_" src="next.png" /></a>
+		<a href="reftraitvar.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

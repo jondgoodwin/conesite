@@ -63,7 +63,9 @@ union Event:
 		field prior to any fields they have defined.</p>
 	<p>For alignment reasons, it may be desirable to place the implicit tag field in some other spot
 		other than the first field. To do this, specify an anonymous field of 
-		<span class="pre">_ enum</span> wherever the tag field should be located.</p>
+		<span class="pre">_ enum</span> wherever the tag field should be located.
+		The size and type of the tag field can vary depending on the number of variants (e.g., u8 when variant count is 255 or less).
+		The tag field cannot be explicitly accessed, referenced or mutated.</p>
 
 		<h3>Initialization</h3>
 		<p>An union initial value is built using a constructor for one of the variant struct types:</p>
@@ -71,6 +73,8 @@ union Event:
 mut event = QuitEvent[timestamp]
 oddval = KeyEvent[timestamp, 's']
 </pre>
+		<p>Notice that the constructor must specify a value for all common fields.
+			It can never specify a value for the hidden tag field, as that is determined by the variant type selected.</p>
 
 		<h3>Copying</h3>
 		<p>A union value may be passed around, by copy, just like any other value.
