@@ -55,7 +55,7 @@ fn fact(mut n i32) i32:
 		re-evaluating the conditional expression.
 		Effectively, <span class="pre">continue</span> ignores all subsequent statements in the loop's block.</p>
 <pre>
-fn countOdd(n i32) i32:
+fn countOdd(mut n i32) i32:
   mut result = 0
   while n &gt; 0:
     if n-- % 2 == 0: continue 

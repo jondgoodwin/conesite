@@ -192,7 +192,7 @@ fn factorial(x i32, prod i32 = 1):
 	<p>Functions complying with these constraints
 		should be marked as <span class="pre">pure</span>.</p>
 <pre>
-pure fn factorial(n i32) i32:
+pure fn factorial(mut n i32) i32:
   if n&lt;=1:
     return 1 
   mut result = 1

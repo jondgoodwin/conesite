@@ -35,7 +35,7 @@
 		back to the function that called it.
 		Instead of returning the expected value, it throws an exception value.</p>
 <pre>
-fn factorial(n i32) i32 throws Bool:
+fn factorial(mut n i32) i32 throws Bool:
   if n &lt;= 0: throw false 
   mut result = 1
   while n:
@@ -168,7 +168,7 @@ requires idx &lt; bound
 		These provide a visibly strengthened contract that governs use of the
 		function. If these conditions fail, a panic is triggered.</p>
 <pre>
-fn factorial(n i32) i32
+fn factorial(mut n i32) i32
   requires n &gt; 0
   ensures result &gt; 0:
 
