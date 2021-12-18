@@ -1,0 +1,38 @@
+<html>
+  <head>
+	  <title>I/O and Concurrency - Cone Reference</title>
+		<meta content="text/html; charset=UTF-8" http-equiv="content-type">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+	  <link rel="stylesheet" type="text/css" href="standard.css" />
+	</head>
+  <body>
+		<div id="header">
+			<a href="/"><div id="title">Cone</div></a>
+			<div id="sub">I/O and Concurrency</div>
+		</div>
+
+    <div class="text">
+
+	<p style="margin-left: 40px;"><i>Note: None of this is implemented.</i></p>
+
+	<p>Generally speaking, work requests that make use of blocking i/o
+		should be performed on an extra native thread so as to not degrade the
+		throughput and latency of non-blocking work.
+		It is possible that functions will be annotated (like purity) such that
+		the compiler can detect whether a thread is known to not block.</p>
+
+	<p>A common use of such yielding co-routines is when a work thread wants to
+		issue non-blocking i/o requests. Any i/o functions it uses
+		automatically yield after submitting the i/o request, suspending work on the co-routine.
+		After the i/o thread determines the i/o request has been handled,
+		it triggers the co-routine to be rescheduled and resumed, 
+		feeding it the appropriate Result from that request.</p>
+
+
+	<p style="text-align: right; margin-top: 2em;">
+		<a href="refmodule.html"><img alt="_" src="next.png" /></a>
+	</p>
+
+	</div>
+	</body>
+</html>
