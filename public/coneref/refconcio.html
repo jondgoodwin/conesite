@@ -24,7 +24,7 @@
 	<ul>
 	<li>We don't want I/O activity to block the CPU from performing other available work.</li>
 	<li>When any I/O activity reports progress, we often want to continue processing where we left off,
-		based on a remembered execution and data state; (context).</li>
+		based on a remembered execution and data state (context).</li>
 	<li>We sometimes want the option to "cancel" already-requested i/o work based on time-outs, failures or other changed conditions.
 		Sometimes, we want to cascade cancellation through multiple levels of already-submitted requests.</li>
 	</ul>
@@ -71,10 +71,10 @@
 			point-of-view of the runtime scheduler.</p>
 		<p>The primary challenge of this approach is that it requires the programmer to manage
 			the concurrent workflow explicitly with actors. This may be a challenge for programmers
-			who are only familiar with synchronously-style programming.</p></li>
+			who are only familiar with synchronous-style programming.</p></li>
 	</ul>
 		
-	<p>Currently, the projected design for Cone is leaning to an Actor-based approach for handling asynchronous I/O,
+	<p>Currently, the projected design for Cone is leaning towards an Actor-based approach for handling asynchronous I/O,
 		sequential workflows, and cancellability.</p>
 
 	<p style="text-align: right; margin-top: 2em;">
