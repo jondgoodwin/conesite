@@ -23,7 +23,7 @@
 	
 	<h2>Race condition safety</h2>
 	<p>Any data passed or shared between threads must be done so safely.
-		Cone protects this by ensure that only "sendable" data can be sent to another thread.
+		Cone ensures this by only allowing "sendable" data to be sent to another thread.
 		The only type of data that is not sendable is a reference that has the "mut" or "const" permission,
 		or any aggregate type containing such a reference. Data of any other type is sendable,
 		including shared, immutable references, unique references (which are moved from one thread to another), 
@@ -32,18 +32,19 @@
 		such as thread creation, concurrent data structures, and more.</p>
 
 	<h2>Message-based Communications</h2>
-	<p>One highly efficient model for thread-based concurrency is independent threads that throw work to each
-		other in the form of messages placed on a thread's queue. Each thread pulls off messages from its queue in order,
-		and then performs the work requested by the message. For now, let's assume that threads do not need
+	<p>An efficient model for thread-based concurrency is independent actors (threads) that throw work to each
+		other in the form of messages placed on an actor's queue. Each actor pulls off messages from its queue in order,
+		and then performs the work requested by the message. For now, let's assume that actors do not need
 		shared, mutable access to objects nor do they perform any resource-blocking operations.</p>
-	<p>An straightforward way to implement this scenario involves using library-packaged threads (or actors)
-		that own and use concurrent message queues (or channels). Such SPSC or MPSC channels are themselves
+	<p>A straightforward way to implement this actor model involves using library-packaged actors
+		that own and use concurrent message queues (or channels). 
+		Such multiple-producer-single-consumer (MPSC) channels are themselves
 		library packaged-delivered concurrent FIFO data structures. 
-		Any thread that wants some thread to perform work adds that work to the thread's queue
-		in the form of a message. As part of a continuous loop, the thread owning the queue 
+		Any actor that wants some actor to perform work adds that work to the actor's queue
+		in the form of a message. As part of a continuous loop, the actor owning the queue 
 		pops a message off the queue and completely performs the non-blocking work it requests.</p>
 		
-	<p>Any particular channel's messages are all the same type, but might very well by some sort of variant type,
+	<p>Any particular channel's messages are all the same type, but might very well be some sort of variant type,
 		allowing different kinds of messages to be sent. Cone makes it easier to support this kind of message-passing
 		by supporting the definition of queued-methods for the message type. For example:
 <pre>
@@ -60,39 +61,42 @@ actor.increment()
 </pre>
 	<p>However, instead of executing the function right away, the message is appended to the actor's queue.
 		Later, the actor can pop this message off and dispatch it, which automatically then dispatches to the 
-		defined function, updating the counter that is part of the actor's state.</p>
-	<p>No "qfn" will specify a return type, because it is always being performed asynchronously with no guarantee of
+		appropriate method's logic, updating the counter that is part of the actor's state.</p>
+	<p>A "qfn" will never specify a return type, because it is always being performed asynchronously with no guarantee of
 		any value ever being calculated or returned.  If a return value is desired, then one can pass the along a reference
 		to the actor to which a message back can be sent.</p>
 	
 	<h2>Shared, Mutable Objects</h2>
-	<p>In most cases, the above approach is the most efficient when the threads do not require shared access
-		to mutable objects. There are at least two performance penalties to using thread-shared, mutable objects:
-		the run-time cost of the atomic synchronization primitives, and the way mutation invalidates the memory cache
-		for other threads.</p>
+	<p>In most cases, the above approach is the most efficient when threads do not require shared access
+		to mutable objects. 
+		This is because using thread-shared, mutable objects carries at least these performance penalties:
+		the run-time cost of the atomic synchronization primitives (especially locks), 
+		and the way mutation invalidates the memory cache for other threads.</p>
 	<p>For this reason (and to minimize the risk of deadlocks), it is desirable to send only small-sized messages
-		between threads (often references) and to only use the <a href="refperm.html">static</a> permissions on references.
+		between threads (typically references) and only use the <a href="refperm.html">static</a> permissions on references.
 		Static permissions offer the best performance, because they guarantee at compile-time that 
 		shared, mutable access to the same memory location cannot happen between threads.
 		No run-time mechanisms are needed to enforce these guarantees. Although mutable objects cannot be
 		shared between threads, immutable can be. Even better, it is possible to move a uniquely-owned object
 		from one thread to another.</p>
-	<p>There are situations where threads really do need to shared access to mutable objects.
+	<p>That said, there are definitely situations where we might want threads to share access to mutable objects.
 		This can be supported using lock permissions, shared data structures or atomic primitives.</p>
 	
 	<h3>Lock Permissions</h2>
 	<p>Cone's <a href="refpermlock.html">locked</a> permissions have already been introduced.
-		Lock permissions make use of runtime locks that make it possible to synchronize when multiple threads
-		need (mutable) access to the same object. The locks provide an atomic envelope around a set of operations,
-		so that no other thread can look at the object while another has it locked.
+		Lock permissions use runtime locks to synchronize when multiple threads
+		need (mutable) access to the same object.</p>
+	<p>The locks provide an atomic envelope around a set of operations,
+		so that no other thread can access the object while another has it locked.
 		If threads request multiple locks at the same time, careful design is needed to avoid the risk of deadlocks.</p>
 
 	<h3>Concurrent data structures</h3>
-	<p>The message queue types are actually one of several kinds of concurrent data structures,
-		including concurrent arrays and dictionaries.
-		These concurrent data structures are implemented in a way that makes it always possible
+	<p>The message queue used by actor is one of several kinds of concurrent data structures.
+		Other examples include concurrent arrays and dictionaries.</p>
+	<p>Concurrent data structures are implemented in a way that makes it always possible
 		to access and mutate these structures across multiple threads.
-		Every operation is essentially atomic. However, these operations do not use locks and never block.</p>
+		Every operation (method) on these types is essentially atomic. 
+		Importantly, these operations never use locks and never block.</p>
 
 	<h3>Atomic primitives</h3>
 	<p>Atomic primitives are a small collection of atomic (mutable) operations that are safe to perform
@@ -102,7 +106,7 @@ actor.increment()
 
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refcommio.html"><img alt="_" src="next.png" /></a>
+		<a href="refconcio.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>
