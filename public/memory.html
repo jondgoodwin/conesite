@@ -3,7 +3,7 @@
 	<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<link rel="stylesheet" type="text/css" href="standard.css" />
-<title>Cone - Fast, Safe, Do-It-Your-Way Memory Management</title>
+<title>Cone - Memory Managed Your Way</title>
 </head>
 <body>
 	<div id="header">
@@ -13,7 +13,7 @@
 		</a>
 		</div>
 		<span id="title">Cone</span>
-		<span id="sub">Fast, Safe, Do-It-Your-Way Memory Management</span></div>
+		<span id="sub">Memory Managed Your Way</span></div>
 		<div class="column flow-opposite">
 	</div>
 
@@ -94,7 +94,8 @@ imm person = +so Person("Tako");
 		they can make use of Cone's borrowed references.
 		A borrowed reference can be obtained from any region-managed reference and then passed along to any package.
 		Borrowed references have "forgotten" what region the object belongs to, but are still always safe to use
-		for reading (or modifying) some object's state.</p>
+		for reading (or modifying) some object's state.
+		It is the lifetime-constraint placed on borrowed references that makes them memory-safe.</p>
 	<p>Borrowed references are not just useful for polymorphism. Their use also 
 		speeds up many programs. Since borrowed references are free from region oversight,
 		they consume no cycles on liveness bookkeeping activities, such as tracing or reference counting.
