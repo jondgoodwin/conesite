@@ -47,10 +47,13 @@
 	<p><b>Region memory management:</b>
 		Cone's region approach to memory management enables significant reductions in runtime overhead
 		associated with allocating and freeing memory. 
-		For example, a program that exclusively uses ref-counting or tracing GC could improve throughput
+		For example, a program that exclusively uses ref-counting or tracing GC can improve throughput
 		by switching some or all of its memory allocations to use of arenas or pools.
-		(Throughput for arenas/pools can be up to 10-20x faster than general-purpose memory allocation and free.)
-		Further savings could be realized by transitioning most of its region-managed references to borrowed references.</p>
+		(Throughput for arenas/pools can be up to 10-20x faster than general-purpose memory allocation and free.)</p>
+	<p>Additional performance improvements can be realized by transitioning most region-managed references to borrowed references,
+		thereby eliminating the runtime overhead of the region-managed references.
+		In addition to this direct benefit, the fact that borrowed references can point to data structures inlined
+		in larger data structures facilitates cache-friendly data layout, further improving throughput.</p>
 	<p>Region-based memory management doesn't just improve throughput. It can also be used to reduce (or eliminate)
 		stop-the-world lag that can negatively impact systems that need to continuously deliver in real-time.</p>
 	

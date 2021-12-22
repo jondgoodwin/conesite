@@ -18,34 +18,7 @@
 	</div>
 
 	<div class="text">
-	<p>A lot of work has gone into making Cone's grammar simple and clear.
-	The lesser benefit is that code creation is faster and easier to remember.
-	The greater benefit is that the resulting concise, readable code is easier to understand and improve,
-	especially when one's eyes are not distracted by unnecessary, space-consuming boilerplate.</p>
-	<p>On another page, we will review Cone's rich code reuse mechanisms which can also play a huge
-	role in keeping code small, by making it easier to create a single piece of code that
-	well serves a number of diverse needs. For now, let's concentrate on Cone's grammatical shortcuts
-	that help keep Cone programs small and easy-to-understand:</p>
 	
-	<p><b>Significant indentation</b></p>
-	<p>To make code more forgiving, statement-ending semicolons are often optional.
-		Likewise, curly braces can optionally be omitted.
-		The compiler makes use of <a href="coneref/reftoken.html#indent">significant indentation</a>
-		(in these situations only) to infer the end of multi-line statements and to delimit a block's statements.</p>
-<pre>
-fn fact(nbr u32):
-  if nbr&lt;=1:
-    1
-  else:
-    n*fact(n-1)
-</pre>
-	<p>This approach eliminates both the visual distraction and the need to type these punctuation characters.
-	Another benefit is that code takes up less space vertically, allowing more of the meat of the program
-	to be visible in a code editor. 
-	The resulting code often looks like a neat, clean, declarative outline.</p>
-	<p>These features are entirely optional. If a programmer dislikes significant indentation
-		and optional semicolons, then semi-colons and braces may be explicitly specified
-		where needed.</p>
 	
 	<p><b>With blocks</b></p>
 	<p>'with' blocks are one of Cone's more distinctive features.
@@ -79,18 +52,6 @@ with $.npcs["Frosty"]:
 	Furthermore, the indented, compositional structure of Cone's code greatly facilitates 
 	the modular "snap-together" assembly of strings, collections, and 3D world parts.</p>
 	
-	<p><b>Type Inference</b></p>
-	<p>A key reason most statically-typed languages are somewhat more verbose than dynamic languages
-	is the requirement for type annotations scattered throughout the code.
-	Type inference and defaults go a long way towards reducing this overhead.</p>
-	<p>Cone supports unidirectional type inference, which means that type annotations
-	are generally required on function signatures and object creation, but can mostly
-	be avoided otherwise (particularly variable declarations).
-	Furthermore, Cone supports type defaults for the most common usage.
-	For example, '&amp;' defaults to a const, borrowed reference.
-	Similarly, methods allow a parameter's type to be omitted, should it be the same as the type
-	that the method is declared within.</p>
-	
 	<p><b>High-level Control Abstractions</b></p>
 	<p>Although <span class="pre">if</span> and <span class="pre">while</span> control structures
 	offer general-purpose flexibility, there are certain control flow patterns that
@@ -111,15 +72,6 @@ with $.npcs["Frosty"]:
 	disposed of.</li>
 	</ul>
 
-	<p><b>Return inference</b></p>
-	<p>As the earlier indentation example showed, the <span class="pre">return</span> keyword can often be omitted.
-	Functions that don't return a value don't need it. Functions that do return one or more values,
-	can specify the values to return on the last line.
-	This inference bubbles into <span class="pre">if</span> and <span class="pre">match</span> control structures,
-	as illustrated above.</p>
-	<p>Implicit return is consistent with Cone treating blocks and if/match structures as expressions.
-	Just like return inference, the last value in each block is treated as the computed value for that block.
-	Such consistency simplifies code refactoring and makes macro expansions more versatile.</p>
 	
 	<p><b>Tuples</b></p>
 	<p>Tuples (ad hoc structs) greatly improve the convenience of working with multiple values simultaneously.
@@ -132,12 +84,6 @@ a,b = b,a                      // parallel assignment used to swap values
 success, result = action(val)  // multiple return values
 </pre>
 
-	<p><b>Operator Overloading</b></p>
-	<p>Infix punctuation operators are both concise and readily digestible, far more so than
-	named functions and methods. 
-	Cone allows any type to define appropriate methods for a large number of these operators,
-	include equality comparisons, pattern matching, arithmetic and logic operators,
-	and even various operator assignments (e.g., '+=').</p>
 	
 	</div>
 
