@@ -35,8 +35,10 @@
 	<p>Cone imposes several constraints to prevent bad memory access:</p>
 	<ul>
 	<li><b>Use-after-free.</b>
-	Each of Cone's regions uses a different technique for calculating when an object's lifetime expires. 
-	An object is freed once there are no live references to it.</li>
+	Each of Cone's regions uses a different technique for calculating when an object's lifetime expires,
+	such as RAII-based escape analysis, reference counting and tracing. 
+	Once there are no live references to it, an object is cleaned up (using the finalizer) and then freed.
+	Since no usable refeerences point to the object, there is no way for it to be used after free.</li>
 	<li><b>Out-of-bounds.</b>
 	All collection types in the standard library perform boundary checks, based on the known size of the collection,
 	before attempting to access a specific element in a collection.</li>

@@ -82,13 +82,24 @@
 		Cone allows any type to define appropriate methods for a large number of these operators,
 		include equality comparisons, pattern matching, arithmetic and logic operators,
 		and even various operator assignments (e.g., '+=').</li>
+	<li><b>Tuples</b>
+		Tuples (ad hoc structs) improve the convenience of working with multiple values simultaneously.
+		Implicit use of tuples avoids the code overhead involved with declaring the data structure
+		and then individually moving around (destructuring) each element of the tuple.
+		Important use cases for tuples are parallel assignment, multiple return values and
+		marshalling queued-messaging data for use by a thread or actor.</p>
+<pre>
+a,b = b,a                      // parallel assignment used to swap values
+success, result = action(val)  // multiple return values
+</pre>
+	</li>
 	</ul>
 	
 	<h2>Significant indentation</h2>
 	<p>You may have noticed (from code examples) that Cone supports Python-like significant indentation,
 		where a block begins with a colon, and subsequent indented lines are considered part of the block.</p>
-	<p>The primary reason for this choice is code readability. When we are not dedicating whole lines to
-		a single curly brace, more of the code logic is visible in the editor. 
+	<p>The primary reason for this choice is code readability. When we are not wasting whole lines to
+		hold a single curly brace, more of the code logic is visible in the editor. 
 		It is easier to digest what code is doing when the bulk of the logic can be seen together without scrolling.</p>
 	<p>If you prefer curly braces (and statement-ending semicolons), go ahead and use them.
 		Cone supports both styles.</p>

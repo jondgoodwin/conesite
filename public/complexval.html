@@ -3,7 +3,7 @@
 	<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<link rel="stylesheet" type="text/css" href="standard.css" />
-<title>Cone - Other Distinctive Features</title>
+<title>Cone - Complex Value Handling</title>
 </head>
 <body>
 	<div id="header">
@@ -13,16 +13,33 @@
 		</a>
 		</div>
 		<span id="title">Cone</span>
-		<span id="sub">Other Distinctive Features</span></div>
+		<span id="sub">Complex Value Handling</span></div>
 		<div class="column flow-opposite">
 	</div>
 
 	<div class="text">
+	<p>When working with simple values, like numbers, Cone code looks very much like other languages.</p>
+	<p>It is when you work with more complex values, like the various forms of collections,
+		you start noticing some subtle but useful tools that help get things done with such values.</p>
 	
-	
-	<p><b>With blocks</b></p>
-	<p>'with' blocks are one of Cone's more distinctive features.
-	They make it possible to create declarative-looking code blocks that
+	<h2>Append operator</h2>
+	<p>The <span class="pre">&lt;-</span> operator appends the value(s) on the right to the collection on the left.
+<pre>
+log &lt;- count, " elements serialized in ", elapsed, " seconds.\n"
+</pre>
+	<p>This operator is quite versatile, as it
+		can be implemented as one or more overloaded methods on any type.
+		As this example illustrates, it can be used to output data to some device (console or file), pipe, socket,
+		thread channel, collection, or more.
+		This versatile mechanism is typically more efficient, as compared to other strategies
+		like concatenation (which does memory allocation) 
+		and functions that bear variable arguments (e.g., printf) that have to interpret values dynamically.</p>
+	<p>Since the operator supports overloaded methods, it is possible to also "append" formatting instructions
+		that change how values are "appended". Formatting instructions could change text color,
+		line width, etc. In effect, the append operator can be employed as a drawing or rendering tool.</p>
+
+	<h2>With blocks</h2>
+	<p>'with' blocks make it possible to create declarative-looking code blocks that
 	concisely build or manipulate complex data collections (such as 3D content).</p>
 	<p>A 'with' block starts with an expression which establishes the value/collection to focus on.
 	Throughout the course of the block, the pseudo-variable <span class="pre">this</span>
@@ -46,44 +63,29 @@ with $.npcs["Frosty"]:
 	to refer to something specific within the context of each conversation. 
 	Such pronouns make conversations pithier and less stilted.
 	'this' plays a similar role in Cone programs.</p>
-	<p>When used in conjunction with significant indentation,
-	'with' blocks make it possible for Cone, as a procedural language,
-	to express and work with content as concisely and declaratively as any markup language.
-	Furthermore, the indented, compositional structure of Cone's code greatly facilitates 
-	the modular "snap-together" assembly of strings, collections, and 3D world parts.</p>
 	
-	<p><b>High-level Control Abstractions</b></p>
-	<p>Although <span class="pre">if</span> and <span class="pre">while</span> control structures
-	offer general-purpose flexibility, there are certain control flow patterns that
-	are common enough that more-concise formulations are worth baking into Cone:</p>
+	<h2>Each comprehensions</h2>
+	<p>'each' is the special-purpose looping control structure you reach for
+		to iterate over a sequential sequence of collected or generated values,
+		on which various filter, map, summarize and sort operations can then be performed,
+		sometimes with the help of programmer specified closures.
+		Under the covers this mechanism uses a standard set of method calls to create the iterator, bind the values,
+		increment the iterator and ultimately destroy the iterator. 
+		Despite the complexity of the underlying mechanisms, the generated code is optimized run quickly
+		with little extra overhead.</p>
+		
+	<h2>Pattern matching</h2>
+	<p>'match' is the special-purpose conditional control structure you reach for to
+		match on some underlying pattern in a potentially-complex value, 
+		and then then destructure and bind some of its information for subsequent specialized processing.</p>
+	<p>It performs different logic based on where some pattern matches. Possible patterns:</p>
 	<ul>
-	<li><span class="pre">each</span> loops collapses the detailed mechanics of iterating over a sequence
-	of values into a single line. 
-	Invisible to the coder, it automates iterator creation, value binding, incrementation and destruction
-	in a safe, type-generic way.</li>
-	<li><span class="pre">match</span> collapses the detailed mechanics of matching a single value
-	to a sequence of patterns in a type-generic way. Key to its simplicity is the ability to safely
-	bind extracted contents from any successful matches.</li>
-	<li>RAII and move semantics collapses the detailed mechanics of ensuring that allocated
-	resources are safely disposed of at the end of their lexical lifetime, avoiding the need
-	for explicit invocation of finalizers and free logic.</li>
-	<li><span class="pre">panic</span> collapses the detailed mechanics of safely handling exception
-	conditions, providing a fast path to the exit door that ensures open resources have been successfully
-	disposed of.</li>
+	<li>Different value of an enum.</li>
+	<li>Different subtypes of a variant type.</li>
+	<li>Different numbers or ranges of numbers.</li>
+	<li>Tokenized parsing (or regex) of some sentence.</li>
+	<li>Use your imagination.</li>
 	</ul>
-
-	
-	<p><b>Tuples</b></p>
-	<p>Tuples (ad hoc structs) greatly improve the convenience of working with multiple values simultaneously.
-	Implicit use of tuples avoids the code overhead involved with declaring the data structure
-	and then individually moving around (destructuring) each element of the tuple.
-	Important use cases for tuples are parallel assignment, multiple return values and
-	marshalling queued-messaging data for use by a thread or actor.</p>
-<pre>
-a,b = b,a                      // parallel assignment used to swap values
-success, result = action(val)  // multiple return values
-</pre>
-
 	
 	</div>
 
