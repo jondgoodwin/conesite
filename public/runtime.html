@@ -18,45 +18,22 @@
 	</div>
 
 	<div class="text">
-	<p>Optimal performance and minimal code footprint are essential to a responsive 3D experience.
-	3D worlds are punishing to deliver, as they have to perform millions of rendering and motion
-	calculations reliably every 16 milliseconds. Internet bandwidth constraints magnify these challenges;
-	if we cannot keep world assets and the underlying engine's code compact, it will be impossible
-	to stream them from the server to the client on a timely basis.</p>
-
-	<p><b>Performance</b></p>
-	<p>
-	  Although Cone's initial focus is on web-delivered 3D, it is designed to also support
-	  native platform 3D experiences. It is also intended to be usable for building 3D world servers,
-	  keeping multi-player clients synchronized to the most recent state of the world.
-	  To satisfy these focus areas,
-	  Cone has been designed to deliver blazingly-fast runtime performance (and to compile quickly too!).
-	</p>
-	<p>A large part of Cone's performance story comes from obvious architectural choices.
-	Cone's statically-typed programs are compiled to native executables
-	supporting all popular platforms:  Windows, Linux, Macintosh, Android, iOS, and WebAssembly.
-	Cone accomplishes this using LLVM's award-winning backend technology and its powerful
-	suite of code optimizers.</p>
-	<p>Inspired by the Rust and Pony languages,
-	Cone's static type system aggressively reduces runtime overhead further:</p>
-	<ul>
-	<li>Static permissions signal when data is immutable or uniquely referenced,
-	enabling memory-access optimizations, reductions in garbage collection (GC) bookkeeping,
-	and lockless, cross-thread sharing of immutable and mutable data.</li>
-	<li>Static memory management techniques, such as borrowed references and lexical move/finalization semantics,
-	make possible more substantial GC bookkeeping reductions.</li>
-	</ul>
-	<p>In addition, Cone's easy-to-use custom regions, such as pools and arenas,
-	go a long way towards lowering the runtime cost of frequent memory allocation and free events,
-	commonly required by 3D worlds.</p>
 	
-	<p><b>Minimal footprint</b></p>
-	<p>To keep 3D program assets small, Cone's 3D libraries are guided by a modular, opt-in philosophy.
-	Rather than making users wait for a monolithic, do-everything 3D engine to finish loading,
-	3D worlds can pick-and-choose the 3D features they require and schedule when to 
-	downloaded them in the background so as to be available when required.</p>
-	<p>The Cone runtime for 3D web is quite small, as it leverages code logic already
-	resident in the client browser.</p>
+	<p>Although Cone programs are often targeted for native execution on large computers,
+		sometimes we want to execute programs on memory- or network-constrained devices,
+		such as mobile phones or browsers (in the form of 3D/wasm apps).</p>
+	<p>These more-constrained environments struggle with large executables
+		that are bloated by the inclusion of a required, large, and complex run-time (e.g., the Java runtime).
+		When running on constrained environments, such apps might be too big to download or run,
+		or might simply run too sluggishly.</p>
+	<p>Cone's fixes this problem by minimizing the size of the runtime to only what is required
+		by the program. In effect, packaged libraries are kept small, simple and extensible.
+		Furthermore, libraries are designed to leverage APIs already built into the environment
+		(e.g., browser APIs such as WebGL).
+		Instead of a monolithic, one-size-fits-all framework, 
+		a program's runtime environment is built up using a modular, opt-in philosophy.</p>
+	<p>This keeps Cone executables lean and fit, allowing them to load quickly, take up minimal space,
+		start-up promptly, and run smoothly.</p>
 	
 	</div>
 
