@@ -16,11 +16,12 @@
 	<p style="margin-left: 40px;"><i>Note: typedef is implemented. extend is not.</i></p>
 	
 	<h2>typedef</h2>
-	<p>To create a named alias for some type, use <span class="pre">typedef</span>:</p>
+	<p>To create a named alias for some type, use <span class="pre">typedef</span> 
+		in the appropriate module's global scope (it may not be placed anywhere else):</p>
 <pre>
 typedef Noderef &rc mut Node
 </pre>
-	<p>In this example, wherever Noderef is used, it will be understood to mean
+	<p>In this example, wherever Noderef is used in this module, it will be understood to mean
 		<span class="pre">&rc mut Node</span>.</p>
 		
 	<h2>extend</h2>
