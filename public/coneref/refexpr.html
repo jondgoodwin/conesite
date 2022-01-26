@@ -68,7 +68,9 @@
 <pre>
 // The method name equivalent for the + operator is `+`
 // The method name is enclosed in backticks since it includes punctuation
-3+4   // is actually: 3.`+`(4)
+3+4 // is actually the same as: 3 .`+`(4)
+// The space between 3 and . is needed here, otherwise 3. would be parsed as the float 3.0
+// When using a variable this space is not needed: n.`+`(4)
 </pre>
 	</li>
 	</ul>
