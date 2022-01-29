@@ -13,25 +13,36 @@
 
     <div class="text">
 
-    <p style="margin-left: 40px;"><i>Note: All of this capability is implemented except
-        fill initialization, multi-element segments, 'each' iteration, comparison, and pattern matching.</i></p>
+    <p style="margin-left: 40px;"><i>Note: All of this capability is implemented except .len,
+        multi-element segments, 'each' iteration, comparison, and pattern matching.</i></p>
 
     <p>An array holds a specified number of values, all of the same type.
-        The array's elements are co-located in memory and can be individually accessed using an integer index.</p>
-        <p>Let's illustrate with an example:
-    </p>
+		The size of the array (its number of elements) is a fixed, constant value and is not resizable.
+        The array's elements are located next to each other in memory.
+		Elements are individually accessed using an unsigned integer index.</p>
+        <p>For example:</p>
 <pre>
 imm numbers [3; f32] = [3.1, 4.1, 5.92]
+imm nbr = numbers[1]     // nbr is 4.1
+numbers[0] = 2.          // numbers is now [2., 4.1, 5.92]
 </pre>
     <p>Here, <span class="pre">numbers</span> is an array containing three floating-point numbers as its elements.
       As the redundant type specification <span class="pre">[3; f32]</span> indicates, the length of the array is 3 
       and the type of its elements is <span class="pre">f32</span>.
-      A multi-dimensional array may also be defined: <span class="pre">[4,4; f32]</span>.
-    </p>
-    <p>An array can only exist as either a global or a local, stack-allocated value. 
-        Its length must be specified using an integer literal, making it fixed and unchangeable.
-        If variable-sized or heap-allocated arrays are needed, use
-        <a href="refarrayref.html">array references</a> instead.</p>
+	  The <span class="pre">[]</span> operator enables access to a specific element.</p>
+	<p>Arrays are always one-dimensional. 
+		However, it is possible to achieve a multi-dimensional capability by embedding an array within an array:</p>
+<pre>
+imm matrix [3; [3; f32]] = [[1., 0., 0.], [0., 1., 0], [0., 0., 1.]]
+imm val = matrix[1, 1]  // 1.
+</pre>
+	<p><b>Warning:</b> Typically, when you want a collection type capability, you won't reach directly for an array, 
+		because of the fixed-size limitations and because you cannot implement methods directly on arrays.
+		More likely, you will use one of the library-based collection types.
+		If you look under the covers of these, you will see these are
+		basically <span class="pre">struct</span> types that wrap around a specific array or 
+		<a href="refarrayref.html">array reference</a> (as well as possibly other fields).
+		Being structs, they offer implemented methods to work with the collection and its elements.</p>
 
     <h2>Initialization</h2>
     <p>To create or initialize an array, specify the values of all its elements
@@ -59,8 +70,6 @@ imm hello = "Hello world!"  // type:  [12] u8
 <pre>
 imm spaces = [100; ' ']
 </pre>
-    <p>Alternatively, a <a href="refclosure.html">closure</a> may be specified in lieu of a fill value.
-        The closure is repeatedly invoked to produce each of the array elements' values.</p>
 
     <h2>Copying</h2>
     <p>Like numeric values, array values may be passed around between variables and functions:</p>
@@ -203,7 +212,7 @@ if somebody == "Jane":
         particularly for <a href="refmatch.html#array">partial pattern matching</a>.
 
 	<p style="text-align: right; margin-top: 2em;">
-		<a href="refunion.html"><img alt="_" src="next.png" /></a>
+		<a href="refnumber.html"><img alt="_" src="next.png" /></a>
 	</p>
 
 	</div>

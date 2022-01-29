@@ -35,15 +35,13 @@
 			finishes at the end of a line, as is typically the case.
 			This example show two expression statements:</p>
 <pre>
-mut a i32
-imm b i32
-a = 12   // Equivalent to: a = 12;
-b = 5    // Equivalent to: b = 5;
+mut a = 12   // Equivalent to: mut a = 12;
+mut b = 5    // Equivalent to: mut b = 5;
 </pre>
 		<p>A single line may hold more than one statement. When this is done,
 			use semi-colons to separate the statements:</p>
 <pre>
-a = 12; b = 5    // Equivalent to:  a = 12; b = 5;
+a = 24; b = 6    // Equivalent to:  a = 24; b = 6;
 </pre>
 		<p>A statement may span multiple lines.
 			When this is required, continuation lines should be indented to visually signal that all the lines
@@ -224,18 +222,24 @@ with Float.Pi/180:
 		taking advantage of this shortcut:</p>
 <pre>
 // Normalize point to unit length
-with &mut point:
+with &amp;mut point:
 	imm len = (.x * .x + .y * .y).sqrt
 	if len > 0:
 		.x /= len
 		.y /= len
 </pre>
-	<p>This example uses <span class="pre">.x</span> and <span class="pre">.y</span> to access
-		fields in <span class="pre">point</span>. This works because this block assigns
-		<span class="pre">this</span> to the value of <span class="pre">point</span>,
-		and <span class="pre">.x</span> is equivalent to <span class="pre">this.x</span>.
+	<p>There are several things happening in this example:</p>
+	<ul>
+	<li>The <span class="pre">with</span> block works with a mutable reference to <span class="pre">point</span>.
+		We do this because the block changes the value of <span class="pre">point</span>.
+		If we had not captured a reference, the block would have tried to change the value of <span class="pre">this</span>,
+		which is not mutable and which does not survive the block.</li>
+	<li>It uses <span class="pre">.x</span> and <span class="pre">.y</span> to indirectly access
+		fields in <span class="pre">point</span>, via the mutable reference held by <span class="pre">this</span>
+		(<span class="pre">.x</span> is equivalent to <span class="pre">this.x</span>).
 		The block's logic is cleaner and easier to read without having to place
-		<span class="pre">point</span> ahead of every dot operator.</p>
+		<span class="pre">point</span> ahead of every dot operator.</li>
+	</ul>
 	<p>Why is this approach is more versatile than method chaining or cascades?</p>
 	<ul>
 	<li>Called methods need not return <span class="pre">self</span>, as method chaining requires.</li>
