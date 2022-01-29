@@ -24,7 +24,7 @@
 	<h2>Race condition safety</h2>
 	<p>Any data passed or shared between threads must be done so safely.
 		Cone ensures this by only allowing "sendable" data to be sent to another thread.
-		The only type of data that is not sendable is a reference that has the "mut" or "const" permission,
+		The only type of data that is not sendable is a reference that has the "mut" or "ro" permission,
 		or any aggregate type containing such a reference. Data of any other type is sendable,
 		including shared, immutable references, unique references (which are moved from one thread to another), 
 		and any other move or copy type.</p>

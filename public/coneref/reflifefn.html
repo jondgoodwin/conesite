@@ -62,7 +62,7 @@ fn dostuff(a: &i32, b: &'b i32) &i32, &'b i32
 	<p>We can rule out the need for any lifetime annotations if the function does not
 		receive at least two borrowed references in its parameters.
 		We can also rule out them out if the borrowed references
-		in parameters are all read-only (<span class="pre">const</span>)
+		in parameters are all read-only (<span class="pre">ro</span>)
 		and no borrowed reference is returned.
 		Beyond this simple test, there are two specific situations where
 		lifetime annotations might be required.</p>

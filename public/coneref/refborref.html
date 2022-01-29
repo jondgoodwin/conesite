@@ -163,7 +163,7 @@ each x in &mut list:
 		The permission governs what may be done with the reference: May we read its value?
 		May we change its value? May we make a copy of the reference?</p>
 	<p>This permission is specified after the ampersand operator.
-		If none is specified, <span class="pre">const</span> is assumed.</p>
+		If none is specified, <span class="pre">ro</span> is assumed.</p>
 <pre>
 mut a = 3
 imm ref = &amp;mut a   // Creates a mutable borrowed reference to a's value

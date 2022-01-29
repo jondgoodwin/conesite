@@ -47,7 +47,7 @@
 	ptrtype ::= '*' type
 	lifetype ::= lifetime_token type
 	reftype ::= '&' region-type? lifetime_token? perm_type? type
-	perm_ident ::= 'mut' | 'imm' | 'uni' | 'const' | 'mutx' | 'id' | genqualname
+	perm_ident ::= 'mut' | 'imm' | 'uni' | 'ro' | 'mutx' | 'id' | genqualname
 	region_type ::= genqualname
 	fntype ::= 'fn' (ident_token)? '(' fnparm (',' fnparm)* ')' (type (',' type)*)?
 	fnparm ::= perm_ident? ident_token type? ('=' (literal | ident))?

@@ -76,19 +76,19 @@
 	<p>A <span class="pre">mut</span> array reference may not re-size its array.
 		Similarly, a <span class="pre">mut</span> reference may not alter a variant value.</p></dd>
 
-	<dt id="const">const</dd>
-	<dd>A <span class="pre">const</span> reference may read, but not modify, the value it points to.
+	<dt id="ro">ro</dd>
+	<dd>A <span class="pre">ro</span> (readonly) reference may read, but not modify, the value it points to.
 		This may sound like <span class="pre">imm</span>, but it is not the same.
 		<span class="pre">imm</span> guarantees that <i>no</i> other mutable reference to the same object exists,
 		making it safe to share between threads. 
-		<span class="pre">const</span> makes no such guarantee.
-		Therefore, <span class="pre">const</span> references cannot be safely shared with another thread.</p>
-	<p>The primary use for <span class="pre">const</span> rests in how it 
+		<span class="pre">ro</span> makes no such guarantee.
+		Therefore, <span class="pre">ro</span> references cannot be safely shared with another thread.</p>
+	<p>The primary use for <span class="pre">ro</span> rests in how it 
 		allows a function to take in a reference of 
-		<a href="#toconst">nearly any permission</a>,
+		<a href="#toro">nearly any permission</a>,
 		simply by promising not to change the value the reference points at.
 		This polymorphic flexibility is why a borrowed reference's default permission
-		is <span class="pre">const</span>, if no permission is explicitly specified.</p></dd>
+		is <span class="pre">ro</span>, if no permission is explicitly specified.</p></dd>
 	
 	<dt>opaq</dt>
 	<dd>An <span class="pre">opaq</span> (opaque) reference
@@ -142,11 +142,11 @@ ref4 = &amp;mut x   // ok
 		In certain cases, however, we may safely create a
 		reference copy carrying a different permission.</p>
 
-	<h3 id="toconst">To 'const'</h3>
-	<p>It is safe to borrow a <span class="pre">const</span>
+	<h3 id="toro">To 'ro'</h3>
+	<p>It is safe to borrow a <span class="pre">ro</span>
 		reference from a reference of any permission other than <span class="pre">opaq</span>.
 		This quality is what makes it attractive for functions to polymorphically
-		accept <span class="pre">const</span> references to any values
+		accept <span class="pre">ro</span> references to any values
 		they do not intend to modify.</p>
 
 	<h3>From 'uni'</h3>
@@ -202,13 +202,13 @@ imm newref2 &amp;mut i32 = newref1  // Two 'mut' references to the same object
 		When the borrowed reference expires, the original permission on the source reference is restored.
 		So, a <span class="pre">uni</span> can be borrowed as <span class="pre">mut</span> or <span class="pre">imm</span>.
 		When the borrowed references expire, you once again again have the original <span class="pre">uni</span> reference.
-		Similarly, one can borrow as <span class="pre">const</span> and get back the original reference's permission later.</li>
+		Similarly, one can borrow as <span class="pre">ro</span> and get back the original reference's permission later.</li>
 	<li><b>Pure method calls</b>
 		Sometimes it is polymorphically convenient to be able to call a method on an object where we have
 		a <span class="pre">uni</span> reference, and we don't want the calling function to lose the object to the
 		called method due to move semantics and we don't want to borrow.
 		This is possible to do if the called method is pure, and no other arguments to the method call
-		have <span class="pre">mut</span> or <span class="pre">const</span> references.</li>
+		have <span class="pre">mut</span> or <span class="pre">ro</span> references.</li>
 	<li><b>Recovery blocks</b>
 		With this feature, described below, it is possible to unwind a some permission transition that happens inside
 		the block for any value returned by the block.</li>
@@ -237,7 +237,7 @@ recover:
 </pre>
 	<p>The recover block imposes several restrictions in order to ensure the reverse transition is safe:</p>
 	<ul>
-	<li>You have no access to any <span class="pre">mut</span>, <span class="pre">const</span> or lock permission
+	<li>You have no access to any <span class="pre">mut</span>, <span class="pre">ro</span> or lock permission
 		reference/object outside the recover block, whether local or global.</li>
 	<li>Any functions you call must be pure.</li>
 	</ul>
@@ -272,7 +272,7 @@ struct Car:
 		that permission forbids the reference from being shared across multiple threads.
 		If the field must remain thread-local, so must any Car value (or reference to a Car value).
 		This principle applies to all the thread-local permissions:
-		<span class="pre">mut</span>, <span class="pre">const</span>
+		<span class="pre">mut</span>, <span class="pre">ro</span>
 		and <span class="pre">rwcell</span>.</p>
 
 	<h3 id="view">Viewpoint Adaptation</h3>
