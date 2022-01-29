@@ -13,6 +13,10 @@
 
     <div class="text">
 
+		<p style="margin-left: 40px;"><i>Note: All of this capability is implemented
+				except for '.[]' indexing and the '<-' Prefix Operator.</i>
+		</p>
+
 		<p>A block is the basic unit for structured control flow.
 			It holds a ordered collection of statements that are executed in order, starting with the first statement.
 			It may also accumulate its own temporary, local state.
@@ -31,6 +35,8 @@
 			finishes at the end of a line, as is typically the case.
 			This example show two expression statements:</p>
 <pre>
+mut a i32
+imm b i32
 a = 12   // Equivalent to: a = 12;
 b = 5    // Equivalent to: b = 5;
 </pre>
@@ -191,15 +197,15 @@ a = {
 <pre>
 // Calculate the value of 'this' (0.174533)
 with Float.Pi/180:
-	quarter = 90 * this  // Use 'this' to convert to radians
-	acute = 10 * this
+	quarter = 90f * this // Use 'this' to convert to radians
+	acute = 10f * this
 </pre>
 	<p>The above example is short-hand for:</p>
 <pre>
 {
 	imm this = Float.Pi/180
-	quarter = 90 * this  // Use 'this' to convert to radians
-	acute = 10 * this	
+	quarter = 90f * this // Use 'this' to convert to radians
+	acute = 10f * this
 }
 </pre>
 	<p>Since <span class="pre">with</span> blocks can be nested within each other,
@@ -218,7 +224,7 @@ with Float.Pi/180:
 		taking advantage of this shortcut:</p>
 <pre>
 // Normalize point to unit length
-with point:
+with &mut point:
 	imm len = (.x * .x + .y * .y).sqrt
 	if len > 0:
 		.x /= len
