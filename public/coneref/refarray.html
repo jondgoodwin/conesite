@@ -33,8 +33,8 @@ numbers[0] = 2.          // numbers is now [2., 4.1, 5.92]
 	<p>Arrays are always one-dimensional. 
 		However, it is possible to achieve a multi-dimensional capability by embedding an array within an array:</p>
 <pre>
-imm matrix [3; [3; f32]] = [[1., 0., 0.], [0., 1., 0], [0., 0., 1.]]
-imm val = matrix[1, 1]  // 1.
+imm matrix [3; [3; f32]] = [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]]
+imm val = matrix[1][1]  // 1.
 </pre>
 	<p><b>Warning:</b> Typically, when you want a collection type capability, you won't reach directly for an array, 
 		because of the fixed-size limitations and because you cannot implement methods directly on arrays.
