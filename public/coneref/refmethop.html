@@ -25,7 +25,7 @@
 		a compiler error results.</p>
 	<p>Let's explore the implications across a number of operators.</p>
 
-	<h2>Arithmetic Operator Methods</h2>
+	<h2>Value Operator Methods</h2>
 	<p>A type may support any of the <a href="refexpr.html#arith">arithmetic operators</a>
 		(<span class="pre">+</span>, <span class="pre">-</span>, <span class="pre">*</span>,
 		<span class="pre">/</span> and <span class="pre">%</span>) 
@@ -52,33 +52,13 @@ fn `-`() Point:
   Point[-x, -y]
 </pre>
 	
-	<h3>Arithmetic Assignment Operators</h3>
-	<p>A custom type may also support any of the <a href="refexpr.html#arithassign">arithmetic assignment operators</a>
-		(<span class="pre">+=</span>, <span class="pre">-=</span>, <span class="pre">*=</span>,
-		<span class="pre">/=</span> and <span class="pre">%=</span>) 
-		by implementing them as methods.</p>
-	<p>If a type does not implement the arithmetic assignment operators,
-		the compiler will attempt to implement them using the arithmetic methods.
-		Thus, <span class="pre">pt1 += pt2</span> would be treated as if it were:
-		<span class="pre">pt1 = pt1 + 2</span>.</p>
-
-	<h3>Increment and Decrement Operators</h3>
-	<p>A type may implement the <a href="refexpr.html#incrdecr">increment or decrement operators</a>
-			(<span class="pre">++</span> and <span class="pre">--</span>) as methods.
-			When used as prefix operators, their names are <span class="pre">`++`</span> and <span class="pre">`--`</span>.
-			When used as postfix operators, their names are
-			<span class="pre">`_++`</span> and <span class="pre">`_--`</span>.
-	</p>
-
-	<h2>Logic and Shift Operator Methods</h2>
-	<p>A type may support any of the <a href="refexpr.html#bitwise">logic and shift operators</a>
+	<h4>Logic and Shift Operator Methods</h4>
+	<p>Similarly, a type may support any of the <a href="refexpr.html#bitwise">logic and shift operators</a>
 		(<span class="pre">!</span>, <span class="pre">&</span>, <span class="pre">^</span>,
 		<span class="pre">~</span>, <span class="pre">&lt;&lt;</span> and <span class="pre">&gt;&gt;</span>) 
 		by implementing them as methods.</p>
-	<p>Similarly, the logic an shift assignment operators may also be implemented as methods.
-		If not, they will be handled in the same way as the arithmetic assignment operators.</p>
-	
-	<h2 id="compare">Comparison Operator Methods</h2>
+		
+	<h4 id="compare">Comparison Operator Methods</h4>
 	<p>To support operator-based comparison of two values, implement the appropriate
 		<a href="refif.html#compare">comparison operator(s)</a>
 		(<span class="pre">==</span>, <span class="pre">&lt;</span>, <span class="pre">&lt;=</span>,
@@ -88,60 +68,71 @@ fn `-`() Point:
 		as this is supported automatically if <span class="pre">`==`</span> is implemented.
 	</p>
 
-	<h2>'set' Methods for Assignment</h2>
-	<p>To implement methods that work to the left of the assignment operator,
-		use a <span class="pre">set</span> method.
-		Such methods are designated by preceding <span class="pre">fn</span> with <span class="pre">set</span>.
-		For example:</p>
+	<h2>Value Mutation Methods</h2>
+	<p>Several operator methods may be implemented that change an existing mutable value in memory.
+		When the value is held by some variable, the compiler effectively obtains a mutable reference to the variable,
+		and calls the method using the mutable reference.
+	<p>This can be illustrated with a simple example. Let's say that a type wants to override the simple assignment
+		operator with a method that performs a deep (rather than the default shallow) copy of the value.
+		The signature of the method will accept a mutable reference to the target:
 <pre>
-struct Counter:
-  _count u32 = 0
-  set fn count(cnt u32):
-    _count = cnt / 2
+fn `=`(self &amp;mut, value) Self:
 </pre>
-	<p>As this example demonstrates, a <span class="pre">set</span> method typically alters
-		some private field's value using a formula or algorithm.
-		We can make use of this method as follows:</p>
-<pre>
-mut cnt = Counter[]
-cnt.count() = 10    // Sets _count to 5
-cnt.count = 6       // Note: the parentheses can be omitted
-</pre>
-	<p>The value to the right of the assignment is passed to the
-		<span class="pre">set</span> method as the last argument.</p>
+	<p>When assignment is performed for a value of this type (<span class="pre">a = b</span>),
+		it will obtain a mutable borrowed reference to the lval 'a' and then
+		call the method like this:  <span class="pre">&amp;uni a.`=`(b)</span>.
+	
+	<h4>Arithmetic, Logic, Bitwise Assignment Operators</h4>
+	<p>A custom type may also support any of the <a href="refexpr.html#arithassign">arithmetic assignment operators</a>
+		(<span class="pre">+=</span>, <span class="pre">-=</span>, <span class="pre">*=</span>,
+		<span class="pre">/=</span> and <span class="pre">%=</span>) 
+		by implementing them as methods.</p>
+	<p>If a type does not implement the arithmetic assignment operators,
+		the compiler will attempt to implement them using the arithmetic methods.
+		Thus, <span class="pre">pt1 += pt2</span> would be treated as if it were:
+		<span class="pre">pt1 = pt1 + pt2</span>.</p>
+	<p>Similarly, the logic and shift assignment operators may also be implemented as methods.
+		If not, they will be handled in the same way as the arithmetic assignment operators.</p>
+	
+	<h4>Increment and Decrement Operators</h4>
+	<p>A type may implement the <a href="refexpr.html#incrdecr">increment or decrement operators</a>
+			(<span class="pre">++</span> and <span class="pre">--</span>) as methods.
+			When used as prefix operators, their names are <span class="pre">`++`</span> and <span class="pre">`--`</span>.
+			When used as postfix operators, their names are
+			<span class="pre">`_++`</span> and <span class="pre">`_--`</span>.
+	</p>
 
-	<h3>Getters and Setters</h3>
+	<h2>Computed Properties</h2>
 	<p>For public fields, there is often no reason to implement getters and setters to offer
-		direct access to their values.
+		direct access to their values, because it is faster to access the fields directly.
 		However, if it would be unsafe to offer direct access to certain fields,
 		in order to preserve specific data invariants, one should make them private
-		and then potentially offer appropriate getters and setters that preserve the invariants.</p>
- 	<p>Implementing a getter and setter is as easy as defining a
-		a regular and <span class="pre">set</span> method of the same name:</p>
+		and then potentially offer appropriate getter and setter methods that preserve the invariants.</p>
+
+ 	<p>Implementing a getter and setter is easy:</p>
 <pre>
 struct Counter:
 	_count u32 = 0
 
   // a getter
   fn counter() u32:
-    _count++
+    _count
 
-  // a setter
-  set fn count(cnt u32):
+  // a setter (notice the use of a mutable reference, since the value will be changed)
+  fn count(self &amp;mut, cnt u32):
     _count = cnt
 </pre>
 	<p>And here we use them:</p>
 <pre>
 mut x = Counter[]
 x.counter // 0
-x.counter // 1
 x.counter = 10 // uses the "setter" to set the value
 x.counter // 10
 </pre>
-  <p>Because we can omit the parentheses when using a getter or setter,
-		their use looks no different than access to a public field.
-		This makes it possible to start off with a type making a field public,
-		and then later changing it to private because of an invariant.
+	<p>Since we can omit the parentheses when using a getter or setter,
+		their use looks just like access to a public field.
+		This makes it possible to start off with a type that makes a field public,
+		and then later changes it to private because of an invariant.
 		By implementing getters and setters instead, the API can be preserved
 		even as the implementation evolves.</p>
 
@@ -196,17 +187,17 @@ print &lt;- "Hello ", user   // equivalent to: print &lt;- "Hello "; print &lt;-
 		The closure <span class="pre">|n i32 {cnt = 0}| cnt += n</span>
 		is roughly equivalent to:</p>
 <pre>
-struct _cntstr:
+struct Cntstr:
   _cnt = 0
-  fn `()`(n i32):
+  fn `()`(self &amp;mut, n i32):
     _cnt += n
 
-mut counter = _cntstr[]
-counter(1)        // 1
-counter(2)        // 3
+mut counter = Cntstr[]
+&amp;mut counter(1)        // 1
+&amp;mut counter(2)        // 3
 </pre>
 	<p>As this example demonstrates, the closure itself is defined by the
-		<span class="pre">_cntstr</span> struct.
+		<span class="pre">Cntstr</span> struct.
 		The closure's state is define by its field(s).
 		The functional logic is captured within a single method named
 		<span class="pre">()</span>.</p>
