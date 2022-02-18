@@ -68,6 +68,19 @@ fn `-`() Point:
 		as this is supported automatically if <span class="pre">`==`</span> is implemented.
 	</p>
 
+	<h4>isTrue "truthy" Method</h4>
+	<p>Conditional expressions depend on a boolean value of true or false.
+		If a conditional expression returns a value of some type other than Bool,
+		Cone will check whether the type implements the <span class="pre">isTrue</span> method.
+		If so, it will use that method to convert a conditional expression's to true or false.</p>
+	<p>In effect, this is how Cone supports the notion of type-specific "truthy" values. For example:</p>
+	<ul>
+	<li>Integer values are false if 0, true otherwise.</li>
+	<li>Floating point values are false if 0 or -0, true otherwise.</li>
+	<li>Pointers are false if null, true otherwise.</li>
+	<li>Option values are false if Null, and true if Some.</li>
+	</ul>
+	
 	<h2>Value Mutation Methods</h2>
 	<p>Several operator methods may be implemented that change an existing mutable value in memory.
 		When the value is held by some variable, the compiler effectively obtains a mutable reference to the variable,
