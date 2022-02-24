@@ -32,7 +32,10 @@ union Point:
 	<ul>
 		<li>These are discriminated unions: there is a hidden "tag" field at the beginning of the value
 			which is used at runtime to distinguish which of the variant types the value belongs to.
-			This tag field would effectively hold a 0 for an XyPoint and 1 for a AngPoint.</li>
+			This tag field would effectively hold a 0 for an XyPoint and 1 for a AngPoint.
+			<p><b>Note:</b> The hidden tag field is implicitly positioned as the first field.
+				If one wishes to place it in a different spot, explicitly specify the tag field
+				(<span class="pre">_ enum</span>) in the place where it is desired.</p></li>
 		<li>All variant structs in a union occupy the exact same size of memory.
 			This size is the size of the largest struct plus the size of the tag field.
 			Any smaller structs are padded to fit.</li>
@@ -40,7 +43,7 @@ union Point:
 			which means they can be used directly without the need to qualify the name with the name of the union.</li>
 	</ul>
 	<p>To create variant types who sizes vary, or whose number of variants is open-ended,
-		use a <a href="reftrait.html">base trait</a> instead of a union.</p>
+		use a <a href="reftraitvar.html">variant trait</a> instead of a union.</p>
 	
 	<h3>Declaration</h3>
 	<p>As the above example shows, the simplest form of a union type declaration is as easy as packaging
