@@ -13,7 +13,7 @@
 
     <div class="text">
 
-	<p>Methods add functional behavior to a defined type, offering capabilities consistent with
+	<p>Methods associate functional behavior to a defined type, offering capabilities consistent with
 		and helpful for values of that type.
 		For example (as mentioned <a href="refexpr.html#method">earlier</a>), 
 		<span class="pre">`+`</span> is one of several methods defined for the <span class="pre">i32</span> type.
@@ -25,19 +25,19 @@ struct Point:
   y f32
 		
   // Calculate distance between two points
-  fn distance(pt2) f32:
+  fn distance(self, pt2) f32:
     (self-pt2).len
 
   // Subtract two points
-  fn `-`(pt2) Point:
+  fn `-`(self, pt2) Point:
     Point[pt2.x - x, pt2.y - y]
 
   // Calculate length of point
-  fn len() f32:
+  fn len(self) f32:
     _lensq().sqrt // _lensq() is equivalent to self._lensq()
 	
   // A private method
-  fn _lensq() f32:
+  fn _lensq(self) f32:
 		x*x + y*y
 </pre>
 	<p>There's a lot to unpack here, which we will get to soon.
@@ -66,7 +66,8 @@ extend i32:
 	<h2>Method definition</h2>
 	<p>A method definition looks (and behaves) like a function definition: It has a name, named parameter(s),
 		return value type(s), and a statement body. 
-		Let's examine how method definitions differ from functions.</p>
+		What distinguishes a type's methods from its associated functions is that the first parameter is
+		named 'self'.</p>
 
 	<h3>Method name</h3>
 	<p>As with fields, the names given to methods will not conflict with another type's method or field names,
@@ -84,8 +85,6 @@ extend i32:
 	
 	<h3 id="self">self Parameter</h3>
 	<p>A method's first parameter is always named <span class="pre">self</span>.
-		If a <span class="pre">self</span> parameter is not specified,
-		one is inserted at the beginning of the parameter list.
 		If the type of <span class="pre">self</span> is not specified,
 		it is assumed to be the same as the type we are specifying (<span class="pre">Self</span>).
 		If a type is specified for <span class="pre">self</span>, it must either be the same as <span class="pre">Self</span>,
