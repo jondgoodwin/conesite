@@ -14,12 +14,11 @@
     <div class="text">
 
 	<p style="margin-left: 40px;"><i>Note: All of this capability is implemented
-		except pure functions.</i></p>
+		except overloaded functions, throws, pure functions.</i></p>
 
-	<p>Earlier, we showed how to call functions as part of an expression.
-	Now it is time to show how to declare and implement functions.
-	In fact, all logic (including expressions) must be defined as part of the implementation
-	of a function (or method).</p>
+	<p>All processing logic (including expressions and blocks) for programs are specified inside functions.
+	We have already shown how to call functions as part of an expression.
+	Now, let's show how to declare and implement functions?</p>
 	<p>Let's start with a simple example of a function definition and its use:</p>
 <pre>
 // Define the 'square' function
@@ -30,25 +29,58 @@ fn square(a f32) f32:
 area = Float.pi * square(r)
 </pre>
 	
-	<p>This example shows the key parts of an function definition:</p>
+	<p>The function definition for 'square' specifies its:</p>
 	<ul>
-	<li>The <b>signature</b> which declares its:
+	<li><a href="#name"><b>Name</b></a> ('square').
+	<li><b>Signature</b> which declares its:
 	<ul>
-	<li><b>name</b> (square in this example).</li>
-	<li><b>parameters</b> in parentheses (a in this example).</li>
-	<li><b>return type(s)</b> which follows the parentheses (f32 in this example).</li>
+	<li><a href="#parms"><b>typed parameters</b></a> in parentheses (a in this example). 
+		These are the named values sent to the function when called.</li>
+	<li><b>return type(s)</b> which follows the parentheses (f32 in this example).
+		These are the types of any values calculated by the function and sent back to the caller.</li>
 	</ul>
-	<li>The function's <a href="#stmtblk">implementation block</a> follows the signature.
+	<li><a href="#stmtblk"><b>Implementation block</b></a> following the block marker (':').
 	The block contains statement(s) that represent the logic to be performed by the function.</li>
 	</ul>
+	
+	<p>Notice how the function call passes the value 'r' to the 'square' function. 
+	This value is caught by the function as the floating-point parameter 'a'. 
+	The function body multiplies 'a' to itself, and then returns the calculated floating-point value to the caller.
 	 
+	<h3 id="name">Function name</h3>
+	<p>The function name is typically simple: the unique name for the function, used when calling the function.
+		If a function name requires non-alphanumeric characters, enclose the name in back ticks
+		(for example, `+` is a valid name for an <a href="refmethop.html">operator function</a> which adds values).</p>
+		
+	<h4>Overloaded functions and their names</h4>
+	<p>It can sometimes be convenient to define more than one function with the same name.
+		This is called function overloading. It typically occurs when all same-named functions
+		perform essentially the same semantic operation, but do so using different number or types of parameter values.
+		The compiler disambiguates which particular function to use based on the number and types of the caller's arguments.</p>
+		
+	<p>Even when overloaded functions share the same name, it can be useful to give each overload a distinct name.
+		Having a distinct name can make public interfaces more durable, debugging easier, and 
+		make it possible to explicitly designate which overload to obtain a reference to (e.g., by '&amp;').</p>
+	<p>To specify both a shared and distinct name for an overloaded function, choose one of these two syntax options:
+		concatenation via '+' (when the distinct name begins with the shared name) or different names separated by '|'.</p>
+<pre>
+// The shared name is 'add'.  The distinct name is 'addfloat' (concatenating add with float)
+fn add+float(a Comp, b f32) Comp:
+  ...
+
+// The shared name is 'add'. The distinct name is 'compfloatadder'
+fn add|compdynadder(a Comp, b dyn) Comp:
+   ...
+</pre>
+	<p>A caller may refer to an overloaded function by its shared or distinct name.</p>
+	
 	<h3 id="parms">Parameter Variables</h3>
-	<p>The declaration of a functions's parameters is a comma-separated list of variable names, 
+	<p>The declaration of a functions's parameters is a comma-separated list of typed variables (name and type), 
 	enclosed in parentheses.
 	Each parameter variable corresponds on a one-to-one basis to the value arguments passed to the function when it is called.
 	They must match in both number and type:</p>
 <pre>
-// Define a method that returns the addition of its two parameters
+// Define a function that returns the addition of its two parameters
 fn add(a i32, b i32) i32:
 	return a+b
 
@@ -58,28 +90,30 @@ add(2.0, 4.0)  // ERROR! add() needs integers, not floating point numbers
 </pre>
 
 	<p>Parameters are local variables, usable within the function.
-	The function's signature effectively declares the parameter variables in the same format as any variable declaration.
-	In the example above, the permission is not specified and therefore
+	Each parameter declaration in the function's signature mimics a local variable declaration,
+	even allowing specification of mutability and a default value.</p>
+	
+	<h4>Parameter Mutability</h4>
+	<p>When no permission is specified before the parameter name (as in the example above),
 	<span class="pre">imm</span> is assumed.
-	That restricts the function's logic from changing the value of these passed parameters.</p>
-	<p>To allow a parameter's value to be changed, precede the name with <span class="pre">mut</span>.
-	Mutation of the parameter's value has
-	no effect on the caller since the parameter's value is a copy of the caller's value.
-	Changes to one value do not affect the other.</p>
+	This forbids the function's logic from changing the value of the passed parameter.</p>
+	<p>To allow a parameter's value to be changed within the function's logic, precede the name with <span class="pre">mut</span>.
+	Any change to the parameter's value in the function logic will have
+	no effect on the caller, since the parameter's value is a copy of the caller's passed value.</p>
 <pre>
-fn weird(a i32, mut b i32):
+fn mutator(a i32, mut b i32):
 	a = 34    // ERROR! a is immutable and may not be changed
 	b = 4     // b may be changed since it is declared 'mut'
 
 number = 3
-weird(5, number)
-// number is still 3, despite weird() changing b to 4
+mutator(5, number)
+// number is still 3, despite mutator() changing b to 4
 </pre>
 
 	<h4>Parameter Defaults</h4>
 	<p>If desired, default values may be specified for any parameter value using the assignment operator '='.
 	The default value is what we want the parameter to have if the caller provides no value for it.
-	The default value can only be a literal value.</p>
+	The default value can only be a constant value.</p>
 <pre>
 fn next(nbr i32, incr i32 = 1) i32:
 	return nbr + incr
@@ -87,6 +121,28 @@ fn next(nbr i32, incr i32 = 1) i32:
 next(5,2) // returns 7
 next(4)   // returns 5 (using incr's default value of 1)
 next()    // ERROR! no default value for nbr
+</pre>
+
+	<h2 id="return">Return types</h2>
+	<p>This comma-separated list specifies the type(s) of all values returned by the function:
+<pre>
+// A function that returns a single integer value
+fn getint() i32:
+
+// A function that returns both an integer and float tuple value 
+fn gettuple() i32, f32:
+
+// A function that returns no values (equivalent to returning 'void'):
+fn get():
+</pre>
+	<p><span class="pre">throws</span> may be specified after the return types to show 
+		that a function may throw an error value 
+		(using <span class="pre">throw</span> instead of <span class="pre">return</span>)
+		if something goes wrong.
+		See <a href="refresult.html">Result</a> for more information.</p>
+<pre>
+// returns an integer on success, or else throws ErrorCond value for an exception
+fn dosomething() i32 throws ErrorCond
 </pre>
 
 	<h2 id="stmtblk">Implementation Block</h2>
